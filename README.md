@@ -22,5 +22,5 @@ Mithilfer der Arduino IDE auf die senseBox hochladen
 
 ## Debug 
 
-In "futuriumSDNoAP.ino" das Makro `#define DEBUG_ENABLED` setzen, damit DEBUG Nachrichten in der Seriellen Konsole angezeigt werden. <b>!!!ACHTUNG</b> Im Debug Modus startet die Box erst, wenn der Serielle Monitor geöffnet wird. Vor dem Betrieb den Debug Modus IMMER ausschalten !
+In `futuriumSDNoAP.ino` das Makro `#define DEBUG_ENABLED` setzen, damit DEBUG Nachrichten in der Seriellen Konsole angezeigt werden. <b>!!!ACHTUNG</b> Im Debug Modus startet die Box erst, wenn der Serielle Monitor geöffnet wird. Vor dem Betrieb den Debug Modus IMMER ausschalten !
 
