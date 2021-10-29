@@ -14,8 +14,8 @@ Mobile Messstation mit der Temperatur, rel. Luftfeuchte, Feinstaub(PM10, PM25), 
   - [BMX](https://github.com/sensebox/BMX)
   
 ## Credentials hinzufügen 
- - In der Datei "variables/network.h" WiFi Informationen (SSID und Passwort) eingeben 
- - In der Datei "variables/ids.h" senseBox ID und Sensor ID's von der openSenseMap eintragen 
+ - In der Datei `variables/network.h` WiFi Informationen (SSID und Passwort) eingeben 
+ - In der Datei `variables/ids.h` senseBox ID und Sensor ID's von der openSenseMap eintragen 
 
 ## Upload
 Mithilfer der Arduino IDE auf die senseBox hochladen 
