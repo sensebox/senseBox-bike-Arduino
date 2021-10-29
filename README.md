@@ -9,7 +9,7 @@ Mobile Messstation mit der Temperatur, rel. Luftfeuchte, Feinstaub(PM10, PM25), 
 ## Vorbereitungen für Arduino 
  - Installiere das [Board-Support-Package der senseBox](https://docs.sensebox.de/arduino/board-support-package-installieren/ "Board-Support-Package der senseBxo") 
  - Installiere folgende Libraries: 
-  - [NewPing](http://https://www.arduino.cc/reference/en/libraries/newping "NewPing")
+  - [NewPing](https://www.arduino.cc/reference/en/libraries/newping "NewPing")
   - [SparkFun u-Blox GNSS](https://www.arduino.cc/reference/en/libraries/sparkfun-u-blox-gnss-arduino-library/tp:// "SparkFun u-Blox GNSS")
   - [BMX](https://github.com/sensebox/BMX)
   
