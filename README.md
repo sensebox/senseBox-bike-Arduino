@@ -20,6 +20,17 @@ Mobile Messstation mit der Temperatur, rel. Luftfeuchte, Feinstaub (PM10, PM25),
 ## Upload
 - Mit Hilfe der Arduino IDE auf die senseBox hochladen
 
+## Entwickeln
+ - Damit du das Projekt in der Arduino IDE öffnen kannst, muss der Name des Ordners mit dem der Einstiegsdatei übereinstimmen.
+ - Dafür clone das Projekt wie folgt:
+
+   ``` bash
+   $ git clone git@github.com:sensebox/senseBox-bike-Arduino.git futuriumSDNoAp
+   ```
+  - Um das gesamte Projekt zu öffnen, doppelklicke die `futuriumSDNoAp.ino` Datei. Daraufhin sollte sich die Arduino IDE automatisch öffnen und diese und alle anderen Dateien anzeigen (siehe Screenshot).
+
+    ![Arduino IDE Screenshot](arduino-ide-screenshot.png "Arduino IDE Screenshot")
+
 ## Debug 
 
 - In `futuriumSDNoAP.ino` das Makro `#define DEBUG_ENABLED` setzen, damit DEBUG Nachrichten in der seriellen Konsole angezeigt werden.
