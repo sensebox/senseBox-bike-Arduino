@@ -14,6 +14,7 @@ Mobile Messstation mit der Temperatur, rel. Luftfeuchte, Feinstaub (PM10, PM25),
   - [BMX](https://github.com/sensebox/BMX)
   
 ## Credentials hinzufügen 
+Mit Hilfe der [openSenseMapAPI](https://api.opensensemap.org/) kannst du die Sensor IDs deiner Box abfragen. Der API call lautet `https://api.opensensemap.org/boxes/[:senseBoxID]`.
  - In der Datei `variables/network.h` WiFi Informationen (SSID und Passwort) eingeben 
  - In der Datei `variables/ids.h` senseBox ID und Sensor ID's von der openSenseMap eintragen 
 
