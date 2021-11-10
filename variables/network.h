@@ -6,7 +6,5 @@
 * const char *pass = "superSafePassword2021";
 */
 
-const char *ssid = "";
-const char *pass = "";
-
-
+char *ssid = "undef";
+char *pass = "undef";
