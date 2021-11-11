@@ -12,11 +12,15 @@ Mobile Messstation mit der Temperatur, rel. Luftfeuchte, Feinstaub (PM10, PM25),
   - [NewPing](https://www.arduino.cc/reference/en/libraries/newping "NewPing")
   - [SparkFun u-Blox GNSS](https://www.arduino.cc/reference/en/libraries/sparkfun-u-blox-gnss-arduino-library/ "SparkFun u-Blox GNSS")
   - [BMX](https://github.com/sensebox/BMX)
+  - [SD](https://www.arduino.cc/en/Reference/SD "SD") For Linux systems
+  - [SDConfig](https://github.com/Fuzzer11/SDconfig)
   
 ## Credentials hinzufügen 
 Mit Hilfe der [openSenseMapAPI](https://api.opensensemap.org/) kannst du die Sensor IDs deiner Box abfragen. Der API call lautet `https://api.opensensemap.org/boxes/[:senseBoxID]`.
  - In der Datei `variables/network.h` WiFi Informationen (SSID und Passwort) eingeben 
  - In der Datei `variables/ids.h` senseBox ID und Sensor ID's von der openSenseMap eintragen 
+
+Alternativ kann auf der SDCard eine Datei `BIKE.CFG` (Siehe `BIKE.CFG.example`) angelegt werden, die die Variablen Datenschutzfreundlich initialisiert.
 
 ## Upload
 - Mit Hilfe der Arduino IDE auf die senseBox hochladen
@@ -36,4 +40,3 @@ Mit Hilfe der [openSenseMapAPI](https://api.opensensemap.org/) kannst du die Sen
 
 - In `futuriumSDNoAP.ino` das Makro `#define DEBUG_ENABLED` setzen, damit DEBUG Nachrichten in der seriellen Konsole angezeigt werden.
 - ⚠️ **ACHTUNG** Im DEBUG Modus startet die Box erst, wenn der *Serielle Monitor* geöffnet wird. Vor dem Betrieb den DEBUG Modus IMMER ausschalten!
-
