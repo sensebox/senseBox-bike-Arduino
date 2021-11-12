@@ -178,34 +178,34 @@ boolean readConfiguration( char* configFile )
       Serial.print("Read SPEED_ID: "); Serial.println(speedID);
 #endif      
     } else if (cfg.nameIs("HOME_MINLON")) {
-      minLon = atof(cfg.copyValue());
+      minLon = strtod(cfg.copyValue(), NULL);
 #ifdef DEBUG_ENABLED
-      Serial.print("Read HOME_MINLON: "); Serial.println(minLon);
+      Serial.print("Read HOME_MINLON: "); Serial.println(minLon, 7);
 #endif      
     } else if (cfg.nameIs("HOME_MAXLON")) {
-      maxLon = atof(cfg.copyValue());
+      maxLon = strtod(cfg.copyValue(), NULL);
 #ifdef DEBUG_ENABLED
-      Serial.print("Read HOME_MAXLON: "); Serial.println(maxLon);
+      Serial.print("Read HOME_MAXLON: "); Serial.println(maxLon, 7);
 #endif      
     } else if (cfg.nameIs("HOME_MINLAT")) {
-      minLat = atof(cfg.copyValue());
+      minLat = strtod(cfg.copyValue(), NULL);
 #ifdef DEBUG_ENABLED
-      Serial.print("Read HOME_MINLAT: "); Serial.println(minLat);
+      Serial.print("Read HOME_MINLAT: "); Serial.println(minLat, 7);
 #endif      
     } else if (cfg.nameIs("HOME_MAXLAT")) {
-      maxLat = atof(cfg.copyValue());
+      maxLat = strtod(cfg.copyValue(), NULL);
 #ifdef DEBUG_ENABLED
-      Serial.print("Read HOME_MAXLAT: "); Serial.println(maxLat);
+      Serial.print("Read HOME_MAXLAT: "); Serial.println(maxLat, 7);
 #endif      
     } else if (cfg.nameIs("HOME_DEFLAT")) {
-      defLat = atof(cfg.copyValue());
+      defLat = strtod(cfg.copyValue(), NULL);
 #ifdef DEBUG_ENABLED
-      Serial.print("Read HOME_DEFLAT: "); Serial.println(defLat);
+      Serial.print("Read HOME_DEFLAT: "); Serial.println(defLat, 7);
 #endif      
     } else if (cfg.nameIs("HOME_DEFLON")) {
-      defLon = atof(cfg.copyValue());
+      defLon = strtod(cfg.copyValue(), NULL);
 #ifdef DEBUG_ENABLED
-      Serial.print("Read HOME_DEFLON: "); Serial.println(defLon);
+      Serial.print("Read HOME_DEFLON: "); Serial.println(defLon, 7);
 #endif      
 
     } else {
@@ -237,10 +237,10 @@ void dumpConfiguration()
   Serial.print("ACC_Y_ID:    "); Serial.println(accYID);
   Serial.print("ACC_Z_ID:    "); Serial.println(accZID);
   Serial.print("SPEED_ID:    "); Serial.println(speedID);
-  Serial.print("HOME_MINLON: "); Serial.println(minLon);
-  Serial.print("HOME_MAXLON: "); Serial.println(maxLon);
-  Serial.print("HOME_MAXLAT: "); Serial.println(minLat);
-  Serial.print("HOME_MINLAT: "); Serial.println(maxLat);
-  Serial.print("HOME_DEFLON: "); Serial.println(defLon);
-  Serial.print("HOME_DEFLAT: "); Serial.println(defLat);
+  Serial.print("HOME_MINLON: "); Serial.println(minLon, 7);
+  Serial.print("HOME_MAXLON: "); Serial.println(maxLon, 7);
+  Serial.print("HOME_MAXLAT: "); Serial.println(minLat, 7);
+  Serial.print("HOME_MINLAT: "); Serial.println(maxLat, 7);
+  Serial.print("HOME_DEFLON: "); Serial.println(defLon, 7);
+  Serial.print("HOME_DEFLAT: "); Serial.println(defLat, 7);
 }
