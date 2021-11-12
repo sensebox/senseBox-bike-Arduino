@@ -22,6 +22,7 @@
 #include <avr/dtostrf.h>
 #include <Adafruit_NeoPixel.h>
 #include <SD.h>
+#include <SDConfig.h>
 // Load other variable files
 #include "ids.h"
 // build id arrays
@@ -104,5 +105,37 @@ double sumAccX;
 double accX;
 double accY;
 double accZ;
+// variables for geofence
+double minLon;
+double maxLon;
+double minLat;
+double maxLat;
+double defLon;
+double defLat;
 
+// forward declarations
+void initBMX(void);
+void initUltrasonic(void);
+void initGPS(void);
+void initSD(void);
+bool readConfiguration(char* confFile);
+void dumpConfiguration(void);
+bool isGPSvalid(void);
+void getAccAmplitudes(double*, double*, double*);
+void setTimestamp(void);
+void setGPS(void);
+void showGreen(void);
+void handleLeft(void);
+void handleRight(void);
+void checkStandby(bool *standby);
+void writeToSD(char *data, char *fileName);
+void resetSD(void);
+bool sdisempty(void);
+void getMeasurements(void);
+void connectToWifi(void);
+bool submitValues(void);
+void showRed(void);
+void showBlue(void);
+void showGreen(void);
+bool pnpoly(int nvert, double *vertx, double *verty, double testx, double testy);
 #endif

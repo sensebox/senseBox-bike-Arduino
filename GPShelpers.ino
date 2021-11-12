@@ -1,3 +1,5 @@
+#include "variables/variables.h"
+
 void initGPS()
 {
   Wire.begin();
@@ -47,9 +49,23 @@ void setGPS(){
   float longitude = myGNSS.getLongitude() / (float)10000000;
   char lng[20];
   char lat[20];
-  dtostrf(longitude, 2, 7, lng);
-  dtostrf(latitude, 1, 7, lat);
-    
+  double homeLon[] = {minLon, minLon, maxLon, maxLon};
+  double homeLat[] = {minLat, maxLat, maxLat, minLat};
+
+  // set GPS to fixed position, when the actual position is inside the fence.
+  if (defLat > 1 && defLon > 1) { // check if default coordiante is set.
+    if (pnpoly(4, homeLat, homeLon, latitude, longitude)) {
+      dtostrf(defLon, 2, 7, lng);
+      dtostrf(defLat, 1, 7, lat);
+    } else {
+      dtostrf(longitude, 2, 7, lng);
+      dtostrf(latitude, 1, 7, lat);
+    }
+  } else {
+      dtostrf(longitude, 2, 7, lng);
+      dtostrf(latitude, 1, 7, lat);
+  }
+
     
   strcpy_P(lngGlobal, lng);
   strcpy_P(latGlobal, lat);

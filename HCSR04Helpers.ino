@@ -1,3 +1,4 @@
+#include "variables/variables.h"
 void initUltrasonic()
 {
   //pinmodes for ultrasonic

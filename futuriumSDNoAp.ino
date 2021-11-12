@@ -22,6 +22,19 @@ void setup()
   initUltrasonic();
   initGPS();
   initSD();
+#ifdef DEBUG_ENABLED
+  Serial.print("try to read configuration from ");
+  Serial.println(confFile);
+#endif
+  bool ret = readConfiguration(confFile);
+#ifdef DEBUG_ENABLED
+  if (ret) {
+    Serial.println("OK");
+  } else {
+    Serial.println("not found");
+  }
+  dumpConfiguration();
+#endif
   //checkForFiles();
   //resetSD();
   rgb_led_1.begin();
@@ -91,7 +104,7 @@ void loop()
       {
         showRed();
 #ifdef DEBUG_ENABLED
-        Serial.println(F("No fix"));
+        //Serial.println(F("No fix"));
 #endif
       }
       else if (fixType == 1)

@@ -1,0 +1,36 @@
+# WLAN Configuration
+SSID=MyNetwork
+PSK=superSafePassword2021
+
+# Donottrack Area
+# https://www.openstreetmap.org/export
+# Hier kann man sich ein Rechteck generieren, das nicht auf Opensensemap hochgeladen werden soll. 
+# DEFLON und DEFLAT ist die koordiante, die gesetzt wird, wenn Koordinaten in der Homzone sind.
+# HOME_MINLON=13.3xxxx
+# HOME_MINLAT=52.5xxxx
+# Zb im Sprengelkiez der Sprengelpark: https://goo.gl/maps/3gHGRP1JbH2wfFHS8
+# HOME_DEFLON=13.353277
+# HOME_DEFLAT=52.540779
+HOME_MINLON=
+HOME_MAXLON=
+HOME_MINLAT=
+HOME_MAXLAT=
+HOME_DEFLON=
+HOME_DEFLAT=
+
+# Sensor IDs können über die API abgefragt werden 
+# https://api.opensensemap.org/boxes/[:senseBoxID]
+# senseboxIds
+# Example SENSEBOX_ID=615f292bc031ff001b117192
+#         TEMP_ID=615f292bc031ff001b11719b
+SENSEBOX_ID=
+TEMP_ID=
+HUMI_ID=
+DIST_L_ID=
+DIST_R_ID=
+PM10_ID=
+PM25_ID=
+ACC_X_ID=
+ACC_Y_ID=
+ACC_Z_ID=
+SPEED_ID=
