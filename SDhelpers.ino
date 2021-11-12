@@ -1,4 +1,5 @@
 #include "variables/variables.h"
+
 void writeToSD(char *data, char *fileName)
 {
   myFile = SD.open(fileName, FILE_WRITE);
@@ -114,81 +115,99 @@ boolean readConfiguration( char* configFile )
     if (cfg.nameIs("SSID")) {
       ssid = cfg.copyValue();
 #ifdef DEBUG_ENABLED
-      Serial.print("Read SSID: ");
-      Serial.println(ssid);
+      Serial.print("Read SSID: "); Serial.println(ssid);
 #endif      
     } else if (cfg.nameIs("PSK")) {
       pass = cfg.copyValue();
 #ifdef DEBUG_ENABLED
-      Serial.print("Read PSK: ");
-      Serial.println(pass);
+      Serial.print("Read PSK: "); Serial.println(pass);
 #endif      
     } else if (cfg.nameIs("SENSEBOX_ID")) {
       SENSEBOX_ID = cfg.copyValue();
 #ifdef DEBUG_ENABLED
-      Serial.print("Read SENSEBOX_ID: ");
-      Serial.println(SENSEBOX_ID);
+      Serial.print("Read SENSEBOX_ID: "); Serial.println(SENSEBOX_ID);
 #endif      
     } else if (cfg.nameIs("TEMP_ID")) {
       tempID = cfg.copyValue();
 #ifdef DEBUG_ENABLED
-      Serial.print("Read TEMP_ID: ");
-      Serial.println(tempID);
+      Serial.print("Read TEMP_ID: "); Serial.println(tempID);
 #endif      
     } else if (cfg.nameIs("HUMI_ID")) {
       humiID = cfg.copyValue();
 #ifdef DEBUG_ENABLED
-      Serial.print("Read HUMI_ID: ");
-      Serial.println(humiID);
+      Serial.print("Read HUMI_ID: "); Serial.println(humiID);
 #endif      
     } else if (cfg.nameIs("DIST_L_ID")) {
       distLeftID = cfg.copyValue();
 #ifdef DEBUG_ENABLED
-      Serial.print("Read DIST_L_ID: ");
-      Serial.println(distLeftID);
+      Serial.print("Read DIST_L_ID: "); Serial.println(distLeftID);
 #endif      
     } else if (cfg.nameIs("DIST_R_ID")) {
       distRightID = cfg.copyValue();
 #ifdef DEBUG_ENABLED
-      Serial.print("Read DIST_R_ID: ");
-      Serial.println(distRightID);
+      Serial.print("Read DIST_R_ID: "); Serial.println(distRightID);
 #endif      
     } else if (cfg.nameIs("PM10_ID")) {
       pm10ID = cfg.copyValue();
 #ifdef DEBUG_ENABLED
-      Serial.print("Read PM10_ID: ");
-      Serial.println(pm10ID);
+      Serial.print("Read PM10_ID: "); Serial.println(pm10ID);
 #endif      
     } else if (cfg.nameIs("PM25_ID")) {
       pm25ID = cfg.copyValue();
 #ifdef DEBUG_ENABLED
-      Serial.print("Read PM25_ID: ");
-      Serial.println(pm25ID);
+      Serial.print("Read PM25_ID: "); Serial.println(pm25ID);
 #endif      
     } else if (cfg.nameIs("ACC_X_ID")) {
       accXID = cfg.copyValue();
 #ifdef DEBUG_ENABLED
-      Serial.print("Read ACC_X_ID: ");
-      Serial.println(accXID);
+      Serial.print("Read ACC_X_ID: "); Serial.println(accXID);
 #endif      
     } else if (cfg.nameIs("ACC_Y_ID")) {
       accYID = cfg.copyValue();
 #ifdef DEBUG_ENABLED
-      Serial.print("Read ACC_Y_ID: ");
-      Serial.println(accYID);
+      Serial.print("Read ACC_Y_ID: "); Serial.println(accYID);
 #endif      
     } else if (cfg.nameIs("ACC_Z_ID")) {
       accZID = cfg.copyValue();
 #ifdef DEBUG_ENABLED
-      Serial.print("Read ACC_Z_ID: ");
-      Serial.println(accZID);
+      Serial.print("Read ACC_Z_ID: "); Serial.println(accZID);
 #endif      
     } else if (cfg.nameIs("SPEED_ID")) {
       speedID = cfg.copyValue();
 #ifdef DEBUG_ENABLED
-      Serial.print("Read SPEED_ID: ");
-      Serial.println(speedID);
+      Serial.print("Read SPEED_ID: "); Serial.println(speedID);
 #endif      
+    } else if (cfg.nameIs("HOME_MINLON")) {
+      minLon = atof(cfg.copyValue());
+#ifdef DEBUG_ENABLED
+      Serial.print("Read HOME_MINLON: "); Serial.println(minLon);
+#endif      
+    } else if (cfg.nameIs("HOME_MAXLON")) {
+      maxLon = atof(cfg.copyValue());
+#ifdef DEBUG_ENABLED
+      Serial.print("Read HOME_MAXLON: "); Serial.println(maxLon);
+#endif      
+    } else if (cfg.nameIs("HOME_MINLAT")) {
+      minLat = atof(cfg.copyValue());
+#ifdef DEBUG_ENABLED
+      Serial.print("Read HOME_MINLAT: "); Serial.println(minLat);
+#endif      
+    } else if (cfg.nameIs("HOME_MAXLAT")) {
+      maxLat = atof(cfg.copyValue());
+#ifdef DEBUG_ENABLED
+      Serial.print("Read HOME_MAXLAT: "); Serial.println(maxLat);
+#endif      
+    } else if (cfg.nameIs("HOME_DEFLAT")) {
+      defLat = atof(cfg.copyValue());
+#ifdef DEBUG_ENABLED
+      Serial.print("Read HOME_DEFLAT: "); Serial.println(defLat);
+#endif      
+    } else if (cfg.nameIs("HOME_DEFLON")) {
+      defLon = atof(cfg.copyValue());
+#ifdef DEBUG_ENABLED
+      Serial.print("Read HOME_DEFLON: "); Serial.println(defLon);
+#endif      
+
     } else {
       // report unrecognized names.
 #ifdef DEBUG_ENABLED
@@ -218,4 +237,10 @@ void dumpConfiguration()
   Serial.print("ACC_Y_ID:    "); Serial.println(accYID);
   Serial.print("ACC_Z_ID:    "); Serial.println(accZID);
   Serial.print("SPEED_ID:    "); Serial.println(speedID);
+  Serial.print("HOME_MINLON: "); Serial.println(minLon);
+  Serial.print("HOME_MAXLON: "); Serial.println(maxLon);
+  Serial.print("HOME_MAXLAT: "); Serial.println(minLat);
+  Serial.print("HOME_MINLAT: "); Serial.println(maxLat);
+  Serial.print("HOME_DEFLON: "); Serial.println(defLon);
+  Serial.print("HOME_DEFLAT: "); Serial.println(defLat);
 }
