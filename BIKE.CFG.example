@@ -8,6 +8,9 @@ PSK=superSafePassword2021
 # DEFLON und DEFLAT ist die koordiante, die gesetzt wird, wenn Koordinaten in der Homzone sind.
 # HOME_MINLON=13.3xxxx
 # HOME_MINLAT=52.5xxxx
+# Zb im Sprengelkiez der Sprengelpark: https://goo.gl/maps/3gHGRP1JbH2wfFHS8
+# HOME_DEFLON=13.353277
+# HOME_DEFLAT=52.540779
 HOME_MINLON=
 HOME_MAXLON=
 HOME_MINLAT=

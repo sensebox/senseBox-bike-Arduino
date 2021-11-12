@@ -22,6 +22,8 @@ Mit Hilfe der [openSenseMapAPI](https://api.opensensemap.org/) kannst du die Sen
 
 Alternativ kann auf der SDCard eine Datei `BIKE.CFG` (Siehe `BIKE.CFG.example`) angelegt werden, die die Variablen Datenschutzfreundlich initialisiert.
 
+In der `BIKE.CFG` kann auch ein umgekehrte [Geofencing](https://de.wikipedia.org/wiki/Geofencing) eingrichtet werden. Dort kann man seine Heimatadresse 'verstecken'. Wenn Koordinaten in dem definiertem Rechteck erfasst werden, werden sie auf eine festgelegte Koordinate (z.B. ein Park) umgeschrieben. 
+
 ## Upload
 - Mit Hilfe der Arduino IDE auf die senseBox hochladen
 
