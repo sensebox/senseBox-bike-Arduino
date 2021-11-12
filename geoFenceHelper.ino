@@ -12,7 +12,7 @@
 
 #include <stdbool.h>
 
-bool pnpoly(int nvert, float *vertx, float *verty, float testx, float testy)
+bool pnpoly(int nvert, double *vertx, double *verty, double testx, double testy)
 {
   int i, j;
   bool c = false;
