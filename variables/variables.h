@@ -105,6 +105,13 @@ double sumAccX;
 double accX;
 double accY;
 double accZ;
+// variables for geofence
+double minLon;
+double maxLon;
+double minLat;
+double maxLat;
+double defLon;
+double defLat;
 
 // forward declarations
 void initBMX(void);
@@ -130,4 +137,5 @@ bool submitValues(void);
 void showRed(void);
 void showBlue(void);
 void showGreen(void);
+bool pnpoly(int nvert, double *vertx, double *verty, double testx, double testy);
 #endif
