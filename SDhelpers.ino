@@ -37,13 +37,10 @@ void resetSD()
 
 bool sdisempty() {
   bool empty = true;
-Serial.print("SDisempty ");
+
   for (int i = 0; i < 3; i++) {
     if (SD.exists(fileNames[i])) {
       empty = false;
-#ifdef DEBUG_ENABLED
-     Serial.println(" false");
-#endif
     }
   }
   return empty;
