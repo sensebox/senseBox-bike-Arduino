@@ -1,8 +1,10 @@
+#include "variables/variables.h"
+
 void initUltrasonic()
 {
   //pinmodes for ultrasonic
   pinMode(TRIGGER_LEFT, OUTPUT);
-  pinMode(TRIGGER_RIGHT, INPUT);
+  pinMode(ECHO_LEFT, INPUT);
   pinMode(TRIGGER_RIGHT, OUTPUT);
   pinMode(ECHO_RIGHT, INPUT);
 };
