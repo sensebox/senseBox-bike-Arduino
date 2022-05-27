@@ -22,6 +22,15 @@ Mit Hilfe der [openSenseMapAPI](https://api.opensensemap.org/) kannst du die Sen
 
 Alternativ kann auf der SDCard eine Datei `BIKE.CFG` (Siehe `BIKE.CFG.example`) angelegt werden, die die Variablen Datenschutzfreundlich initialisiert.
 
+## Verbinden
+ - Damit du das Sketch hochladen kannst, muss das USB-Kabel **direkt** mit der Hauptplatine verbunden werden.
+
+    ![senseBox:bike / USB-Port](sensebox-usb-port.png "senseBox:bike / USB-Port")
+
+ - Wenn die Kabelverbindung korrekt hergestellt ist, erscheint der richtige Port unter *Werkzeuge* / *Port*.
+
+    ![Arduino IDE / Eintrag im Port-Menü](arduino-ide-port-entry.png "Arduino IDE / Eintrag im Port-Menü")
+
 ## Upload
 - Mit Hilfe der Arduino IDE auf die senseBox hochladen
 
