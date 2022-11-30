@@ -8,7 +8,6 @@
 #define VARIABLES_H
 
 /// LIBRARIES
-#include <BMX055.h>
 #include <senseBoxIO.h>
 #include <SPI.h>
 #include <Wire.h>
@@ -23,6 +22,8 @@
 #include <Adafruit_NeoPixel.h>
 #include <SD.h>
 #include <SDConfig.h>
+#include <Adafruit_MPU6050.h>
+#include <Adafruit_Sensor.h>
 // Load other variable files
 #include "ids.h"
 // build id arrays
@@ -47,7 +48,7 @@ WiFiClient client;
 Adafruit_HDC1000 HDC = Adafruit_HDC1000();
 SDS011 SDS(Serial1);
 SFE_UBLOX_GNSS myGNSS;
-BMX055 bmx;
+Adafruit_MPU6050 mpu;
 // RGB LED
 Adafruit_NeoPixel rgb_led_1 = Adafruit_NeoPixel(1, 5, NEO_GRB + NEO_KHZ800);
 // Ultraschall

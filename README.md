@@ -11,7 +11,7 @@ Mobile Messstation mit der Temperatur, rel. Luftfeuchte, Feinstaub (PM10, PM25),
  - Installiere folgende Libraries: 
   - [NewPing](https://www.arduino.cc/reference/en/libraries/newping "NewPing")
   - [SparkFun u-Blox GNSS](https://www.arduino.cc/reference/en/libraries/sparkfun-u-blox-gnss-arduino-library/ "SparkFun u-Blox GNSS")
-  - [BMX](https://github.com/sensebox/BMX)
+  - [MPU](https://github.com/adafruit/Adafruit_MPU6050)
   - [SD](https://www.arduino.cc/en/Reference/SD "SD") For Linux systems
   - [SDConfig](https://github.com/Fuzzer11/SDconfig)
   
