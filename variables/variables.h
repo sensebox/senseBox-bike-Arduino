@@ -50,7 +50,7 @@ SDS011 SDS(Serial1);
 SFE_UBLOX_GNSS myGNSS;
 Adafruit_MPU6050 mpu;
 // RGB LED
-Adafruit_NeoPixel rgb_led_1 = Adafruit_NeoPixel(1, 5, NEO_GRB + NEO_KHZ800);
+ Adafruit_NeoPixel rgb_led_6= Adafruit_NeoPixel(1, 6,NEO_GRB + NEO_KHZ800);
 // Ultraschall
 NewPing left(TRIGGER_LEFT, ECHO_LEFT, SENSOR_MAX_RANGE);
 NewPing right(TRIGGER_RIGHT, ECHO_RIGHT, SENSOR_MAX_RANGE);
