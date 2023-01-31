@@ -276,15 +276,11 @@ bool submitValues()
 #ifdef DEBUG_ENABLED
       Serial.println(F("connection failed."));
 #endif
-  // If values have not been submitted blink red for some seconds and 
-    smartBlink(255, 0, 0);
     return false;
     }
   }
   // after values have been sent remove everything from sd
   resetSD();
-    // If values have been submitted blink green for some seconds and then shut off
-  smartBlink(51,255,51);
   return true;
 }
 

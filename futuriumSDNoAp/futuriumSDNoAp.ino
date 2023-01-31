@@ -159,6 +159,10 @@ void loop()
             senseBoxIO.powerNone();
           }
         }
+        else {
+          // Something happened with the openSenseMap blink Blue
+           smartBlink(51, 102, 255);
+        }
         // disconnect and try again in 60 seconds
         WiFi.disconnect();
       }
