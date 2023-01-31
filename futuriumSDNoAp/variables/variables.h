@@ -12,7 +12,9 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <WiFi101.h>
-#include <SparkFun_u-blox_GNSS_Arduino_Library.h> //http://librarymanager/All#SparkFun_u-blox_GNSS
+#include <NMEAGPS.h>
+#include <GPSport.h>
+#include <Streamers.h>
 #include <NewPing.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
@@ -24,6 +26,8 @@
 #include <SDConfig.h>
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
+#include <sps30.h>
+
 // Load other variable files
 #include "ids.h"
 // build id arrays
@@ -47,19 +51,22 @@ const int port = 80;
 WiFiClient client;
 Adafruit_HDC1000 HDC = Adafruit_HDC1000();
 SDS011 SDS(Serial1);
-SFE_UBLOX_GNSS myGNSS;
 Adafruit_MPU6050 mpu;
 // RGB LED
- Adafruit_NeoPixel rgb_led_6= Adafruit_NeoPixel(1, 6,NEO_GRB + NEO_KHZ800);
+ Adafruit_NeoPixel rgb_led_1= Adafruit_NeoPixel(1, 6,NEO_GRB + NEO_KHZ800);
 // Ultraschall
 NewPing left(TRIGGER_LEFT, ECHO_LEFT, SENSOR_MAX_RANGE);
 NewPing right(TRIGGER_RIGHT, ECHO_RIGHT, SENSOR_MAX_RANGE);
 
+static NMEAGPS  gps;
+static gps_fix  fix;
+float lat, lon, alt;
+float lat_old, lon_old = 0.0;
+unsigned int day, month, year, hour, minute, second;
 
 
 bool standby = false;
 int standbycounter;
-
 
 File myFile;
 
@@ -86,7 +93,7 @@ long time_actual_30s = 0;
 long time_actual_20s = 0;
 long time_actual_60s = 0;
 int standbyThresholdTime = 6;
-double standbyThreshold = 2.0;
+double standbyThreshold = 5.0;
 unsigned long previousMillis = 0;
 unsigned long previousMillis10s = 0;
 
@@ -99,13 +106,13 @@ char latGlobal[20];
 unsigned long clength = 0;
 /// BMX
 // SUMMED AMPLITUDES
-double sumAccZ;
-double sumAccY;
-double sumAccX;
+float sumAccZ;
+float sumAccY;
+float sumAccX;
 // Variables for BMX
-double accX;
-double accY;
-double accZ;
+float accX;
+float accY;
+float accZ;
 
 // forward declarations
 void initBMX(void);
