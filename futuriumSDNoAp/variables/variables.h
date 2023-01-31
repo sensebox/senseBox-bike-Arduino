@@ -96,6 +96,11 @@ int standbyThresholdTime = 6;
 double standbyThreshold = 5.0;
 unsigned long previousMillis = 0;
 unsigned long previousMillis10s = 0;
+const long blinkInterval = 500;
+long blink_startInterval = 0;
+long blink2_startInterval = 0;
+long blink_actualInterval = 0;
+bool on = false;
 
 
 /// GLOBAL PLACEHOLDERS

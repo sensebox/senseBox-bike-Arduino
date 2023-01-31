@@ -151,7 +151,8 @@ void loop()
           // Uploaded all values to home wifi, goes to sleep afterwards
           Serial.println("Going to hibernation");
 #endif
-          showRed();
+          // If values have been submitted blink green for some seconds and then shut off
+          smartBlink(51,255,51);
           for (;;)
           {
             WiFi.disconnect();
