@@ -34,9 +34,20 @@ void initSPS()
   }
 }
 
+uint8_t connectToWifiWrapper(){
+  uint8_t status;
 
+  for(int i = 0; i < (sizeof(ssids) / sizeof(ssids[0])); i++)
+  { 
+    if(status == WL_CONNECTED) {
+      break;
+    }
+    status = connectToWifi(ssids[i], pws[i]);
+  }
 
-void connectToWifi()
+}
+
+uint8_t connectToWifi(char *ssid, char *pw)
 {
   // Check WiFi Bee status
   if (WiFi.status() == WL_NO_SHIELD)
@@ -57,7 +68,7 @@ void connectToWifi()
 #endif
   // Connect to WPA/WPA2 network. Change this line if using open or WEP
   // network
-  status = WiFi.begin(ssid, pass);
+  status = WiFi.begin(ssid, pw);
   // wait 10 seconds for connection:
 #ifdef DEBUG_ENABLED
   Serial.print(F("Waiting 10 seconds for connection..."));
@@ -66,12 +77,13 @@ void connectToWifi()
 #ifdef DEBUG_ENABLED
   Serial.println(F("done."));
 #endif
+  return status;
 }
 
 void getMeasurements()
 {
   struct sps30_measurement m;
-    char serial[SPS30_MAX_SERIAL_LEN];
+  char serial[SPS30_MAX_SERIAL_LEN];
   uint16_t data_ready;
   int16_t ret;
     do {
@@ -185,16 +197,6 @@ void checkStandby(bool *standby)
 
 bool submitValues()
 {
-  if (WiFi.status() != WL_CONNECTED)
-  {
-#ifdef DEBUG_ENABLED
-    Serial.println("No wifi; connecting again");
-#endif
-    WiFi.disconnect();
-    delay(1000); // wait 1s
-    WiFi.begin(ssid, pass);
-    delay(5000); // wait 5s
-  }
   // for every file do a request!
   for (int i = 0; i < 2; i++)
   {

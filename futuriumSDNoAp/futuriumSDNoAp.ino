@@ -30,7 +30,6 @@ void setup()
   initUltrasonic();
   // init sps
   initSPS();
-
   initSD();
 #ifdef DEBUG_ENABLED
   Serial.print("try to read configuration from ");
@@ -45,6 +44,8 @@ void setup()
   // }
   // dumpConfiguration();
 #endif
+
+
   //checkForFiles();
   //resetSD();
   rgb_led_1.begin();
@@ -55,8 +56,6 @@ void setup()
 
 void loop()
 {
-
-
   time_start = millis();
   while (gps.available( Serial1 )) {
     fix = gps.read();
@@ -94,10 +93,10 @@ void loop()
       {
         time_actual_60s = millis();
 #ifdef DEBUG_ENABLED
-        Serial.println("60s passed Looking for wifi");
+        Serial.println("60s passed");
 #endif
         if (!sdisempty()) {
-          connectToWifi();
+          connectToWifiWrapper();
         }
         if (WiFi.status() == WL_CONNECTED)
         {
@@ -142,7 +141,8 @@ void loop()
       Serial.println("Connecting to wifi");
 #endif
       previousMillis = currentMillis;
-      connectToWifi();
+      connectToWifiWrapper();
+     
       if (WiFi.status() == WL_CONNECTED)
       {
         if (submitValues()) // success; if http gets 200 back go to sleep
