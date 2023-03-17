@@ -5,10 +5,11 @@ void initGPS()
 };
 void setTimestamp(){
   char timestamp[124];
-  sprintf(timestamp, "%d-%02d-%02dT%02d:%02d:%02dZ\0",
+
+  sprintf(timestamp, "20%d-%02d-%02dT%02d:%02d:%02dZ\0",
         fix.dateTime.year,
         fix.dateTime.month,
-        fix.dateTime.day,
+        fix.dateTime.date,
         fix.dateTime.hours,
         fix.dateTime.minutes,
         fix.dateTime.seconds);
@@ -18,7 +19,7 @@ void setTimestamp(){
 }
 
 void setGPS(){
-  float latitude = fix.latitude();
+  double latitude = fix.latitude();
   double longitude = fix.longitude();
   char lng[20];
   char lat[20];

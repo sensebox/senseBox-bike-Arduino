@@ -8,7 +8,6 @@
 #define VARIABLES_H
 
 /// LIBRARIES
-#include <senseBoxIO.h>
 #include <SPI.h>
 #include <Wire.h>
 #include <WiFi101.h>
@@ -32,7 +31,6 @@
 #include "ids.h"
 // build id arrays
 char *bmxIDS[] = {accXID, accYID, accZID};
-char *distanceIDS[] = {distLeftID, distRightID};
 char *sensorIDS[] = {tempID, humiID, pm10ID, pm25ID, speedID};
 #include "network.h"
 const char server[] PROGMEM = "ingress.opensensemap.org";
@@ -71,7 +69,7 @@ int standbycounter;
 File myFile;
 
 
-char *fileNames[] = {"bmx.csv", "sensor.csv", "distanz.csv"};
+char *fileNames[] = {"bmx.csv", "hdc.csv", "distanz.csv","sps.csv","sps2.csv"};
 
 /// TIME VARIABLES
 const long interval1s = 1000;
@@ -100,7 +98,9 @@ const long blinkInterval = 500;
 long blink_startInterval = 0;
 long blink2_startInterval = 0;
 long blink_actualInterval = 0;
+long last;
 bool on = false;
+bool recording = false;
 
 
 /// GLOBAL PLACEHOLDERS
@@ -108,6 +108,7 @@ char buffer[750];
 char timestampGlobal[124];
 char lngGlobal[20];
 char latGlobal[20];
+long distance; 
 unsigned long clength = 0;
 /// BMX
 // SUMMED AMPLITUDES

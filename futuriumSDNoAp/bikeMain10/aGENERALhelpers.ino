@@ -39,10 +39,13 @@ uint8_t connectToWifiWrapper(){
 
   for(int i = 0; i < (sizeof(ssids) / sizeof(ssids[0])); i++)
   { 
-    if(status == WL_CONNECTED) {
-      break;
-    }
-    status = connectToWifi(ssids[i], pws[i]);
+    if(WiFi.status() != WL_CONNECTED) {
+      #ifdef DEBUG_ENABLED
+      Serial.print("Now trying to connect to: ");
+      Serial.println(ssids[i]);
+      #endif
+      status = connectToWifi(ssids[i], pws[i]);    }
+
   }
 
 }
@@ -62,10 +65,6 @@ uint8_t connectToWifi(char *ssid, char *pw)
   }
   uint8_t status = WL_IDLE_STATUS;
   // attempt to connect to Wifi network:
-#ifdef DEBUG_ENABLED
-  Serial.print(F("Attempting to connect to SSID: "));
-  Serial.println(ssid);
-#endif
   // Connect to WPA/WPA2 network. Change this line if using open or WEP
   // network
   status = WiFi.begin(ssid, pw);
@@ -111,57 +110,76 @@ void getMeasurements()
     #endif
   } 
 
- // SDS.read(&pm10, &pm25);
-  sensors_event_t a, g, temp;
-  mpu.getEvent(&a, &g, &temp);
   float bmxValues[] = {sumAccX, sumAccY , sumAccZ}  ;
-  // int distanceR = (int)left.ping_cm();
-  // if (distanceR == 0) distanceR = 400;
 
-
-  // int distanceL = (int)left.ping_cm();
-  // if (distanceL == 0) distanceL = 400;
- 
   float speed = fix.speed_kph();
-  // int distanceValues[2] = {distanceL, distanceR};
-
   float sensorValues[5] = {HDC.readTemperature(), HDC.readHumidity(), m.mc_10p0, m.mc_2p5, speed};
-  
+  float temp = HDC.readTemperature();
+  float humi = HDC.readHumidity();
+  float pm10 = m.mc_10p0;
+  float pm25 = m.mc_2p5; 
+  float pm4 = m.mc_4p0; 
+  float pm1 = m.mc_1p0;
+
   #ifdef DEBUG_ENABLED
   Serial.println("Sensor measurements");
-  #endif  
-  // sensor values
+  #endif   
   char buffer[750];
-  for (uint8_t i = 0; i < (sizeof(sensorValues) / sizeof(sensorValues[0])); i++)
-  {
-    sprintf_P(buffer, PSTR("%s,%f,%s,%02s,%02s\r\n\0"), sensorIDS[i], sensorValues[i], timestampGlobal, lngGlobal, latGlobal);
+
+  sprintf_P(buffer, PSTR("%s,%.2f,%s,%02s,%02s\r\n\0"), tempID, temp, timestampGlobal, lngGlobal, latGlobal);
 #ifdef DEBUG_ENABLED
-    Serial.print(buffer);
+  Serial.print(buffer);
 #endif
-    writeToSD(buffer, "sensor.csv");
-  }
-  #ifdef DEBUG_ENABLED
-  Serial.println("BMX");
-  #endif  
+  writeToSD(buffer, "hdc.csv");
+
+    sprintf_P(buffer, PSTR("%s,%.2f,%s,%02s,%02s\r\n\0"), humiID, humi, timestampGlobal, lngGlobal, latGlobal);
+#ifdef DEBUG_ENABLED
+  Serial.print(buffer);
+#endif
+  writeToSD(buffer, "hdc.csv");
+
+
+
+  sprintf_P(buffer, PSTR("%s,%.0f,%s,%02s,%02s\r\n\0"), pm10ID, pm10, timestampGlobal, lngGlobal, latGlobal);
+#ifdef DEBUG_ENABLED
+  Serial.print(buffer);
+#endif
+  writeToSD(buffer, "sps.csv");
+
+  sprintf_P(buffer, PSTR("%s,%.0f,%s,%02s,%02s\r\n\0"), pm25ID, pm25, timestampGlobal, lngGlobal, latGlobal);
+#ifdef DEBUG_ENABLED
+  Serial.print(buffer);
+#endif
+  writeToSD(buffer, "sps.csv");
+
+    sprintf_P(buffer, PSTR("%s,%.0f,%s,%02s,%02s\r\n\0"), pm4ID, pm4, timestampGlobal, lngGlobal, latGlobal);
+#ifdef DEBUG_ENABLED
+  Serial.print(buffer);
+#endif
+  writeToSD(buffer, "sps2.csv");
+
+    sprintf_P(buffer, PSTR("%s,%.0f,%s,%02s,%02s\r\n\0"), pm1ID, pm1, timestampGlobal, lngGlobal, latGlobal);
+#ifdef DEBUG_ENABLED
+  Serial.print(buffer);
+#endif
+  writeToSD(buffer, "sps2.csv");
+
+  sprintf_P(buffer, PSTR("%s,%.1f,%s,%02s,%02s\r\n\0"), speedID, speed, timestampGlobal, lngGlobal, latGlobal);
+#ifdef DEBUG_ENABLED
+  Serial.print(buffer);
+#endif
+  writeToSD(buffer, "hdc.csv");
+
   // bmx values
   for (uint8_t i = 0; i < (sizeof(bmxValues) / sizeof(bmxValues[0])); i++)
   {
-    sprintf_P(buffer, PSTR("%s,%f,%s,%02s,%02s\r\n\0"), bmxIDS[i], bmxValues[i], timestampGlobal, lngGlobal, latGlobal);
+    sprintf_P(buffer, PSTR("%s,%.0f,%s,%02s,%02s\r\n\0"), bmxIDS[i], bmxValues[i], timestampGlobal, lngGlobal, latGlobal);
 #ifdef DEBUG_ENABLED
     Serial.print(buffer);
 #endif
      writeToSD(buffer, "bmx.csv");
   }
-//  memset(buffer, 0, sizeof(buffer));
-//   // distance values
-//   for (uint8_t i = 0; i < (sizeof(distanceValues) / sizeof(distanceValues[0])); i++)
-//   {
-//     sprintf_P(buffer, PSTR("%s,%d,%s,%02s,%02s\r\n\0"), distanceIDS[i], distanceValues[i], timestampGlobal, lngGlobal, latGlobal);
-// #ifdef DEBUG_ENABLED
-//     Serial.print(buffer);
-// #endif
-//     writeToSD(buffer, "distanz.csv");
-//   }
+
   resetVariables();
 }
 
@@ -198,7 +216,7 @@ void checkStandby(bool *standby)
 bool submitValues()
 {
   // for every file do a request!
-  for (int i = 0; i < 2; i++)
+  for (int i = 0;  i < (sizeof(fileNames) / sizeof(fileNames[0])) ; i++)
   {
     // close any connection before send a new request.
     // This will free the socket on the WiFi shield

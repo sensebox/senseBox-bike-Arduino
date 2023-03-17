@@ -7,5 +7,5 @@
  **/
 
 
-char *ssids[] = {"ReeduNet"};
-char *pws[] = {"werockschools!"};
+char *ssids[] = {"ReeduNet", "senseBox-AP"};
+char *pws[] = {"werockschools!", "werockschools",};

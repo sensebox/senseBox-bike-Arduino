@@ -28,7 +28,7 @@ void initSD()
 }
 void resetSD()
 {
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < (sizeof(fileNames) / sizeof(fileNames[0])); i++)
   {
     SD.remove(fileNames[i]);
   }

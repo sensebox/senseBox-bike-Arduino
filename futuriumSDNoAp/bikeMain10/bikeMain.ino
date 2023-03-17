@@ -1,4 +1,5 @@
 #include "variables/variables.h"
+#include <senseBoxIO.h>
 
 #define DEBUG_ENABLED
 
@@ -10,31 +11,24 @@ void setup()
 
 #ifdef DEBUG_ENABLED
   Serial.begin(9600);
-  while (!Serial)
-    ;
   Serial.println("Starting");
 #endif
-
   senseBoxIO.powerNone();
   delay(1000);
   senseBoxIO.powerAll();
   delay(100);
-
-  Serial.println("");
-  delay(100);
-
-
-
-  HDC.begin();
   Serial1.begin(9600);
   initUltrasonic();
   // init sps
   initSPS();
+  initBMX();
+
+  if (!HDC.begin()) {
+    Serial.println("Couldn't find HDC1080!");
+    while (1);
+  }
   initSD();
-#ifdef DEBUG_ENABLED
-  Serial.print("try to read configuration from ");
-  Serial.println(confFile);
-#endif
+
   // bool ret = readConfiguration(confFile);
 #ifdef DEBUG_ENABLED
   // if (ret) {
@@ -44,14 +38,11 @@ void setup()
   // }
   // dumpConfiguration();
 #endif
-
-
   //checkForFiles();
-  //resetSD();
+  // resetSD();
   rgb_led_1.begin();
   rgb_led_1.setBrightness(30);
 
-  initBMX();
 }
 
 void loop()
@@ -65,21 +56,21 @@ void loop()
     if (fix.valid.location)
     {
       getAccAmplitudes(&sumAccX, &sumAccY, &sumAccZ);
+      distance = getCm();
       setTimestamp();
       setGPS();
       showGreen();
       // if a new distance value came in save to sd
-      // handleLeft();
-      // handleRight();
+      handleDistance();
       // check for standby every 10 seconds
       if (time_start > time_actual_10s + interval10s)
       {
         checkStandby(&standby);
+        getMeasurements();
         time_actual_10s = millis();
       }
       if (time_start > time_actual_20s + interval20s)
       {
-        getMeasurements();
         time_actual_20s = millis();
       }
     }
@@ -142,7 +133,7 @@ void loop()
 #endif
       previousMillis = currentMillis;
       connectToWifiWrapper();
-     
+
       if (WiFi.status() == WL_CONNECTED)
       {
         if (submitValues()) // success; if http gets 200 back go to sleep
@@ -152,7 +143,7 @@ void loop()
           Serial.println("Going to hibernation");
 #endif
           // If values have been submitted blink green for some seconds and then shut off
-          smartBlink(51,255,51);
+          smartBlink(51, 255, 51);
           for (;;)
           {
             WiFi.disconnect();
@@ -161,7 +152,7 @@ void loop()
         }
         else {
           // Something happened with the openSenseMap blink Blue
-           smartBlink(51, 102, 255);
+          smartBlink(51, 102, 255);
         }
         // disconnect and try again in 60 seconds
         WiFi.disconnect();
