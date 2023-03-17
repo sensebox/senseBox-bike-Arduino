@@ -28,18 +28,6 @@ void setup()
     while (1);
   }
   initSD();
-
-  // bool ret = readConfiguration(confFile);
-#ifdef DEBUG_ENABLED
-  // if (ret) {
-  //   Serial.println("OK");
-  // } else {
-  //   Serial.println("not found");
-  // }
-  // dumpConfiguration();
-#endif
-  //checkForFiles();
-  // resetSD();
   rgb_led_1.begin();
   rgb_led_1.setBrightness(30);
 
