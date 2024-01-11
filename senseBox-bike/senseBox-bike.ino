@@ -59,10 +59,7 @@ int accelerationCharacteristic = 0;
 int GPSCharacteristic = 0;
 int distanceCharacteristic = 0;
 int GPSFixCharacteristisc = 0;
-float speed;
-status_t status;
-float latitude;
-float longitude;
+float status;
 String name;
 
 
@@ -150,11 +147,27 @@ void writeToBluetooth(){
 
 }
 
-
 // sets global variables for gps
 void setGPSValues(){
   speed = (float)fix.speed_kph();
-  status = fix.status();
+  gps_fix::status_t statusTmp = fix.status; 
+  switch (statusTmp) {
+    case gps_fix::STATUS_NONE: 
+      status = 0;
+      break;
+    case gps_fix::STATUS_EST: 
+      status = 1; 
+      break; 
+    case gps_fix::STATUS_TIME_ONLY: 
+      status = 2; 
+      break; 
+    case gps_fix::STATUS_DGPS: 
+      status = 3;
+      break;
+    default: 
+      status = 0;
+      break;
+  }
   latitude = (float)fix.latitude();
   longitude = (float)fix.longitude();
 }
