@@ -21,6 +21,7 @@ NewPing sonarA(TRIGGER_LEFT, ECHO_LEFT, MAX_DISTANCE_A);
 Adafruit_MPU6050 mpu;
 Adafruit_HDC1000 HDC = Adafruit_HDC1000();
 static NMEAGPS gps;
+// https://github.com/SlashDevin/NeoGPS/blob/master/extras/doc/Data%20Model.md
 static gps_fix fix;
 
 int period = 1000;
@@ -28,6 +29,7 @@ unsigned long time_now = 0;
 bool recording = false;
 long last;
 long time_start = 0;
+unsigned long previousMillis = 0;  // Variable zur Speicherung der letzten Millisekunden
 
 float temp = 0;
 float humi = 0;
@@ -56,8 +58,11 @@ int PMCharacteristic = 0;
 int accelerationCharacteristic = 0;
 int GPSCharacteristic = 0;
 int distanceCharacteristic = 0;
-
-
+int GPSFixCharacteristisc = 0;
+float speed;
+status_t status;
+float latitude;
+float longitude;
 String name;
 
 
@@ -104,8 +109,55 @@ void setMeasurements() {
   pm1 = m.mc_1p0;
 }
 
+// Helper function to bypass the delay function 
+void smartDelay (unsigned int milliseconds){
+  unsigned long currentMillis = millis();
+  unsigned long interval = milliseconds;
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+  } 
+}
+
+void startBluetooth () {
+  SenseBoxBLE::start("senseBox-BLE");
+  smartDelay(1000);
+  name = "senseBox:bike [" + SenseBoxBLE::getMCUId() + "]";
+  SenseBoxBLE::setName(name);
+  Serial.println(name);
+  smartDelay(1000);
+  Serial.print("Adding BLE characteristics...");
+  SenseBoxBLE::addService("CF06A218F68EE0BEAD048EBC1EB0BC84");
+  temperatureCharacteristic = SenseBoxBLE::addCharacteristic("2CDF217435BEFDC44CA26FD173F8B3A8");
+  humidityCharacteristic = SenseBoxBLE::addCharacteristic("772DF7EC8CDC4EA986AF410ABE0BA257");
+  PMCharacteristic = SenseBoxBLE::addCharacteristic("7E14E07084EA489FB45AE1317364B979");
+  accelerationCharacteristic = SenseBoxBLE::addCharacteristic("B944AF10F4954560968F2F0D18CAB522");
+  GPSCharacteristic = SenseBoxBLE::addCharacteristic("8EDF8EBB12464329928DEE0C91DB2389");
+  distanceCharacteristic = SenseBoxBLE::addCharacteristic("B3491B60C0F34306A30D49C91F37A62B");
+  GPSFixCharacteristisc = SenseBoxBLE::addCharacteristic("PPFSSPSPXGIPIIPFFXXPSXSFSSXSPXFF");
+  Serial.println("done!");
+
+}
+
+// sends phenomenas to the given BT characteristics
+void writeToBluetooth(){
+  bool connected = SenseBoxBLE::write(temperatureCharacteristic, temp);
+  SenseBoxBLE::write(humidityCharacteristic, humi);
+  SenseBoxBLE::write(PMCharacteristic, pm1, pm25, pm4, pm10);
+  SenseBoxBLE::write(accelerationCharacteristic, sumAccX, sumAccY, sumAccZ);
+  SenseBoxBLE::write(GPSCharacteristic, latitude, longitude, speed);
+  SenseBoxBLE::write(distanceCharacteristic, dist_l);
+  SenseBoxBLE::write(GPSFixCharacteristisc, status);
+
+}
 
 
+// sets global variables for gps
+void setGPSValues(){
+  speed = (float)fix.speed_kph();
+  status = fix.status();
+  latitude = (float)fix.latitude();
+  longitude = (float)fix.longitude();
+}
 
 
 void setup() {
@@ -117,28 +169,10 @@ void setup() {
   initSensors();
   Serial.println("Sensor init done!");
 
-  delay(1000);
+  smartDelay(10000);
+  startBluetooth();
+  smartDelay(500);
 
-  delay(500);
-  SenseBoxBLE::start("senseBox-BLE");
-  delay(1000);
-  name = "senseBox:bike [" + SenseBoxBLE::getMCUId() + "]";
-  SenseBoxBLE::setName(name);
-
-  Serial.println(name);
-
-  delay(1000);
-
-  Serial.print("Adding BLE characteristics...");
-  SenseBoxBLE::addService("CF06A218F68EE0BEAD048EBC1EB0BC84");
-
-  temperatureCharacteristic = SenseBoxBLE::addCharacteristic("2CDF217435BEFDC44CA26FD173F8B3A8");
-  humidityCharacteristic = SenseBoxBLE::addCharacteristic("772DF7EC8CDC4EA986AF410ABE0BA257");
-  PMCharacteristic = SenseBoxBLE::addCharacteristic("7E14E07084EA489FB45AE1317364B979");
-  accelerationCharacteristic = SenseBoxBLE::addCharacteristic("B944AF10F4954560968F2F0D18CAB522");
-  GPSCharacteristic = SenseBoxBLE::addCharacteristic("8EDF8EBB12464329928DEE0C91DB2389");
-  distanceCharacteristic = SenseBoxBLE::addCharacteristic("B3491B60C0F34306A30D49C91F37A62B");
-  Serial.println("done!");
 }
 
 void loop() {
@@ -149,18 +183,8 @@ void loop() {
   }
 
   setMeasurements();
-  // printMeasurements();
-  float speed = (float)fix.speed_kph();
-  float latitude = (float)fix.latitude();
-  float longitude = (float)fix.longitude();
-
-  bool connected = SenseBoxBLE::write(temperatureCharacteristic, temp);
-  SenseBoxBLE::write(humidityCharacteristic, humi);
-  SenseBoxBLE::write(PMCharacteristic, pm1, pm25, pm4, pm10);
-  SenseBoxBLE::write(accelerationCharacteristic, sumAccX, sumAccY, sumAccZ);
-  SenseBoxBLE::write(GPSCharacteristic, latitude, longitude, speed);
-  SenseBoxBLE::write(distanceCharacteristic, dist_l);
-
+  setGPSValues();
+  writeToBluetooth();
   sumAccX = 0;
   sumAccY = 0;
   sumAccZ = 0;
@@ -172,6 +196,6 @@ void loop() {
 
   while (millis() < time_start + period) {
     SenseBoxBLE::poll();
-    delay(5);
+    smartDelay(5);
   }
 }
