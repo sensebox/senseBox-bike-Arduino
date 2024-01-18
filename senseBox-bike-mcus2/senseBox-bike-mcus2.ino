@@ -1,4 +1,4 @@
-#include "SenseBoxBLE.h"
+#include <SenseBoxBLE.h>
 #include <Wire.h>
 #include <SDConfig.h>
 #include <SD.h>
@@ -28,7 +28,8 @@ unsigned long time_now = 0;
 bool recording = false;
 long last;
 long time_start = 0;
-unsigned long previousMillis = 0;  // Variable zur Speicherung der letzten Millisekunden
+unsigned long startMillis = 0;  // Variable zur Speicherung der letzten Millisekunden
+unsigned long time_actualInterval = 0;
 
 float temp = 0;
 float humi = 0;
@@ -64,7 +65,7 @@ String name;
 
 
 
-void initSensors() {
+void initsSensors() {
   Serial.print("Ultrasonic...");
   initUltrasonic();
   Serial.println("done!");
@@ -107,16 +108,20 @@ void setMeasurements() {
   // pm1 = m.mc_1p0;
 }
 
-// Helper function to bypass the delay function 
-void smartDelay (unsigned int milliseconds){
-  unsigned long currentMillis = millis();
-  unsigned long interval = milliseconds;
-  if (currentMillis - previousMillis >= interval) {
-    previousMillis = currentMillis;
-  } 
+static void smartDelay(unsigned long ms)
+{
+  unsigned long start = millis();
+  do
+  {
+    while (Serial1.available())
+      fix = gps.read();
+  } while (millis() - start < ms);
 }
 
+
+
 void startBluetooth () {
+  Serial.println("start BT");
   SenseBoxBLE::start("senseBox-BLE");
   smartDelay(1000);
   name = "senseBox:bike [" + SenseBoxBLE::getMCUId() + "]";
@@ -176,16 +181,14 @@ void setGPSValues(){
 
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
+  while(!Serial);
   Serial.println("Starting Sketch!");
-
-
   Serial.println("Initializing sensors..");
-  initSensors();
-  Serial.println("Sensor init done!");
-
-  smartDelay(10000);
+  initsSensors();
+  Serial.println("Sensor init done! ");
   startBluetooth();
+  Serial.println("Bluetooth done!"); 
   smartDelay(500);
 
 }
@@ -203,8 +206,6 @@ void loop() {
   sumAccX = 0;
   sumAccY = 0;
   sumAccZ = 0;
-
-  Serial.println(name);
 
   time_now = millis();
 
