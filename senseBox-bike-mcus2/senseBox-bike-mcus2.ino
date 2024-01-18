@@ -1,3 +1,7 @@
+// First sketch for the senseBox:bike working with the second generation for the MCU
+// SPS is disabled 
+// 
+
 #include <SenseBoxBLE.h>
 #include <Wire.h>
 #include <SDConfig.h>
@@ -11,25 +15,22 @@
 #define TRIGGER_LEFT 1
 #define ECHO_LEFT 2
 #define MAX_DISTANCE_A 400
-
-#define Addr_Accl 0x18
-#define Addr_Gyro 0x68
-#define Addr_Mag 0x10
 NewPing sonarA(TRIGGER_LEFT, ECHO_LEFT, MAX_DISTANCE_A);
-
-Adafruit_MPU6050 mpu;
-Adafruit_HDC1000 HDC = Adafruit_HDC1000();
 static NMEAGPS gps;
 // https://github.com/SlashDevin/NeoGPS/blob/master/extras/doc/Data%20Model.md
 static gps_fix fix;
+
+// Accelerometer and Gyroscope
+Adafruit_MPU6050 mpu;
+// Temperatur and humidity
+Adafruit_HDC1000 HDC = Adafruit_HDC1000();
+
 
 int period = 1000;
 unsigned long time_now = 0;
 bool recording = false;
 long last;
 long time_start = 0;
-unsigned long startMillis = 0;  // Variable zur Speicherung der letzten Millisekunden
-unsigned long time_actualInterval = 0;
 
 float temp = 0;
 float humi = 0;
@@ -43,11 +44,12 @@ float accZ = 0;
 float gps_lat = 0;
 float gps_lng = 0;
 float gps_spd = 0;
-float dist_l = 0;
-struct sps30_measurement m;
 float speed;
 float latitude;
 float longitude;
+float dist_l = 0;
+struct sps30_measurement m;
+
 float sumAccZ;
 float sumAccY;
 float sumAccX;
@@ -65,14 +67,14 @@ String name;
 
 
 
+// init all sensors
+// todo: give feedback through LED if all is working?
 void initsSensors() {
   Serial.print("Ultrasonic...");
   initUltrasonic();
-  Serial.println("done!");
-  // no sps just now
+  // ATTENTION! SPS Disabled for essen-auf-raedern
   // Serial.print("SPS30...");
-  // initSPS();
-  Serial.println("done!");
+  // initSPS();  Serial.println("done!");
   Serial.print("MPU6050...");
   initBMX();
   Serial.println("done!");
@@ -92,21 +94,20 @@ void initsSensors() {
 
 
 
+
+// set measurements for acceleration, distance, humidity and temperature
 void setMeasurements() {
   getAccAmplitudes(&sumAccX, &sumAccY, &sumAccZ);
-
   handleDistance();
   temp = HDC.readTemperature();
   humi = HDC.readHumidity();
 
 }
 
-
-
-
+// starts bluetooth and sets the name according to the Bluetooth Bee
+// TODO: can the ID be seen on the hardware? 
 void startBluetooth() {
   SenseBoxBLE::start("senseBox-BLE");
-
   delay(1000);
   name = "senseBox:bike [" + SenseBoxBLE::getMCUId() + "]";
   SenseBoxBLE::setName(name);
@@ -135,13 +136,17 @@ void writeToBluetooth() {
   SenseBoxBLE::write(GPSFixCharacteristisc, status);
 }
 
+void resetVariables(){
+  sumAccX = 0;
+  sumAccY = 0;
+  sumAccZ = 0;
+}
+
 
 
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial)
-    ;
   Serial.println("Starting Sketch!");
   Serial.println("Initializing sensors..");
   initsSensors();
@@ -155,15 +160,14 @@ void loop() {
   SenseBoxBLE::poll();
   time_start = millis();
 
-
+  // set global variables for measurements
   setMeasurements();
+  // write measurements to bluetooth
   writeToBluetooth();
-  sumAccX = 0;
-  sumAccY = 0;
-  sumAccZ = 0;
+  // reset acceleration values
+  resetVariables();
 
   time_now = millis();
-
   while (millis() < time_start + period) {
     SenseBoxBLE::poll();
     delay(5);
