@@ -106,22 +106,15 @@ void setMeasurements() {
   pm1 = m.mc_1p0;
 }
 
-// Helper function to bypass the delay function 
-void smartDelay (unsigned int milliseconds){
-  unsigned long currentMillis = millis();
-  unsigned long interval = milliseconds;
-  if (currentMillis - previousMillis >= interval) {
-    previousMillis = currentMillis;
-  } 
-}
+
 
 void startBluetooth () {
   SenseBoxBLE::start("senseBox-BLE");
-  smartDelay(1000);
+  delay(1000);
   name = "senseBox:bike [" + SenseBoxBLE::getMCUId() + "]";
   SenseBoxBLE::setName(name);
   Serial.println(name);
-  smartDelay(1000);
+  delay(1000);
   Serial.print("Adding BLE characteristics...");
   SenseBoxBLE::addService("CF06A218F68EE0BEAD048EBC1EB0BC84");
   temperatureCharacteristic = SenseBoxBLE::addCharacteristic("2CDF217435BEFDC44CA26FD173F8B3A8");
@@ -182,9 +175,9 @@ void setup() {
   initSensors();
   Serial.println("Sensor init done!");
 
-  smartDelay(10000);
+  delay(10000);
   startBluetooth();
-  smartDelay(500);
+  delay(500);
 
 }
 
@@ -209,6 +202,6 @@ void loop() {
 
   while (millis() < time_start + period) {
     SenseBoxBLE::poll();
-    smartDelay(5);
+    delay(5);
   }
 }
