@@ -41,6 +41,9 @@ jobs:
             - name: "Adafruit SSD1306"
             - source-url: https://github.com/felixerdy/QRCodeGenerator.git
             - name: "Adafruit MAX1704X"
+            - name: SDConfig
+            - name: SD
+            - name: Ethernet
           enable-deltas-report: true
           sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
 
