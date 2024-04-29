@@ -25,16 +25,16 @@ jobs:
           sketch-paths: |
             - ./blink
           libraries: |
-            - SenseBoxBLE
-            - SDConfig
-            - SD
-            - Adafruit_HDC1000
-            - sps30
-            - Adafruit_MPU6050
-            - NewPing
-            - display
-            - vl53l8cx_class
-            - Adafruit_GFX
-            - Adafruit_SSD1306
-            - qrcode
-            - Adafruit_MAX1704X
+            - name: SenseBoxBLE
+            - name: SDConfig
+            - name: SD
+            - name: Adafruit_HDC1000
+            - name: sps30
+            - name: Adafruit_MPU6050
+            - name: NewPing
+            - name: display
+            - name: vl53l8cx_class
+            - name: Adafruit_GFX
+            - name: Adafruit_SSD1306
+            - name: qrcode
+            - name: Adafruit_MAX1704X
