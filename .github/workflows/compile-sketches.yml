@@ -51,4 +51,4 @@ jobs:
         with:
           if-no-files-found: error
           path: ${{ env.SKETCHES_REPORTS_PATH }}
-          name: sketches-report-atrai
+          # name: sketches-report-atrai
