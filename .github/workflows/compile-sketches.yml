@@ -68,6 +68,7 @@ jobs:
             - name: WiFi101
             - name: TinyGPSPlus
             - name: OneWire
+            - name: DallasTemperature
           enable-deltas-report: true
           enable-warnings-report: true
           cli-compile-flags: |
