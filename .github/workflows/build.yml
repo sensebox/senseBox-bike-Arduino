@@ -30,10 +30,10 @@ jobs:
             - name: SD
             - name: "Adafruit HDC1000 Library"
             - name: sensirion-sps
-            - name: Adafruit_MPU6050
+            - name: "Adafruit MPU6050"
             - name: NewPing
             - name: vl53l8cx_class
-            - name: Adafruit_GFX
-            - name: Adafruit_SSD1306
+            - name: "Adafruit GFX Library"
+            - name: "Adafruit SSD1306"
             - name: qrcode
-            - name: Adafruit_MAX1704X
+            - name: "Adafruit MAX1704X"
