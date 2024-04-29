@@ -1,0 +1,37 @@
+name: Compile Sketch
+
+# The workflow will run on every push and pull request to the repository
+on:
+  - push
+  - pull_request
+
+jobs:
+  compile-sketch:
+    runs-on: ubuntu-latest
+
+    steps:
+      # This step makes the contents of the repository available to the workflow
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # For more information: https://github.com/arduino/compile-sketches#readme
+      - name: Compile sketch
+        uses: arduino/compile-sketches@v1
+        with:
+          fqbn: esp32:esp32:sensebox_mcu_esp32s2
+          sketch-paths: |
+            - ./sensebox-bike-atrai
+          libraries: |
+            - SenseBoxBLE
+            - SDConfig
+            - SD
+            - Adafruit_HDC1000
+            - sps30
+            - Adafruit_MPU6050
+            - NewPing
+            - display
+            - vl53l8cx_class
+            - Adafruit_GFX
+            - Adafruit_SSD1306
+            - qrcode
+            - Adafruit_MAX1704X
