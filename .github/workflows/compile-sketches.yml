@@ -10,7 +10,30 @@ on:
 
 jobs:
   compile-sketch:
+    name: ${{ matrix.board.fqbn }}
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        board:
+          - fqbn: sensebox:samd:sb:power=on
+            platforms: |
+              - name: sensebox:samd
+                source-url: https://raw.githubusercontent.com/mariopesch/senseBoxMCU-core/master/package_sensebox_index.json
+            sketch-paths: |
+              - ./senseBox-bike
+              - ./senseBox-bike-v0
+            artifact-name-suffix: sensebox-samd-sb
+          - fqbn: esp32:esp32:sensebox_mcu_esp32s2
+            platforms: |
+              - name: esp32:esp32
+                source-url: https://espressif.github.io/arduino-esp32/package_esp32_index.json
+            sketch-paths: |
+              - ./senseBox-bike-atrai
+              - ./senseBox-bike-mcus2
+            artifact-name-suffix: esp32-esp32-sensebox_mcu_esp32s2
 
     steps:
       # This step makes the contents of the repository available to the workflow
@@ -21,12 +44,9 @@ jobs:
       - name: Compile sketch
         uses: arduino/compile-sketches@v1
         with:
-          fqbn: esp32:esp32:sensebox_mcu_esp32s2
-          platforms: |
-            - name: esp32:esp32
-              source-url: https://espressif.github.io/arduino-esp32/package_esp32_index.json
-          sketch-paths: |
-            - ./senseBox-bike-atrai
+          fqbn: ${{ matrix.board.fqbn }}
+          platforms: ${{ matrix.board.platforms }}
+          sketch-paths: ${{ matrix.board.sketch-paths }}
           libraries: |
             - name: SenseBoxBLE
             - name: "Adafruit HDC1000 Library"
@@ -50,5 +70,5 @@ jobs:
       - name: Export binaries as artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: binaries
-          path: ${{ github.workspace }}/senseBox-bike-atrai/
+          name: ${{ matrix.board.artifact-name-suffix }}
+          path: ${{ github.workspace }}
