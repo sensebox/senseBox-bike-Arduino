@@ -66,6 +66,7 @@ jobs:
             - name: Ethernet
             - name: NeoGPS
             - name: WiFi101
+            - name: TinyGPSPlus
           enable-deltas-report: true
           enable-warnings-report: true
           cli-compile-flags: |
