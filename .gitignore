@@ -1,3 +1,6 @@
 .vscode/*
 Data/*
 BIKE.CFG
+
+**/build/*
+.DS_Store
