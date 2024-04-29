@@ -10,10 +10,32 @@ on:
 
 jobs:
   compile-sketch:
+    name: ${{ matrix.board.fqbn }}
     runs-on: ubuntu-latest
 
-    env:
-      SKETCHES_REPORTS_PATH: sketches-reports
+    strategy:
+      fail-fast: false
+
+      matrix:
+        board:
+          # senseBox MCU
+          - fqbn: sensebox:samd:sb:power=on
+            platforms: |
+              - name: arduino:samd
+              - name: sensebox:samd
+                source-url: https://raw.githubusercontent.com/mariopesch/senseBoxMCU-core/master/package_sensebox_index.json
+            sketch-paths: |
+              - ./senseBox-bike
+            artifact-name-suffix: sensebox.samd.sb
+          # senseBox MCU S2 (ESP32)
+          - fqbn: esp32:esp32:sensebox_mcu_esp32s2
+            platforms: |
+              - name: esp32:esp32
+                source-url: https://espressif.github.io/arduino-esp32/package_esp32_index.json
+            sketch-paths: |
+              - ./senseBox-bike-atrai
+              - ./senseBox-bike-mcus2
+            artifact-name-suffix: esp32.esp32.sensebox_mcu_esp32s2
 
     steps:
       # This step makes the contents of the repository available to the workflow
@@ -24,12 +46,9 @@ jobs:
       - name: Compile sketch
         uses: arduino/compile-sketches@v1
         with:
-          fqbn: esp32:esp32:sensebox_mcu_esp32s2
-          platforms: |
-            - name: esp32:esp32
-              source-url: https://espressif.github.io/arduino-esp32/package_esp32_index.json
-          sketch-paths: |
-            - ./senseBox-bike-atrai
+          fqbn: ${{ matrix.board.fqbn }}
+          platforms: ${{ matrix.board.platforms }}
+          sketch-paths: ${{ matrix.board.sketch-paths }}
           libraries: |
             - name: SenseBoxBLE
             - name: "Adafruit HDC1000 Library"
@@ -45,5 +64,24 @@ jobs:
             - name: SD
             - name: Ethernet
             - name: NeoGPS
+            - name: WiFi101
+            - name: TinyGPSPlus
+            - name: OneWire
+            - name: DallasTemperature
           enable-deltas-report: true
           enable-warnings-report: true
+          cli-compile-flags: |
+            - --export-binaries
+
+      - name: Export binaries as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.board.artifact-name-suffix }}
+          path: ${{ github.workspace }}
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            ${{ matrix.board.artifact-name-suffix }}
