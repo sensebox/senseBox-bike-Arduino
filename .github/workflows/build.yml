@@ -32,7 +32,7 @@ jobs:
             - name: sensirion-sps
             - name: "Adafruit MPU6050"
             - name: NewPing
-            - name: vl53l8cx_class
+            - name: "STM32duino VL53L8CX"
             - name: "Adafruit GFX Library"
             - name: "Adafruit SSD1306"
             - name: qrcode
