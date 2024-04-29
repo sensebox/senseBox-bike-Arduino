@@ -84,4 +84,4 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            ${{ matrix.board.artifact-name-suffix }}.zip
+            ${{ github.workspace }}/${{ matrix.board.artifact-name-suffix }}.zip
