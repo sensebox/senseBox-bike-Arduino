@@ -18,14 +18,17 @@ jobs:
 
       matrix:
         board:
+          # senseBox MCU
           - fqbn: sensebox:samd:sb:power=on
             platforms: |
+              - name: arduino:samd
               - name: sensebox:samd
                 source-url: https://raw.githubusercontent.com/mariopesch/senseBoxMCU-core/master/package_sensebox_index.json
             sketch-paths: |
               - ./senseBox-bike
               - ./senseBox-bike-v0
             artifact-name-suffix: sensebox-samd-sb
+          # senseBox MCU S2 (ESP32)
           - fqbn: esp32:esp32:sensebox_mcu_esp32s2
             platforms: |
               - name: esp32:esp32
