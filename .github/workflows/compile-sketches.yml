@@ -39,7 +39,7 @@ jobs:
             - name: "STM32duino VL53L8CX"
             - name: "Adafruit GFX Library"
             - name: "Adafruit SSD1306"
-            - name: qrcode
+            - name: QRCode
             - name: "Adafruit MAX1704X"
           enable-deltas-report: true
           sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
