@@ -3,4 +3,4 @@ Data/*
 BIKE.CFG
 
 **/build/*
-.DS_Store
+**/.DS_Store

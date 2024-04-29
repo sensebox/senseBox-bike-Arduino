@@ -1,3 +1,8 @@
 # senseBox:bike
 
-Mobile Messstation mit der Temperatur, rel. Luftfeuchte, Feinstaub (PM10, PM25), Abstand nach links und rechts sowie die Bodenerschütterung gemessen werden. Die Daten werden über das senseBox BLE-Bee übertragen
+A mobile measurement station that measures temperature, relative humidity, particulate matter (PM10, PM25), distance to the left as well as ground vibration. The data is transmitted via the senseBox BLE-Bee
+
+### Variants
+
+- [senseBox:bike v0](senseBox-bike-v0): The first version of the senseBox:bike tested in the Futurium
+- [senseBox:bike MCUS2](senseBox-bike-mcus2): The second version of the senseBox:bike with a new microcontroller and BLE-Bee. Used for the [Essen auf Rädern](https://essen.aufraedern.org/) project

@@ -1,0 +1,20 @@
+# WLAN Configuration
+SSID=MyNetwork
+PSK=superSafePassword2021
+
+# Sensor IDs können über die API abgefragt werden 
+# https://api.opensensemap.org/boxes/[:senseBoxID]
+# senseboxIds
+# Example SENSEBOX_ID=615f292bc031ff001b117192
+#         TEMP_ID=615f292bc031ff001b11719b
+SENSEBOX_ID=
+TEMP_ID=
+HUMI_ID=
+DIST_L_ID=
+DIST_R_ID=
+PM10_ID=
+PM25_ID=
+ACC_X_ID=
+ACC_Y_ID=
+ACC_Z_ID=
+SPEED_ID=
