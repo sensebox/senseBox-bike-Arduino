@@ -93,4 +93,5 @@ jobs:
         with:
           artifacts: release/**/*.bin
           allowUpdates: true
+          omitBodyDuringUpdate: true
           token: ${{ secrets.GITHUB_TOKEN }}
