@@ -67,6 +67,7 @@ jobs:
             - name: NeoGPS
             - name: WiFi101
             - name: TinyGPSPlus
+            - name: OneWire
           enable-deltas-report: true
           enable-warnings-report: true
           cli-compile-flags: |
