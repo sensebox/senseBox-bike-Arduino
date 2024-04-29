@@ -32,8 +32,6 @@ jobs:
             - ./senseBox-bike-atrai
           libraries: |
             - name: SenseBoxBLE
-            - name: SDConfig
-            - name: SD
             - name: "Adafruit HDC1000 Library"
             - name: sensirion-sps
             - name: "Adafruit MPU6050"
