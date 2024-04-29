@@ -28,7 +28,7 @@ jobs:
             - name: SenseBoxBLE
             - name: SDConfig
             - name: SD
-            - name: Adafruit_HDC1000
+            - name: Adafruit_HDC1000_Library
             - name: sps30
             - name: Adafruit_MPU6050
             - name: NewPing
