@@ -10,6 +10,12 @@
 #include <vl53l8cx_class.h>
 
 
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <qrcode.h>
+#include <Adafruit_MAX1704X.h>
+
+
 
 
 // Accelerometer and Gyroscope
