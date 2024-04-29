@@ -5,7 +5,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include <qrcode.h>
+#include <QRCodeGenerator.h>
 #include <Adafruit_MAX1704X.h>
 
 #define SCREEN_WIDTH 128
