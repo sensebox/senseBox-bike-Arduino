@@ -92,6 +92,5 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           artifacts: release/**/*.bin
-          generateReleaseNotes: true
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
