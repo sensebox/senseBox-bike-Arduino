@@ -26,7 +26,7 @@ jobs:
                 source-url: https://raw.githubusercontent.com/mariopesch/senseBoxMCU-core/master/package_sensebox_index.json
             sketch-paths: |
               - ./senseBox-bike
-            artifact-name-suffix: sensebox-samd-sb
+            artifact-name-suffix: sensebox.samd.sb
           # senseBox MCU S2 (ESP32)
           - fqbn: esp32:esp32:sensebox_mcu_esp32s2
             platforms: |
@@ -73,16 +73,8 @@ jobs:
           cli-compile-flags: |
             - --export-binaries
 
-      - name: Bundle binaries
-        run: |
-          mkdir -p ${{ github.workspace }}/binaries/${{ matrix.board.artifact-name-suffix }}
-          # iterate over sketch-paths and move the compiled binaries to the binaries directory
-          for sketch_path in ${{ matrix.board.sketch-paths }}; do
-            mv ${{ github.workspace }}/${sketch_path}/build/${{ matrix.board.artifact-name-suffix }} ${{ github.workspace }}/binaries/${{ matrix.board.artifact-name-suffix }}/${sketch_path}
-          done
-
       - name: Export binaries as artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.board.artifact-name-suffix }}
-          path: ${{ github.workspace }}/binaries/${{ matrix.board.artifact-name-suffix }}
+          path: ${{ github.workspace }}
