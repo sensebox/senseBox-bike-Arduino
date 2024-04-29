@@ -1,10 +1,6 @@
 // First sketch for the senseBox:bike working with the second generation for the MCU
-// SPS is disabled
-//
 
 #include <SenseBoxBLE.h>
-#include <SDConfig.h>
-#include <SD.h>
 #include <Adafruit_HDC1000.h>
 #include <sps30.h>
 #include <Adafruit_MPU6050.h>
@@ -12,9 +8,6 @@
 #include "display.h"
 
 #include <vl53l8cx_class.h>
-
-
-
 
 // Accelerometer and Gyroscope
 Adafruit_MPU6050 mpu;
