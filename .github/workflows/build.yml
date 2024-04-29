@@ -29,7 +29,7 @@ jobs:
             - name: SDConfig
             - name: SD
             - name: "Adafruit HDC1000 Library"
-            - name: sps30
+            - name: sensirion-sps
             - name: Adafruit_MPU6050
             - name: NewPing
             - name: display
