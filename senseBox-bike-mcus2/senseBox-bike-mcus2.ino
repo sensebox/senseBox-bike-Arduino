@@ -76,8 +76,8 @@ void initsSensors() {
   // initUltrasonic();
   initVL53L8CX();
   // ATTENTION! SPS Disabled for essen-auf-raedern
-  Serial.print("SPS30...");
-  initSPS();  Serial.println("done!");
+  // Serial.print("SPS30...");
+  // initSPS();  Serial.println("done!");
   Serial.print("MPU6050...");
   initBMX();
   Serial.println("done!");
