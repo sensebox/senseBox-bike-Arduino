@@ -6,6 +6,7 @@ Adafruit_MAX17048 SBDisplay::maxlipo;
 
 void SBDisplay::begin() {
   display.begin(SSD1306_SWITCHCAPVCC, 0x3D);
+  display.setRotation(2);
   display.display();
   delay(100);
   display.clearDisplay();
@@ -65,6 +66,9 @@ void SBDisplay::showSystemStatus() {
 
 void SBDisplay::drawQrCode(const char *qrStr, const char *lines[]) {
   display.clearDisplay();
+  display.setTextSize(1);
+
+
   uint8_t qrcodeData[qrcode_getBufferSize(3)];
   qrcode_initText(&qrcode, qrcodeData, 3, ECC_MEDIUM, qrStr);
 
