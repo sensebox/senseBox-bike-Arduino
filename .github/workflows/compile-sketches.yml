@@ -73,6 +73,32 @@ jobs:
           cli-compile-flags: |
             - --export-binaries
 
+      - name: Create OTA update file
+        if: startsWith(matrix.board.fqbn, 'esp32')
+        run: |
+          git clone https://github.com/arduino-libraries/ArduinoIoTCloud.git
+
+          pip install crccheck
+
+          cd ArduinoIoTCloud/extras/tools
+
+          # Set the Internal Field Separator to newline to handle paths correctly
+          IFS=$'\n'
+          # Convert the list of sketch paths into an array
+          sketch_paths=(${{ matrix.board.sketch-paths }})
+          for sketch_path in "${sketch_paths[@]}"; do
+            if [[ "$sketch_path" != "-" ]]; then
+              echo "Processing sketch path: $sketch_path"
+              # replace ./ with nothing
+              clean_sketch_path=${sketch_path//.\//}
+              python3 lzss.py --encode ${{ github.workspace }}/$sketch_path/build/${{ matrix.board.artifact-name-suffix}}/$clean_sketch_path.ino.bin ${{ runner.temp }}/$clean_sketch_path.ino.lzss
+              echo "LZSS file created: ${{ runner.temp }}/$clean_sketch_path.ino.lzss"
+              python3 bin2ota.py ESP32 ${{ runner.temp }}/$clean_sketch_path.ino.lzss ${{ runner.temp }}/$clean_sketch_path.ino.ota
+              echo "OTA file created: ${{ runner.temp }}/$clean_sketch_path.ino.ota"
+              mv ${{ runner.temp }}/$clean_sketch_path.ino.ota ${{ github.workspace }}/$sketch_path/build/${{ matrix.board.artifact-name-suffix}}/$clean_sketch_path.ino.ota
+            fi
+          done
+
       - name: Export binaries as artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -91,7 +117,7 @@ jobs:
         uses: ncipollo/release-action@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          artifacts: release/**/*.bin
+          artifacts: "release/**/*.bin, release/**/*.ota"
           allowUpdates: true
           omitBodyDuringUpdate: true
           token: ${{ secrets.GITHUB_TOKEN }}
