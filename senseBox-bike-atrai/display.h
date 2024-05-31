@@ -8,6 +8,11 @@
 #include <QRCodeGenerator.h>
 #include <Adafruit_MAX1704X.h>
 
+#include <Arduino.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "bicycle_loading_bitmap.h"
+
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define OLED_RESET -1
@@ -19,6 +24,8 @@ public:
   static void drawQrCode(const char *qrStr, const char *lines[]);
   static void showLoading(String msg, float val);
   static void drawProgressbar(int x, int y, int width, int height, int progress);
+  static void drawBattery(int x, int y, int width, int height);
+  static void bicycleAnimationTask(void *pvParams);
 
 private:
   static Adafruit_SSD1306 display;

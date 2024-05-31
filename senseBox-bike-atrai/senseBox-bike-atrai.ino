@@ -94,7 +94,7 @@ void setMeasurements() {
   pm4 = m.mc_4p0;
   pm1 = m.mc_1p0;
 
-  distance = getVl53l8cxMin() / 10; // mm in cm
+  distance = getVl53l8cxMin() / 10;  // mm in cm
 }
 
 // starts bluetooth and sets the name according to the Bluetooth Bee
@@ -149,6 +149,7 @@ void setup() {
   Serial.println("Bluetooth done!");
   delay(500);
   SBDisplay::showLoading("Start measurements...", 1);
+  delay(500);
 }
 
 void loop() {
