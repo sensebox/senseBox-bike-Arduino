@@ -85,7 +85,7 @@ void DistanceSensor::sensorTask(void *pvParameters)
         oldVl53l8cxMin = (min == 10000.0) ? 0.0 : min;
       }
 
-      float distance = oldVl53l8cxMin;
+      float distance = oldVl53l8cxMin / 10.0;
 
       if (sensor->measurementCallback)
       {
