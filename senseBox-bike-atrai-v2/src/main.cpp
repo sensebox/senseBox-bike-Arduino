@@ -1,6 +1,4 @@
 #include <Arduino.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
 #include "sensors/TempHumiditySensor/TempHumiditySensor.h"
 #include "sensors/DustSensor/DustSensor.h"
 #include "sensors/DistanceSensor/DistanceSensor.h"
@@ -8,8 +6,10 @@
 #include "display/Display.h"
 #include "ble/BLEModule.h"
 
-TempHumiditySensor tempHumiditySensor;
+#include "Adafruit_NeoPixel.h"
+
 DustSensor dustSensor;
+TempHumiditySensor tempHumiditySensor;
 DistanceSensor distanceSensor;
 AccelerationSensor accelerationSensor;
 
@@ -17,10 +17,17 @@ SBDisplay display;
 
 BLEModule bleModule;
 
+Adafruit_NeoPixel rgb_led = Adafruit_NeoPixel(1, 1, NEO_GRB + NEO_KHZ800);
+
 void setup()
 {
     Serial.begin(115200);
     delay(1000);
+
+    rgb_led.begin();
+
+    rgb_led.setBrightness(30);
+
     SBDisplay::begin();
 
     pinMode(IO_ENABLE, OUTPUT);
@@ -58,8 +65,8 @@ void setup()
     //     Serial.printf("DustSensor [%s]\n", uuid.c_str());
     //   }, "UUID-Dust");
 
-    // distanceSensor.subscribe([](String uuid, std::vector<float> values)
-    //                          { Serial.printf("DistanceSensor [%s]: %.2f\n", uuid.c_str(), values[0]); });
+    // distanceSensor.subscribe([](std::vector<float> values)
+    //                          { Serial.printf("DistanceSensor [%s]: %.2f\n", values[0]); });
 
     // accelerationSensor.subscribe([](String uuid, std::vector<float> values)
     //                              {
@@ -68,13 +75,13 @@ void setup()
     //                             float z = values[2];
     //                             Serial.printf("Acceleration [%s]: %.2f, %.2f, %.2f\n", uuid.c_str(), x, y, z); });
 
-    tempHumiditySensor.startSubscription();
     dustSensor.startSubscription();
+    tempHumiditySensor.startSubscription();
     distanceSensor.startSubscription();
     accelerationSensor.startSubscription();
 
-    tempHumiditySensor.startBLE();
     dustSensor.startBLE();
+    tempHumiditySensor.startBLE();
     distanceSensor.startBLE();
     accelerationSensor.startBLE();
 

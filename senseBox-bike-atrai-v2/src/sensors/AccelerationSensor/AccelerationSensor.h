@@ -1,25 +1,17 @@
 #ifndef ACCELERATION_SENSOR_H
 #define ACCELERATION_SENSOR_H
 
-#include "../Sensor.h"
+#include "../BaseSensor.h"
+#include <Adafruit_MPU6050.h>
 
-class AccelerationSensor : public Sensor
+class AccelerationSensor : public BaseSensor
 {
 public:
-  void begin() override;
-  void subscribe(std::function<void(String, std::vector<float>)> callback) override;
-  void startSubscription() override;
-  void stopSubscription() override;
-  void startBLE() override;
-  void stopBLE() override;
+  AccelerationSensor();
 
-private:
-  std::function<void(String, std::vector<float>)> measurementCallback;
-  String uuid;
-
-  static const String accUUID;
-
-  static void sensorTask(void *pvParameters);
+protected:
+  void initSensor() override;
+  void readSensorData() override;
   void notifyBLE(float x, float y, float z);
 };
 
