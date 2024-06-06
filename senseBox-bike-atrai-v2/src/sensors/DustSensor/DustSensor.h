@@ -1,25 +1,19 @@
 #ifndef DUST_SENSOR_H
 #define DUST_SENSOR_H
 
-#include "../Sensor.h"
+#include "../BaseSensor.h"
+#include <sps30.h>
 
-class DustSensor : public Sensor
+// include necceary libraries
+
+class DustSensor : public BaseSensor
 {
 public:
-  void begin() override;
-  void subscribe(std::function<void(String, std::vector<float>)> callback) override;
-  void startSubscription() override;
-  void stopSubscription() override;
-  void startBLE() override;
-  void stopBLE() override;
+  DustSensor();
 
-private:
-  std::function<void(String, std::vector<float>)> measurementCallback;
-  String uuid;
-
-  static const String pmUUID;
-
-  static void sensorTask(void *pvParameters);
+protected:
+  void initSensor() override;
+  void readSensorData() override;
   void notifyBLE(float pm1, float pm2_5, float pm4, float pm10);
 };
 

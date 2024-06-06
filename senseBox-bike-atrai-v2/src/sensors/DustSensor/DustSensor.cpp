@@ -1,19 +1,20 @@
 #include "DustSensor.h"
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-#include <sps30.h>
 
-const String DustSensor::pmUUID = "7E14E07084EA489FB45AE1317364B979";
+DustSensor::DustSensor() : BaseSensor("DustSensorTask", 2048, 1000) {}
 
+String dustUUID = "7E14E07084EA489FB45AE1317364B979";
 int dustCharacteristic = 0;
 
-void DustSensor::begin()
+// add more if needed
+
+void DustSensor::initSensor()
 {
   int16_t ret;
   uint8_t auto_clean_days = 4;
   uint32_t auto_clean;
 
-  Serial.println("Dust Setup");
+  Serial.begin(9600);
+  delay(2000);
 
   sensirion_i2c_init();
 
@@ -22,6 +23,8 @@ void DustSensor::begin()
     Serial.print("SPS sensor probing failed\n");
     delay(500);
   }
+
+  Serial.print("SPS sensor probing successful\n");
 
   ret = sps30_set_fan_auto_cleaning_interval_days(auto_clean_days);
   if (ret)
@@ -36,100 +39,59 @@ void DustSensor::begin()
     Serial.print("error starting measurement\n");
   }
 
-  dustCharacteristic = BLEModule::createCharacteristic(pmUUID.c_str());
+  Serial.print("measurements started\n");
 
-  sendBLE = false;
-  activeSubscription = true;
-
-  xTaskCreate(sensorTask, "DustSensorTask", 2048, this, 1, NULL);
+  dustCharacteristic = BLEModule::createCharacteristic(dustUUID.c_str());
 }
 
-void DustSensor::subscribe(std::function<void(String, std::vector<float>)> callback)
+void DustSensor::readSensorData()
 {
-  this->measurementCallback = callback;
-}
+  struct sps30_measurement m;
+  char serial[SPS30_MAX_SERIAL_LEN];
+  uint16_t data_ready;
+  int16_t ret;
 
-void DustSensor::startSubscription()
-{
-  activeSubscription = true;
-}
-
-void DustSensor::stopSubscription()
-{
-  activeSubscription = false;
-}
-
-void DustSensor::startBLE()
-{
-  setBLEStatus(true);
-}
-
-void DustSensor::stopBLE()
-{
-  setBLEStatus(false);
-}
-
-void DustSensor::sensorTask(void *pvParameters)
-{
-  DustSensor *sensor = static_cast<DustSensor *>(pvParameters);
-
-  while (true)
+  do
   {
-    if (sensor->activeSubscription)
+    ret = sps30_read_data_ready(&data_ready);
+    if (ret < 0)
     {
+      Serial.print("error reading data-ready flag: ");
+      Serial.println(ret);
+    }
+    else if (!data_ready)
+      Serial.print("data not ready, no new measurement available\n");
+    else
+      break;
+    delay(100); /* retry in 100ms */
+  } while (1);
 
-      struct sps30_measurement m;
-      char serial[SPS30_MAX_SERIAL_LEN];
-      uint16_t data_ready;
-      int16_t ret;
+  ret = sps30_read_measurement(&m);
+  if (ret < 0)
+  {
+    Serial.print("error reading measurement\n");
+  }
+  else
+  {
 
-      do
-      {
-        ret = sps30_read_data_ready(&data_ready);
-        if (ret < 0)
-        {
-          Serial.print("error reading data-ready flag: ");
-          Serial.println(ret);
-        }
-        else if (!data_ready)
-          Serial.print("data not ready, no new measurement available\n");
-        else
-          break;
-        delay(100); /* retry in 100ms */
-      } while (1);
+    float pm1 = m.mc_1p0;
+    float pm2_5 = m.mc_2p5;
+    float pm4 = m.mc_4p0;
+    float pm10 = m.mc_10p0;
 
-      ret = sps30_read_measurement(&m);
-      if (ret < 0)
-      {
-        Serial.print("error reading measurement\n");
-      }
-      else
-      {
-        float pm1 = m.mc_1p0;
-        float pm2_5 = m.mc_2p5;
-        float pm4 = m.mc_4p0;
-        float pm10 = m.mc_10p0;
-
-        if (sensor->measurementCallback)
-        {
-          sensor->measurementCallback(sensor->uuid, {pm1, pm2_5, pm4, pm10});
-        }
-
-        if (sensor->sendBLE)
-        {
-          sensor->notifyBLE(pm1, pm2_5, pm4, pm10);
-        }
-      }
+    if (measurementCallback)
+    {
+      measurementCallback({pm1, pm2_5, pm4, pm10});
     }
 
-    vTaskDelay(pdMS_TO_TICKS(2000));
+    if (sendBLE)
+    {
+      notifyBLE(pm1, pm2_5, pm4, pm10);
+    }
   }
 }
 
 void DustSensor::notifyBLE(float pm1, float pm2_5, float pm4, float pm10)
 {
-  Serial.print("Dust Characteristic: ");
-  Serial.println(dustCharacteristic);
-  Serial.printf("Dust: PM1: %f, PM2.5: %f, PM4: %f, PM10: %f\n", pm1, pm2_5, pm4, pm10);
-  BLEModule::writeBLE(characteristicId, pm1, pm2_5, pm4, pm10);
+  BLEModule::writeBLE(dustCharacteristic, pm1, pm2_5, pm4, pm10);
 }

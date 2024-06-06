@@ -1,27 +1,18 @@
 #ifndef TEMP_HUMIDITY_SENSOR_H
 #define TEMP_HUMIDITY_SENSOR_H
 
-#include "../Sensor.h"
+#include "../BaseSensor.h"
+#include "Adafruit_HDC1000.h"
 
-class TempHumiditySensor : public Sensor
+class TempHumiditySensor : public BaseSensor
 {
 public:
-  void begin() override;
-  void subscribe(std::function<void(String, std::vector<float>)> callback) override;
-  void startSubscription() override;
-  void stopSubscription() override;
-  void startBLE() override;
-  void stopBLE() override;
+  TempHumiditySensor();
 
-private:
-  std::function<void(String, std::vector<float>)> measurementCallback;
-  String uuid;
-
-  static const String tempUUID;
-  static const String humUUID;
-
-  static void sensorTask(void *pvParameters);
+protected:
+  void initSensor() override;
+  void readSensorData() override;
   void notifyBLE(float temperature, float humidity);
 };
 
-#endif // TEMP_HUMIDITY_SENSOR_H
+#endif // DISTANCESENSOR_H
