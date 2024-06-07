@@ -42,10 +42,9 @@ jobs:
           python3 lzss.py --encode ${{ github.workspace }}/senseBox-bike-atrai-v2/.pio/build/sensebox_mcu_esp32s2/firmware.bin ${{ runner.temp }}/firmware.bin.lzss
           python3 bin2ota.py ESP32 ${{ runner.temp }}/firmware.bin.lzss ${{ runner.temp }}/firmware.ota
 
-          mv ${{ runner.temp }}/firmware.ota ${{ github.workspace }}/senseBox-bike-atrai-v2/.pio/build/sensebox_mcu_esp32s2/senseBox-bike-atrai-v2.bin.ota
-          mv ${{ github.workspace }}/senseBox-bike-atrai-v2/.pio/build/sensebox_mcu_esp32s2/firmware.bin ${{ github.workspace }}/senseBox-bike-atrai-v2/.pio/build/sensebox_mcu_esp32s2/senseBox-bike-atrai-v2.bin
-
-          ls -lah ${{ github.workspace }}/senseBox-bike-atrai-v2/.pio/build/sensebox_mcu_esp32s2/
+          mkdir -p ${{ github.workspace }}/senseBox-bike-atrai-v2/build/sensebox_mcu_esp32s2
+          mv ${{ runner.temp }}/firmware.ota ${{ github.workspace }}/senseBox-bike-atrai-v2/build/sensebox_mcu_esp32s2/senseBox-bike-atrai-v2.bin.ota
+          mv ${{ github.workspace }}/senseBox-bike-atrai-v2/build/sensebox_mcu_esp32s2/firmware.bin ${{ github.workspace }}/senseBox-bike-atrai-v2/.pio/build/sensebox_mcu_esp32s2/senseBox-bike-atrai-v2.bin
 
       - name: Export binaries as artifacts
         uses: actions/upload-artifact@v4
