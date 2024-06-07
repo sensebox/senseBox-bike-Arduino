@@ -137,8 +137,10 @@ void SBDisplay::showConnectionScreen()
     isBicycleAnimationShowing = false;
   }
 
-  String name = SenseBoxBLE::getMCUId();
   String bleId = "[" + SenseBoxBLE::getMCUId() + "]";
+
+  String name = "senseBox:bike " + bleId;
+
   String bleIdBegin = bleId.substring(0, bleId.length() / 2);
   String bleIdEnd = bleId.substring(bleId.length() / 2);
   const char *message[] = {

@@ -1,6 +1,6 @@
 #include "DistanceSensor.h"
 
-DistanceSensor::DistanceSensor() : BaseSensor("distanceTask", 8192, 100) {}
+DistanceSensor::DistanceSensor() : BaseSensor("distanceTask", 8192, 1000) {}
 
 String distanceUUID = "B3491B60C0F34306A30D49C91F37A62B";
 int distanceCharacteristic = 0;

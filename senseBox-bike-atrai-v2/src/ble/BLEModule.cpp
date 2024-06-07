@@ -1,10 +1,21 @@
 #include "BLEModule.h"
+#include "Utf16Converter/Utf16Converter.h"
 
-// void (*BLEModule::receiveCallback)(BLEDevice, BLECharacteristic) = nullptr;
+void (*BLEModule::receiveCallback)(String) = nullptr;
+
+void BLEModule::receivedData()
+{
+    int size = 32;
+    uint8_t receivedData[size];
+    SenseBoxBLE::read(receivedData, size);
+
+    String data = utf16leToString(receivedData, size);
+
+    BLEModule::receiveCallback(data);
+}
 
 BLEModule::BLEModule()
 {
-    // service = nullptr;
     bleName = "";
 }
 
@@ -18,7 +29,12 @@ bool BLEModule::begin()
     delay(200);
     SenseBoxBLE::addService("CF06A218F68EE0BEAD048EBC1EB0BC84");
 
-    xTaskCreate(bleTask, "bleTask", 1024, NULL, 1, NULL);
+    delay(200);
+    SenseBoxBLE::configHandler = &receivedData;
+
+    int configCharacteristic = SenseBoxBLE::setConfigCharacteristic("29BD0A8551E44D3C914E126541EB2A5E", "60B1D5CE353944D2BB35FF2DAABE17FF");
+
+    xTaskCreate(bleTask, "bleTask", 2048, NULL, 1, NULL);
 
     return true;
 }
@@ -71,21 +87,16 @@ bool BLEModule::writeBLE(int characteristicId, float value, float value2, float 
     return SenseBoxBLE::write(characteristicId, value, value2, value3, value4, value5);
 }
 
-// void BLEModule::setReceiveCallback(void (*callback)(BLEDevice, BLECharacteristic)) {
-//     receiveCallback = callback;
-// }
-
-// void BLEModule::onReceive(BLEDevice central, BLECharacteristic characteristic) {
-//     if (receiveCallback) {
-//         receiveCallback(central, characteristic);
-//     }
-// }
+void BLEModule::setReceiveCallback(void (*callback)(String data))
+{
+    BLEModule::receiveCallback = callback;
+}
 
 void BLEModule::bleTask(void *pvParameters)
 {
     while (true)
     {
         SenseBoxBLE::poll();
-        vTaskDelay(pdMS_TO_TICKS(5));
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }

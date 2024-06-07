@@ -15,7 +15,7 @@ public:
     // Get the BLE module ID
     String getBLEName();
 
-    const char** getBLEConnectionString();
+    const char **getBLEConnectionString();
 
     // Create a BLE characteristic
     static int createCharacteristic(const char *uuid);
@@ -27,17 +27,16 @@ public:
     static bool writeBLE(int characteristicId, float value, float value2, float value3, float value4, float value5);
 
     // Set callback for receiving data
-    // void setReceiveCallback(void (*callback)(BLEDevice, BLECharacteristic));
+    void setReceiveCallback(void (*callback)(String data));
+    static void (*receiveCallback)(String data);
 
     // Task function for polling BLE
     static void bleTask(void *pvParameters);
 
 private:
-    // BLEService* service;
     String bleName;
 
-    // static void onReceive(BLEDevice central, BLECharacteristic characteristic);
-    // static void (*receiveCallback)(BLEDevice, BLECharacteristic);
+    static void receivedData();
 };
 
 #endif // BLE_MODULE_H
