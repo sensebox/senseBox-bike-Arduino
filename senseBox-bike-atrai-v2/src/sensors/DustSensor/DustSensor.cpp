@@ -51,6 +51,9 @@ void DustSensor::readSensorData()
   uint16_t data_ready;
   int16_t ret;
 
+  // retry 5 times until the sensor has data ready
+  int retries = 5;
+  int retryCount = 0;
   do
   {
     ret = sps30_read_data_ready(&data_ready);
@@ -63,8 +66,15 @@ void DustSensor::readSensorData()
       Serial.print("data not ready, no new measurement available\n");
     else
       break;
+    retryCount++;
     delay(100); /* retry in 100ms */
-  } while (1);
+  } while (retryCount <= retries);
+
+  if (retryCount > retries)
+  {
+    Serial.print("No data available\n");
+    return;
+  }
 
   ret = sps30_read_measurement(&m);
   if (ret < 0)
