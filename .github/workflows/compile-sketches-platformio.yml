@@ -1,0 +1,69 @@
+name: PlatformIO CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*.*.*"]
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: ${{ runner.os }}-pio
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install PlatformIO Core
+        run: pip install --upgrade platformio
+
+      - name: Build PlatformIO Project
+        run: pio run -d senseBox-bike-atrai-v2
+
+      - name: Create OTA update file
+        run: |
+          git clone https://github.com/arduino-libraries/ArduinoIoTCloud.git
+
+          pip install crccheck
+
+          cd ArduinoIoTCloud/extras/tools
+
+
+          python3 lzss.py --encode ${{ github.workspace }}/senseBox-bike-atrai-v2/.pio/build/sensebox_mcu_esp32s2/firmware.bin ${{ runner.temp }}/firmware.bin.lzss
+          python3 bin2ota.py ESP32 ${{ runner.temp }}/firmware.bin.lzss ${{ runner.temp }}/firmware.ota
+          mv ${{ runner.temp }}/firmware.ota ${{ github.workspace }}/senseBox-bike-atrai-v2/.pio/build/sensebox_mcu_esp32s2/senseBox-bike-atrai-v2.bin.ota
+          mv ${{ github.workspace }}/senseBox-bike-atrai-v2/.pio/build/sensebox_mcu_esp32s2/firmware.bin ${{ github.workspace }}/senseBox-bike-atrai-v2/.pio/build/sensebox_mcu_esp32s2/senseBox-bike-atrai-v2.bin
+
+      - name: Export binaries as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: senseBox-bike-atrai-v2-artifacts
+          path: ${{ github.workspace }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Firmware Files
+        uses: actions/download-artifact@v4
+        with:
+          path: release
+      - name: Release Firmware
+        uses: ncipollo/release-action@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          artifacts: "release/**/*.bin, release/**/*.ota"
+          allowUpdates: true
+          omitBodyDuringUpdate: true
+          token: ${{ secrets.GITHUB_TOKEN }}
