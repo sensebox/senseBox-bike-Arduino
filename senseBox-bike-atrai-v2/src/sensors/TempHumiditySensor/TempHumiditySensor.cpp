@@ -1,18 +1,16 @@
 #include "TempHumiditySensor.h"
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
 
-#include "Adafruit_HDC1000.h"
+TempHumiditySensor::TempHumiditySensor() : BaseSensor("temperatureHumidityTask", 2048, 1000) {}
 
-const String TempHumiditySensor::tempUUID = "2CDF217435BEFDC44CA26FD173F8B3A8";
-const String TempHumiditySensor::humUUID = "772DF7EC8CDC4EA986AF410ABE0BA257";
+String tempUUID = "2CDF217435BEFDC44CA26FD173F8B3A8";
+String humUUID = "772DF7EC8CDC4EA986AF410ABE0BA257";
 
 int temperatureCharacteristic = 0;
 int humidityCharacteristic = 0;
 
-Adafruit_HDC1000 hdc = Adafruit_HDC1000();
+Adafruit_HDC1000 hdc;
 
-void TempHumiditySensor::begin()
+void TempHumiditySensor::initSensor()
 {
   if (!hdc.begin())
   {
@@ -23,69 +21,26 @@ void TempHumiditySensor::begin()
 
   temperatureCharacteristic = BLEModule::createCharacteristic(tempUUID.c_str());
   humidityCharacteristic = BLEModule::createCharacteristic(humUUID.c_str());
-
-  sendBLE = false;
-  activeSubscription = true;
-  xTaskCreate(sensorTask, "TempHumiditySensorTask", 2048, this, 1, NULL);
 }
 
-void TempHumiditySensor::subscribe(std::function<void(String, std::vector<float>)> callback)
+void TempHumiditySensor::readSensorData()
 {
-  this->measurementCallback = callback;
-}
+  float temperature = hdc.readTemperature();
+  float humidity = hdc.readHumidity();
 
-void TempHumiditySensor::startSubscription()
-{
-  activeSubscription = true;
-}
-
-void TempHumiditySensor::stopSubscription()
-{
-  activeSubscription = false;
-}
-
-void TempHumiditySensor::startBLE()
-{
-  setBLEStatus(true);
-}
-
-void TempHumiditySensor::stopBLE()
-{
-  setBLEStatus(false);
-}
-
-void TempHumiditySensor::sensorTask(void *pvParameters)
-{
-  TempHumiditySensor *sensor = static_cast<TempHumiditySensor *>(pvParameters);
-
-  while (true)
+  if (measurementCallback)
   {
-    if (sensor->activeSubscription)
-    {
-      float temperature = hdc.readTemperature();
-      float humidity = hdc.readHumidity();
+    measurementCallback({temperature, humidity});
+  }
 
-      if (sensor->measurementCallback)
-      {
-        sensor->measurementCallback(sensor->uuid, {temperature, humidity});
-      }
-
-      if (sensor->sendBLE)
-      {
-        sensor->notifyBLE(temperature, humidity);
-      }
-    }
-
-    vTaskDelay(pdMS_TO_TICKS(5000));
+  if (sendBLE)
+  {
+    notifyBLE(temperature, humidity);
   }
 }
 
-void TempHumiditySensor::notifyBLE(float temperature, float humidity)
+void TempHumiditySensor::notifyBLE(float temoperature, float humidity)
 {
-  Serial.println("Notifying BLE");
-  Serial.println(temperature);
-  Serial.println(temperatureCharacteristic);
-
-  BLEModule::writeBLE(temperatureCharacteristic, temperature);
+  BLEModule::writeBLE(temperatureCharacteristic, temoperature);
   BLEModule::writeBLE(humidityCharacteristic, humidity);
 }

@@ -1,26 +1,19 @@
-#ifndef DISTANCE_SENSOR_H
-#define DISTANCE_SENSOR_H
+#ifndef DISTANCESENSOR_H
+#define DISTANCESENSOR_H
 
-#include "../Sensor.h"
+#include "../BaseSensor.h"
+#include <Wire.h>
+#include <vl53l8cx_class.h>
 
-class DistanceSensor : public Sensor
+class DistanceSensor : public BaseSensor
 {
 public:
-  void begin() override;
-  void subscribe(std::function<void(String, std::vector<float>)> callback) override;
-  void startSubscription() override;
-  void stopSubscription() override;
-  void startBLE() override;
-  void stopBLE() override;
+  DistanceSensor();
 
-private:
-  std::function<void(String, std::vector<float>)> measurementCallback;
-  String uuid;
-
-  static const String distanceUUID;
-
-  static void sensorTask(void *pvParameters);
+protected:
+  void initSensor() override;
+  void readSensorData() override;
   void notifyBLE(float distance);
 };
 
-#endif // DISTANCE_SENSOR_H
+#endif // DISTANCESENSOR_H
