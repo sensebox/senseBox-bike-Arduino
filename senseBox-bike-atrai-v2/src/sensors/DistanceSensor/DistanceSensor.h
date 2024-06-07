@@ -13,7 +13,7 @@ public:
 protected:
   void initSensor() override;
   void readSensorData() override;
-  void notifyBLE(float distance);
+  void notifyBLE(float distance, float overtakingPredictionPercentage);
 };
 
 #endif // DISTANCESENSOR_H
