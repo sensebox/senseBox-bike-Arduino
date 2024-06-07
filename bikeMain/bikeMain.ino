@@ -13,6 +13,8 @@ void setup()
   Serial.begin(9600);
   Serial.println("Starting");
 #endif
+  pinMode(3, OUTPUT);
+  digitalWrite(3, HIGH);
   senseBoxIO.powerNone();
   delay(1000);
   senseBoxIO.powerAll();
