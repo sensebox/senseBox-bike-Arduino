@@ -15,7 +15,6 @@ AccelerationSensor accelerationSensor;
 SBDisplay display;
 
 BLEModule bleModule;
-
 LED led(1, 1);
 
 void setup()
@@ -26,6 +25,7 @@ void setup()
     led.begin();
 
     led.startRainbow();
+
 
     SBDisplay::begin();
 
