@@ -5,8 +5,7 @@
 #include "sensors/AccelerationSensor/AccelerationSensor.h"
 #include "display/Display.h"
 #include "ble/BLEModule.h"
-
-#include "Adafruit_NeoPixel.h"
+#include "led/LED.h"
 
 DustSensor dustSensor;
 TempHumiditySensor tempHumiditySensor;
@@ -16,17 +15,17 @@ AccelerationSensor accelerationSensor;
 SBDisplay display;
 
 BLEModule bleModule;
-
-Adafruit_NeoPixel rgb_led = Adafruit_NeoPixel(1, 1, NEO_GRB + NEO_KHZ800);
+LED led(1, 1);
 
 void setup()
 {
     Serial.begin(115200);
     delay(1000);
 
-    rgb_led.begin();
+    led.begin();
 
-    rgb_led.setBrightness(30);
+    led.startRainbow();
+
 
     SBDisplay::begin();
 
@@ -55,26 +54,6 @@ void setup()
 
     SBDisplay::showLoading("Start measurements...", 1);
 
-    // Subscribe to sensor measurements
-    // tempHumiditySensor.subscribe([](String uuid, std::vector<float> values) {
-    // float temperature = values[0];
-    // float humidity = values[1];
-    // Serial.printf("TempHumiditySensor [%s]: %.2f, %.2f\n", uuid.c_str(), temperature, humidity); });
-
-    //   dustSensor.subscribe([](String uuid) {
-    //     Serial.printf("DustSensor [%s]\n", uuid.c_str());
-    //   }, "UUID-Dust");
-
-    // distanceSensor.subscribe([](std::vector<float> values)
-    //                          { Serial.printf("DistanceSensor [%s]: %.2f\n", values[0]); });
-
-    // accelerationSensor.subscribe([](String uuid, std::vector<float> values)
-    //                              {
-    //                             float x = values[0];
-    //                             float y = values[1];
-    //                             float z = values[2];
-    //                             Serial.printf("Acceleration [%s]: %.2f, %.2f, %.2f\n", uuid.c_str(), x, y, z); });
-
     dustSensor.startSubscription();
     tempHumiditySensor.startSubscription();
     distanceSensor.startSubscription();
@@ -86,6 +65,8 @@ void setup()
     accelerationSensor.startBLE();
 
     display.showConnectionScreen();
+
+    led.stopRainbow();
 }
 
 void loop()
