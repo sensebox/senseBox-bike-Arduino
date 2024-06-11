@@ -13,9 +13,6 @@ void DustSensor::initSensor()
   uint8_t auto_clean_days = 4;
   uint32_t auto_clean;
 
-  Serial.begin(9600);
-  delay(2000);
-
   sensirion_i2c_init();
 
   while (sps30_probe() != 0)
