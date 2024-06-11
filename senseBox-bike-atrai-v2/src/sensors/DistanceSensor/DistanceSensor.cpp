@@ -1,13 +1,5 @@
 #include "DistanceSensor.h"
 
-DistanceSensor::DistanceSensor() : BaseSensor("distanceTask", 8192, 100) {}
-
-String distanceUUID = "B3491B60C0F34306A30D49C91F37A62B";
-int distanceCharacteristic = 0;
-
-String overtakingUUID = "FC01C6882C444965AE18373AF9FED18D";
-int overtakingCharacteristic = 0;
-
 #include "model_data.h"
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -20,6 +12,14 @@ int overtakingCharacteristic = 0;
 #include "tensorflow/lite/micro/all_ops_resolver.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 #include <tensorflow/lite/micro/micro_error_reporter.h>
+
+DistanceSensor::DistanceSensor() : BaseSensor("distanceTask", 8192, 100) {}
+
+String distanceUUID = "B3491B60C0F34306A30D49C91F37A62B";
+int distanceCharacteristic = 0;
+
+String overtakingUUID = "FC01C6882C444965AE18373AF9FED18D";
+int overtakingCharacteristic = 0;
 
 VL53L8CX sensor_vl53l8cx_top(&Wire, -1, -1);
 const int kChannelNumber = 64;
@@ -177,7 +177,7 @@ void DistanceSensor::readSensorData()
       }
     }
 
-    oldVl53l8cxMin = (min == 10000.0) ? 0.0 : min;
+    float distance = oldVl53l8cxMin;
 
     if (measurementCallback)
     {
