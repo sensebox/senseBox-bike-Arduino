@@ -4,10 +4,13 @@ A mobile measurement station that measures temperature, relative humidity, parti
 
 ### Variants
 
-- [senseBox:bike v0](senseBox-bike-v0): The first version of the senseBox:bike tested in the Futurium
-- [senseBox:bike MCUS2](senseBox-bike-mcus2): The second version of the senseBox:bike with a new microcontroller and BLE-Bee. Used for the [Essen auf Rädern](https://essen.aufraedern.org/) project
-- [senseBox:bike](senseBox-bike): The second version of the senseBox:bike with a new microcontroller and BLE-Bee. Used for the [senseBox:bike to buy](https://sensebox.kaufen/product/sensebox-bike)
-- [senseBox:bike Atrai Bike](senseBox-bike-atrai): The third version of the senseBox:bike with the new microcontroller, BLE-Bee, Display and SPS30. Used for the [Atrai Bike](https://atrai.bike/) project
+| Version                                               | Hardware        | Connectivity | AI | Description                                                                        |
+|-------------------------------------------------------|-----------------|--------------|----|------------------------------------------------------------------------------------|
+| [senseBox:bike v0](senseBox-bike-v0)                  | senseBox:mini   | WiFi         |    | The first version of the senseBox:bike used in the Futurium, Berlin                |
+| [senseBox:bike MCUS2](senseBox-bike-mcus2)            | senseBox MCU S2 | BLE          |    | Used for the [Essen auf Rädern](https://essen.aufraedern.org/) project             |
+| [senseBox:bike](senseBox-bike)                        | senseBox MCU S2 | BLE          |    | Used for the [senseBox:bike to buy](https://sensebox.kaufen/product/sensebox-bike) |
+| [senseBox:bike Atrai Bike](senseBox-bike-atrai)       | senseBox MCU S2 | BLE          |    | Initial draft for [Atrai Bike](https://atrai.bike/) project                        |
+| [senseBox:bike Atrai Bike v2](senseBox-bike-atrai-v2) | senseBox MCU S2 | BLE          | ✅  | AI powered version for [Atrai Bike](https://atrai.bike/) project                   |
 
 ### License
 
