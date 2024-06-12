@@ -15,7 +15,9 @@ public:
     // Get the BLE module ID
     String getBLEName();
 
-    const char** getBLEConnectionString();
+    const char **getBLEConnectionString();
+
+    static int createService(const char *uuid);
 
     // Create a BLE characteristic
     static int createCharacteristic(const char *uuid);

@@ -28,6 +28,12 @@ void TempHumiditySensor::readSensorData()
   float temperature = hdc.readTemperature();
   float humidity = hdc.readHumidity();
 
+  if (temperature < -37 || humidity < 2)
+  {
+    Serial.println("Invalid temperature or humidity value");
+    return;
+  }
+
   if (measurementCallback)
   {
     measurementCallback({temperature, humidity});
