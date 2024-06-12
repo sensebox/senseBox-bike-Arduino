@@ -3,6 +3,7 @@
 #include "sensors/DustSensor/DustSensor.h"
 #include "sensors/DistanceSensor/DistanceSensor.h"
 #include "sensors/AccelerationSensor/AccelerationSensor.h"
+#include "sensors/BatterySensor/BatterySensor.h"
 #include "display/Display.h"
 #include "ble/BLEModule.h"
 #include "led/LED.h"
@@ -11,6 +12,7 @@ DustSensor dustSensor;
 TempHumiditySensor tempHumiditySensor;
 DistanceSensor distanceSensor;
 AccelerationSensor accelerationSensor;
+BatterySensor batterySensor;
 
 SBDisplay display;
 
@@ -37,6 +39,10 @@ void setup()
     SBDisplay::showLoading("Setup BLE...", 0.1);
     bleModule.begin();
 
+    batterySensor.begin();
+
+    bleModule.createService("CF06A218F68EE0BEAD048EBC1EB0BC84");
+
     SBDisplay::showLoading("Distance...", 0.2);
     distanceSensor.begin();
 
@@ -56,15 +62,17 @@ void setup()
 
     SBDisplay::showLoading("Start measurements...", 1);
 
-    // dustSensor.startSubscription();
-    // tempHumiditySensor.startSubscription();
-    // distanceSensor.startSubscription();
-    // accelerationSensor.startSubscription();
+    dustSensor.startSubscription();
+    tempHumiditySensor.startSubscription();
+    distanceSensor.startSubscription();
+    accelerationSensor.startSubscription();
+    batterySensor.startSubscription();
 
     dustSensor.startBLE();
     tempHumiditySensor.startBLE();
     distanceSensor.startBLE();
     accelerationSensor.startBLE();
+    batterySensor.startBLE();
 
     display.showConnectionScreen();
 

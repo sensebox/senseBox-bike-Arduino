@@ -13,7 +13,7 @@
 #include "tensorflow/lite/schema/schema_generated.h"
 #include <tensorflow/lite/micro/micro_error_reporter.h>
 
-DistanceSensor::DistanceSensor() : BaseSensor("distanceTask", 8192, 100) {}
+DistanceSensor::DistanceSensor() : BaseSensor("distanceTask", 8192, 0) {}
 
 String distanceUUID = "B3491B60C0F34306A30D49C91F37A62B";
 int distanceCharacteristic = 0;
@@ -42,7 +42,7 @@ int begin_index = 0;
 // True if there is not yet enough data to run inference
 bool pending_initial_data = true;
 
-long prevDistanceTime = millis();
+long prevMeasureTime = millis();
 
 void DistanceSensor::initSensor()
 {

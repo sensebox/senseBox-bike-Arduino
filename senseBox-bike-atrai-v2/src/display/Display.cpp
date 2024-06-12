@@ -9,7 +9,8 @@
 
 Adafruit_SSD1306 SBDisplay::display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 QRCode SBDisplay::qrcode;
-Adafruit_MAX17048 SBDisplay::maxlipo;
+
+float batteryCharge = 0;
 
 TaskHandle_t xBicycleAnimationTaskHandle;
 bool isBicycleAnimationShowing = false;
@@ -55,13 +56,6 @@ void SBDisplay::begin()
   display.display();
   delay(100);
   display.clearDisplay();
-
-  // if (!maxlipo.begin())
-  // {
-  //   Serial.println(F("Couldnt find Adafruit MAX17048?\nMake sure a battery is plugged in!"));
-  //   while (1)
-  //     delay(10);
-  // }
 }
 
 void SBDisplay::drawProgressbar(int x, int y, int width, int height, int progress)
@@ -75,16 +69,9 @@ void SBDisplay::drawProgressbar(int x, int y, int width, int height, int progres
 
 void SBDisplay::drawBattery(int x, int y, int width, int height)
 {
-  drawProgressbar(x, y, width, height, maxlipo.cellPercent());
+  batteryCharge = BatterySensor::getBatteryCharge();
+  drawProgressbar(x, y, width, height, batteryCharge);
   display.fillRect(x + width, y + 2, 2, height, WHITE);
-  if (maxlipo.chargeRate() > 0)
-  {
-    display.setCursor(x + width + 4, y + 1);
-    display.setTextSize(1);
-    display.setTextColor(WHITE, BLACK);
-    display.println("+");
-    display.setCursor(0, 0);
-  }
 }
 
 void SBDisplay::showLoading(String msg, float val)
@@ -114,18 +101,10 @@ void SBDisplay::showSystemStatus()
 
   display.println(F("Batt Percent: "));
   display.setTextSize(1);
-  display.print(maxlipo.cellPercent(), 1);
+  display.print(batteryCharge, 1);
   display.println(" %");
 
-  display.println("");
-
-  display.setTextSize(1);
-  display.println(F("(Dis)Charge rate : "));
-  display.setTextSize(1);
-  display.print(maxlipo.chargeRate(), 1);
-  display.println(" %/hr");
-
-  // drawBattery(0, 0, 16, 4);
+  drawBattery(0, 0, 16, 4);
 
   display.display();
 }

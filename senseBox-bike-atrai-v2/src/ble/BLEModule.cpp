@@ -16,7 +16,7 @@ bool BLEModule::begin()
     SenseBoxBLE::setName(bleName);
 
     delay(200);
-    SenseBoxBLE::addService("CF06A218F68EE0BEAD048EBC1EB0BC84");
+    // SenseBoxBLE::addService("CF06A218F68EE0BEAD048EBC1EB0BC84");
 
     // xTaskCreate(bleTask, "bleTask", 1024, NULL, 1, NULL);
 
@@ -39,6 +39,11 @@ const char **BLEModule::getBLEConnectionString()
         bleIdBegin.c_str(),
         bleIdEnd.c_str()};
     return MESSAGE_CONFIGURE_WIFI;
+}
+
+int BLEModule::createService(const char *uuid)
+{
+    return SenseBoxBLE::addService(uuid);
 }
 
 int BLEModule::createCharacteristic(const char *uuid)
