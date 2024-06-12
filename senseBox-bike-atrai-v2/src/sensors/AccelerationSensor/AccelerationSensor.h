@@ -8,10 +8,10 @@ class AccelerationSensor : public BaseSensor
 {
 public:
   AccelerationSensor();
+  void readSensorData() override;
 
 protected:
   void initSensor() override;
-  void readSensorData() override;
   void notifyBLE(float x, float y, float z);
 };
 

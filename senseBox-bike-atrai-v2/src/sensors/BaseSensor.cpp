@@ -7,7 +7,7 @@ void BaseSensor::begin()
 {
     initSensor();
     delay(1000);
-    xTaskCreate(sensorTask, taskName, taskStackSize, this, 1, NULL);
+    // xTaskCreate(sensorTask, taskName, taskStackSize, this, 1, NULL);
 }
 
 void BaseSensor::subscribe(std::function<void(std::vector<float>)> callback)

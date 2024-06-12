@@ -42,8 +42,7 @@ int begin_index = 0;
 // True if there is not yet enough data to run inference
 bool pending_initial_data = true;
 
-long prevMeasureTime = millis();
-long prevBleTime = millis();
+long prevDistanceTime = millis();
 
 void DistanceSensor::initSensor()
 {
@@ -101,8 +100,6 @@ void DistanceSensor::initSensor()
 
 void DistanceSensor::readSensorData()
 {
-  Serial.println("Reading distance sensor data...");
-
   VL53L8CX_ResultsData Results;
   uint8_t NewDataReady = 0;
   uint8_t status = sensor_vl53l8cx_top.vl53l8cx_check_data_ready(&NewDataReady);
@@ -184,18 +181,18 @@ void DistanceSensor::readSensorData()
       measurementCallback({distance, overtakingPredictionPercentage});
     }
 
-    if (sendBLE && (millis() - prevBleTime) >= 1000)
+    if (sendBLE)
     {
       notifyBLE(distance, overtakingPredictionPercentage);
-      prevBleTime = millis();
     }
   }
-  if ((millis() - prevMeasureTime) < 65)
+  if ((millis() - prevDistanceTime) < 65)
   {
-    vTaskDelay(pdMS_TO_TICKS(65 - (millis() - prevMeasureTime)));
+    vTaskDelay(pdMS_TO_TICKS(65 - (millis() - prevDistanceTime)));
   }
-  Serial.println(millis() - prevMeasureTime);
-  prevMeasureTime = millis();
+  Serial.print("distance: ");
+  Serial.println(millis() - prevDistanceTime);
+  prevDistanceTime = millis();
 }
 
 void DistanceSensor::notifyBLE(float distance, float overtakingPredictionPercentage)

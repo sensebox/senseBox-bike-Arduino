@@ -10,10 +10,10 @@ class DustSensor : public BaseSensor
 {
 public:
   DustSensor();
+  void readSensorData() override;
 
 protected:
   void initSensor() override;
-  void readSensorData() override;
   void notifyBLE(float pm1, float pm2_5, float pm4, float pm10);
 };
 

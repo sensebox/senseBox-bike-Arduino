@@ -18,7 +18,7 @@ bool BLEModule::begin()
     delay(200);
     SenseBoxBLE::addService("CF06A218F68EE0BEAD048EBC1EB0BC84");
 
-    xTaskCreate(bleTask, "bleTask", 1024, NULL, 1, NULL);
+    // xTaskCreate(bleTask, "bleTask", 1024, NULL, 1, NULL);
 
     return true;
 }
@@ -88,4 +88,9 @@ void BLEModule::bleTask(void *pvParameters)
         SenseBoxBLE::poll();
         vTaskDelay(pdMS_TO_TICKS(5));
     }
+}
+
+void BLEModule::blePoll()
+{
+    SenseBoxBLE::poll();
 }

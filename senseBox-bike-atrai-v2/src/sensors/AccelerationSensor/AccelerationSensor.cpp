@@ -7,6 +7,8 @@ int accCharacteristic = 0;
 
 Adafruit_MPU6050 mpu;
 
+long prevAccTime = millis();
+
 void AccelerationSensor::initSensor()
 {
   if (!mpu.begin(0x68, &Wire1))
@@ -45,6 +47,9 @@ void AccelerationSensor::readSensorData()
   {
     notifyBLE(x, y, z);
   }
+  Serial.print("acc: ");
+  Serial.println(millis() - prevAccTime);
+  prevAccTime = millis();
 }
 
 void AccelerationSensor::notifyBLE(float x, float y, float z)

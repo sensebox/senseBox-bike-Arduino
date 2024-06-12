@@ -15,6 +15,8 @@ public:
     // Get the BLE module ID
     String getBLEName();
 
+    void blePoll();
+
     const char** getBLEConnectionString();
 
     // Create a BLE characteristic

@@ -54,10 +54,10 @@ void setup()
 
     SBDisplay::showLoading("Start measurements...", 1);
 
-    dustSensor.startSubscription();
-    tempHumiditySensor.startSubscription();
-    distanceSensor.startSubscription();
-    accelerationSensor.startSubscription();
+    // dustSensor.startSubscription();
+    // tempHumiditySensor.startSubscription();
+    // distanceSensor.startSubscription();
+    // accelerationSensor.startSubscription();
 
     dustSensor.startBLE();
     tempHumiditySensor.startBLE();
@@ -71,4 +71,9 @@ void setup()
 
 void loop()
 {
+    dustSensor.readSensorData();
+    tempHumiditySensor.readSensorData();
+    accelerationSensor.readSensorData();
+    distanceSensor.readSensorData();
+    bleModule.blePoll();
 }

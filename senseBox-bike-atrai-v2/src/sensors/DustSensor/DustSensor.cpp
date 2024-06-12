@@ -6,6 +6,7 @@ String dustUUID = "7E14E07084EA489FB45AE1317364B979";
 int dustCharacteristic = 0;
 
 // add more if needed
+long prevDustTime = millis();
 
 void DustSensor::initSensor()
 {
@@ -51,8 +52,6 @@ void DustSensor::readSensorData()
   // retry 5 times until the sensor has data ready
   int retries = 5;
   int retryCount = 0;
-  do
-  {
     ret = sps30_read_data_ready(&data_ready);
     if (ret < 0)
     {
@@ -62,40 +61,33 @@ void DustSensor::readSensorData()
     else if (!data_ready)
       Serial.print("data not ready, no new measurement available\n");
     else
-      break;
-    retryCount++;
-    delay(100); /* retry in 100ms */
-  } while (retryCount <= retries);
 
-  if (retryCount > retries)
-  {
-    Serial.print("No data available\n");
-    return;
-  }
+      ret = sps30_read_measurement(&m);
+      if (ret < 0)
+      {
+        Serial.print("error reading measurement\n");
+      }
+      else
+      {
 
-  ret = sps30_read_measurement(&m);
-  if (ret < 0)
-  {
-    Serial.print("error reading measurement\n");
-  }
-  else
-  {
+        float pm1 = m.mc_1p0;
+        float pm2_5 = m.mc_2p5;
+        float pm4 = m.mc_4p0;
+        float pm10 = m.mc_10p0;
 
-    float pm1 = m.mc_1p0;
-    float pm2_5 = m.mc_2p5;
-    float pm4 = m.mc_4p0;
-    float pm10 = m.mc_10p0;
+        if (measurementCallback)
+        {
+          measurementCallback({pm1, pm2_5, pm4, pm10});
+        }
 
-    if (measurementCallback)
-    {
-      measurementCallback({pm1, pm2_5, pm4, pm10});
-    }
-
-    if (sendBLE)
-    {
-      notifyBLE(pm1, pm2_5, pm4, pm10);
-    }
-  }
+        if (sendBLE)
+        {
+          notifyBLE(pm1, pm2_5, pm4, pm10);
+        }
+      }
+  
+  Serial.println('dust:' + String(millis() - prevDustTime));
+  prevDustTime = millis();
 }
 
 void DustSensor::notifyBLE(float pm1, float pm2_5, float pm4, float pm10)

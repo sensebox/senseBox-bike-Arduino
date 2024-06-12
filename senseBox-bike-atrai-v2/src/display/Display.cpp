@@ -34,7 +34,7 @@ void SBDisplay::bicycleAnimationTask(void *pvParameter)
       display.setTextSize(1);
       display.setTextColor(WHITE, BLACK);
       display.println(loadingMessage);
-      drawBattery(0, 0, 16, 4);
+      // drawBattery(0, 0, 16, 4);
       display.display();
       delay(100);
 
@@ -56,12 +56,12 @@ void SBDisplay::begin()
   delay(100);
   display.clearDisplay();
 
-  if (!maxlipo.begin())
-  {
-    Serial.println(F("Couldnt find Adafruit MAX17048?\nMake sure a battery is plugged in!"));
-    while (1)
-      delay(10);
-  }
+  // if (!maxlipo.begin())
+  // {
+  //   Serial.println(F("Couldnt find Adafruit MAX17048?\nMake sure a battery is plugged in!"));
+  //   while (1)
+  //     delay(10);
+  // }
 }
 
 void SBDisplay::drawProgressbar(int x, int y, int width, int height, int progress)
@@ -125,7 +125,7 @@ void SBDisplay::showSystemStatus()
   display.print(maxlipo.chargeRate(), 1);
   display.println(" %/hr");
 
-  drawBattery(0, 0, 16, 4);
+  // drawBattery(0, 0, 16, 4);
 
   display.display();
 }
@@ -195,6 +195,6 @@ void SBDisplay::drawQrCode(const char *qrStr, const char *lines[])
     display.setCursor(cursor_start_x, cursor_start_y + font_height * i);
     display.println(lines[i]);
   }
-  drawBattery(0, 0, 16, 4);
+  // drawBattery(0, 0, 16, 4);
   display.display();
 }
