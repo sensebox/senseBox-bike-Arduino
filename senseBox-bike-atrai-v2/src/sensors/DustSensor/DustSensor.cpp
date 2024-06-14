@@ -48,52 +48,37 @@ void DustSensor::readSensorData()
   uint16_t data_ready;
   int16_t ret;
 
-  // retry 5 times until the sensor has data ready
-  int retries = 5;
-  int retryCount = 0;
-  do
-  {
-    ret = sps30_read_data_ready(&data_ready);
-    if (ret < 0)
-    {
-      Serial.print("error reading data-ready flag: ");
-      Serial.println(ret);
-    }
-    else if (!data_ready)
-      Serial.print("data not ready, no new measurement available\n");
-    else
-      break;
-    retryCount++;
-    delay(100); /* retry in 100ms */
-  } while (retryCount <= retries);
-
-  if (retryCount > retries)
-  {
-    Serial.print("No data available\n");
-    return;
-  }
-
-  ret = sps30_read_measurement(&m);
+  ret = sps30_read_data_ready(&data_ready);
   if (ret < 0)
   {
-    Serial.print("error reading measurement\n");
+    Serial.print("error reading data-ready flag: ");
+    Serial.println(ret);
   }
+  else if (!data_ready)
+    Serial.print("data not ready, no new measurement available\n");
   else
   {
-
-    float pm1 = m.mc_1p0;
-    float pm2_5 = m.mc_2p5;
-    float pm4 = m.mc_4p0;
-    float pm10 = m.mc_10p0;
-
-    if (measurementCallback)
+    ret = sps30_read_measurement(&m);
+    if (ret < 0)
     {
-      measurementCallback({pm1, pm2_5, pm4, pm10});
+      Serial.print("error reading measurement\n");
     }
-
-    if (sendBLE)
+    else
     {
-      notifyBLE(pm1, pm2_5, pm4, pm10);
+      float pm1 = m.mc_1p0;
+      float pm2_5 = m.mc_2p5;
+      float pm4 = m.mc_4p0;
+      float pm10 = m.mc_10p0;
+
+      if (measurementCallback)
+      {
+        measurementCallback({pm1, pm2_5, pm4, pm10});
+      }
+
+      if (sendBLE)
+      {
+        notifyBLE(pm1, pm2_5, pm4, pm10);
+      }
     }
   }
 }

@@ -100,6 +100,7 @@ void DistanceSensor::initSensor()
 
 void DistanceSensor::readSensorData()
 {
+  Wire.setClock(1000000);
   Serial.println("Reading distance sensor data...");
 
   VL53L8CX_ResultsData Results;
@@ -177,6 +178,8 @@ void DistanceSensor::readSensorData()
     }
 
     float distance = oldVl53l8cxMin;
+
+    Wire.setClock(100000);
 
     if (measurementCallback)
     {

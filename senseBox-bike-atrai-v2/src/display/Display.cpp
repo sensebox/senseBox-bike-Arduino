@@ -37,7 +37,7 @@ void SBDisplay::bicycleAnimationTask(void *pvParameter)
       display.println(loadingMessage);
       drawBattery(0, 0, 16, 4);
       display.display();
-      delay(100);
+      vTaskDelay(100);
 
       if (!isBicycleAnimationShowing)
       {

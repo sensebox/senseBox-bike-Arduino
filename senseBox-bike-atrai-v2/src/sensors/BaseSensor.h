@@ -30,6 +30,7 @@ private:
     const char *taskName;
     uint32_t taskStackSize;
     uint32_t taskDelay;
+    TaskHandle_t taskHandle;
 };
 
 #endif // BASESENSOR_H
