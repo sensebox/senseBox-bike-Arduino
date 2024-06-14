@@ -96,10 +96,12 @@ void DistanceSensor::initSensor()
 
   distanceCharacteristic = BLEModule::createCharacteristic(distanceUUID.c_str());
   overtakingCharacteristic = BLEModule::createCharacteristic(overtakingUUID.c_str());
+  Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
 }
 
 void DistanceSensor::readSensorData()
 {
+  Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
   VL53L8CX_ResultsData Results;
   uint8_t NewDataReady = 0;
   uint8_t status = sensor_vl53l8cx_top.vl53l8cx_check_data_ready(&NewDataReady);
@@ -193,6 +195,7 @@ void DistanceSensor::readSensorData()
   Serial.print("distance: ");
   Serial.println(millis() - prevDistanceTime);
   prevDistanceTime = millis();
+  Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
 }
 
 void DistanceSensor::notifyBLE(float distance, float overtakingPredictionPercentage)

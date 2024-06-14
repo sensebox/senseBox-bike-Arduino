@@ -3,6 +3,7 @@
 
 #include "../BaseSensor.h"
 #include <sps30.h>
+#include <Wire.h>
 
 // include necceary libraries
 

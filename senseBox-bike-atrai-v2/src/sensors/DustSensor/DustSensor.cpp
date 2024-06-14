@@ -6,7 +6,6 @@ String dustUUID = "7E14E07084EA489FB45AE1317364B979";
 int dustCharacteristic = 0;
 
 // add more if needed
-long prevDustTime = millis();
 
 void DustSensor::initSensor()
 {
@@ -44,6 +43,7 @@ void DustSensor::initSensor()
 
 void DustSensor::readSensorData()
 {
+  Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
   struct sps30_measurement m;
   char serial[SPS30_MAX_SERIAL_LEN];
   uint16_t data_ready;
@@ -60,8 +60,7 @@ void DustSensor::readSensorData()
     }
     else if (!data_ready)
       Serial.print("data not ready, no new measurement available\n");
-    else
-
+    else {
       ret = sps30_read_measurement(&m);
       if (ret < 0)
       {
@@ -69,12 +68,10 @@ void DustSensor::readSensorData()
       }
       else
       {
-
         float pm1 = m.mc_1p0;
         float pm2_5 = m.mc_2p5;
         float pm4 = m.mc_4p0;
         float pm10 = m.mc_10p0;
-
         if (measurementCallback)
         {
           measurementCallback({pm1, pm2_5, pm4, pm10});
@@ -85,9 +82,7 @@ void DustSensor::readSensorData()
           notifyBLE(pm1, pm2_5, pm4, pm10);
         }
       }
-  
-  Serial.println('dust:' + String(millis() - prevDustTime));
-  prevDustTime = millis();
+    }
 }
 
 void DustSensor::notifyBLE(float pm1, float pm2_5, float pm4, float pm10)
