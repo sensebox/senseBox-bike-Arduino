@@ -51,7 +51,7 @@ void SBDisplay::bicycleAnimationTask(void *pvParameter)
 void SBDisplay::begin()
 {
   display.begin(SSD1306_SWITCHCAPVCC, 0x3D);
-  display.setRotation(2);
+  // display.setRotation(2);
   display.display();
   delay(100);
   display.clearDisplay();

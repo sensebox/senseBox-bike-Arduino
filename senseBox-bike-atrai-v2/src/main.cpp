@@ -3,6 +3,9 @@
 #include "sensors/DustSensor/DustSensor.h"
 #include "sensors/DistanceSensor/DistanceSensor.h"
 #include "sensors/AccelerationSensor/AccelerationSensor.h"
+#include "sensors/HeartBeatSensor/HeartBeatSensor.h"
+#include "sensors/SoundSensor/SoundSensor.h"
+
 #include "display/Display.h"
 #include "ble/BLEModule.h"
 #include "led/LED.h"
@@ -11,6 +14,8 @@ DustSensor dustSensor;
 TempHumiditySensor tempHumiditySensor;
 DistanceSensor distanceSensor;
 AccelerationSensor accelerationSensor;
+HeartBeatSensor heartBeatSensor;
+SoundSensor soundSensor;
 
 SBDisplay display;
 
@@ -25,7 +30,6 @@ void setup()
     led.begin();
 
     led.startRainbow();
-
 
     SBDisplay::begin();
 
@@ -47,6 +51,12 @@ void setup()
     SBDisplay::showLoading("Temperature...", 0.5);
     tempHumiditySensor.begin();
 
+    SBDisplay::showLoading("Heart Beat...", 0.55);
+    heartBeatSensor.begin();
+
+    SBDisplay::showLoading("Sound...", 0.56);
+    soundSensor.begin();
+
     SBDisplay::showLoading("Ventilation...", 0.6);
     pinMode(3, OUTPUT);
     delay(100);
@@ -54,15 +64,19 @@ void setup()
 
     SBDisplay::showLoading("Start measurements...", 1);
 
-    // dustSensor.startSubscription();
-    // tempHumiditySensor.startSubscription();
-    // distanceSensor.startSubscription();
-    // accelerationSensor.startSubscription();
+    dustSensor.startSubscription();
+    tempHumiditySensor.startSubscription();
+    distanceSensor.startSubscription();
+    accelerationSensor.startSubscription();
+    heartBeatSensor.startSubscription();
+    soundSensor.startSubscription();
 
     dustSensor.startBLE();
     tempHumiditySensor.startBLE();
     distanceSensor.startBLE();
     accelerationSensor.startBLE();
+    heartBeatSensor.startBLE();
+    soundSensor.startBLE();
 
     display.showConnectionScreen();
 
@@ -75,5 +89,8 @@ void loop()
     tempHumiditySensor.readSensorData();
     accelerationSensor.readSensorData();
     distanceSensor.readSensorData();
+    heartBeatSensor.readSensorData();
+    soundSensor.readSensorData();
+
     bleModule.blePoll();
 }
