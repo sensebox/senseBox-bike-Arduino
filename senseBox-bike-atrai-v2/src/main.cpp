@@ -17,6 +17,9 @@ SBDisplay display;
 BLEModule bleModule;
 LED led(1, 1);
 
+unsigned long previousMillis = 0; // stores the last time the sensors were read
+const long interval = 1000;       // interval at which to read the temperature and fine dust sensors (1 second)
+
 void setup()
 {
     Serial.begin(115200);
@@ -25,7 +28,6 @@ void setup()
     led.begin();
 
     led.startRainbow();
-
 
     SBDisplay::begin();
 
@@ -71,9 +73,20 @@ void setup()
 
 void loop()
 {
-    dustSensor.readSensorData();
-    tempHumiditySensor.readSensorData();
+    unsigned long currentMillis = millis();
+
+    // Read temperature and fine dust sensor data at defined interval
+    if (currentMillis - previousMillis >= interval)
+    {
+        previousMillis = currentMillis;
+        dustSensor.readSensorData();
+        tempHumiditySensor.readSensorData();
+    }
+
+    // Read acceleration and distance sensor data as fast as possible
     accelerationSensor.readSensorData();
     distanceSensor.readSensorData();
+
+    // Perform BLE polling
     bleModule.blePoll();
 }
