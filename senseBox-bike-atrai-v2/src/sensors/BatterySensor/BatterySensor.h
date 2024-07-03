@@ -11,6 +11,7 @@ class BatterySensor : public BaseSensor
 public:
   BatterySensor();
   static float getBatteryCharge();
+  static float getBatteryChargeRate();
 
 protected:
   void initSensor() override;

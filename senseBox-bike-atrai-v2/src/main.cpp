@@ -97,4 +97,9 @@ void loop()
 
     // Perform BLE polling
     bleModule.blePoll();
+
+    if (bleModule.isConnected())
+    {
+        display.showSystemStatus();
+    }
 }

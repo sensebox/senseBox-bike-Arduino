@@ -50,3 +50,9 @@ float BatterySensor::getBatteryCharge()
   float batteryCharge = maxlipo.cellPercent();
   return batteryCharge;
 }
+
+float BatterySensor::getBatteryChargeRate()
+{
+  float batteryChargeRate = maxlipo.chargeRate();
+  return batteryChargeRate;
+}
