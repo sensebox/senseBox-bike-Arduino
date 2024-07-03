@@ -72,6 +72,15 @@ void SBDisplay::drawBattery(int x, int y, int width, int height)
   batteryCharge = BatterySensor::getBatteryCharge();
   drawProgressbar(x, y, width, height, batteryCharge);
   display.fillRect(x + width, y + 2, 2, height, WHITE);
+  if (BatterySensor::getBatteryChargeRate() > 0)
+  {
+    display.setCursor(x + width + 4, y + 1);
+    display.setTextSize(1);
+    display.setTextColor(WHITE, BLACK);
+    display.println("+");
+    display.setCursor(0, 0);
+  }
+  Serial.println(BatterySensor::getBatteryChargeRate());
 }
 
 void SBDisplay::showLoading(String msg, float val)

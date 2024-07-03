@@ -78,4 +78,9 @@ void setup()
 
 void loop()
 {
+    if (bleModule.isConnected())
+    {
+        display.showSystemStatus();
+    }
+    delay(1000);
 }

@@ -34,6 +34,8 @@ public:
     // Task function for polling BLE
     static void bleTask(void *pvParameters);
 
+    static bool isConnected();
+
 private:
     // BLEService* service;
     String bleName;

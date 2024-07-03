@@ -1,5 +1,7 @@
 #include "BLEModule.h"
 
+bool isConnectedVar = false;
+
 // void (*BLEModule::receiveCallback)(BLEDevice, BLECharacteristic) = nullptr;
 
 BLEModule::BLEModule()
@@ -28,6 +30,11 @@ String BLEModule::getBLEName()
     return bleName;
 }
 
+bool BLEModule::isConnected()
+{
+    return isConnectedVar;
+}
+
 const char **BLEModule::getBLEConnectionString()
 {
     String bleId = "[" + SenseBoxBLE::getMCUId() + "]";
@@ -53,27 +60,32 @@ int BLEModule::createCharacteristic(const char *uuid)
 
 bool BLEModule::writeBLE(int characteristicId, float value)
 {
-    return SenseBoxBLE::write(characteristicId, value);
+    isConnectedVar = SenseBoxBLE::write(characteristicId, value);
+    return isConnectedVar;
 }
 
 bool BLEModule::writeBLE(int characteristicId, float value, float value2)
 {
-    return SenseBoxBLE::write(characteristicId, value, value2);
+    isConnectedVar = SenseBoxBLE::write(characteristicId, value, value2);
+    return isConnectedVar;
 }
 
 bool BLEModule::writeBLE(int characteristicId, float value, float value2, float value3)
 {
-    return SenseBoxBLE::write(characteristicId, value, value2, value3);
+    isConnectedVar = SenseBoxBLE::write(characteristicId, value, value2, value3);
+    return isConnectedVar;
 }
 
 bool BLEModule::writeBLE(int characteristicId, float value, float value2, float value3, float value4)
 {
-    return SenseBoxBLE::write(characteristicId, value, value2, value3, value4);
+    isConnectedVar = SenseBoxBLE::write(characteristicId, value, value2, value3, value4);
+    return isConnectedVar;
 }
 
 bool BLEModule::writeBLE(int characteristicId, float value, float value2, float value3, float value4, float value5)
 {
-    return SenseBoxBLE::write(characteristicId, value, value2, value3, value4, value5);
+    isConnectedVar = SenseBoxBLE::write(characteristicId, value, value2, value3, value4, value5);
+    return isConnectedVar;
 }
 
 // void BLEModule::setReceiveCallback(void (*callback)(BLEDevice, BLECharacteristic)) {
