@@ -191,8 +191,8 @@ void DistanceSensor::readSensorData()
     {
         vTaskDelay(pdMS_TO_TICKS(65 - (millis() - prevDistanceTime)));
     }
-    Serial.print("distance: ");
-    Serial.println(millis() - prevDistanceTime);
+    // Serial.print("distance: ");
+    // Serial.println(millis() - prevDistanceTime);
     prevDistanceTime = millis();
     Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
 }

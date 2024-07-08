@@ -8,8 +8,6 @@ int accCharacteristic = 0;
 
 Adafruit_MPU6050 mpu;
 
-long prevAccTime = millis();
-
 void AccelerationSensor::initSensor()
 {
 
@@ -33,8 +31,12 @@ void AccelerationSensor::initSensor()
 float buffer[EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE] = {};
 size_t ix = 0;
 float probAsphalt = 0.0;
+float probCompact = 0.0;
+float probPaving = 0.0;
 float probSett = 0.0;
 float probStanding = 0.0;
+
+float prevAccTime = millis();
 
 void AccelerationSensor::readSensorData()
 {
@@ -42,14 +44,15 @@ void AccelerationSensor::readSensorData()
 
   mpu.getEvent(&a, &g, &temp);
 
-  buffer[ix + 0] = a.acceleration.x;
-  buffer[ix + 1] = a.acceleration.y;
-  buffer[ix + 2] = a.acceleration.z;
-  buffer[ix + 3] = g.gyro.x;
-  buffer[ix + 4] = g.gyro.y;
-  buffer[ix + 5] = g.gyro.z;
+  buffer[ix++] = a.acceleration.x;
+  buffer[ix++] = a.acceleration.y;
+  buffer[ix++] = a.acceleration.z;
+  buffer[ix++] = g.gyro.x;
+  buffer[ix++] = g.gyro.y;
+  buffer[ix++] = g.gyro.z;
 
-  ix += 6;
+  Serial.println(millis() - prevAccTime);
+  prevAccTime = millis();
 
   // one second inverval
   if (EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE <= ix)
@@ -74,12 +77,16 @@ void AccelerationSensor::readSensorData()
     }
 
     probAsphalt = result.classification[0].value;
-    probSett = result.classification[1].value;
-    probStanding = result.classification[2].value;
+    probCompact = result.classification[1].value;
+    probPaving = result.classification[2].value;
+    probSett = result.classification[3].value;
+    probStanding = result.classification[4].value;
 
-    // Serial.println(probAsphalt);
-    // Serial.println(probSett);
-    // Serial.println(probStanding);
+    if (sendBLE)
+    {
+
+      notifyBLE(probAsphalt, probCompact, probPaving, probSett, probStanding);
+    }
 
     ix = 0;
 
@@ -88,19 +95,11 @@ void AccelerationSensor::readSensorData()
 
   if (measurementCallback)
   {
-    measurementCallback({probAsphalt, probSett, probStanding});
-  }
-
-  if (sendBLE)
-  {
-    Serial.println(prevAccTime - millis());
-    prevAccTime = millis();
-    notifyBLE(probAsphalt, probSett, probStanding);
-    bool hasResultChanged = false;
+    measurementCallback({probAsphalt, probCompact, probPaving, probSett, probStanding});
   }
 }
 
-void AccelerationSensor::notifyBLE(float x, float y, float z)
+void AccelerationSensor::notifyBLE(float probAsphalt, float probCompact, float probPaving, float probSett, float probStanding)
 {
-  BLEModule::writeBLE(accCharacteristic, x, y, z);
+  BLEModule::writeBLE(accCharacteristic, probAsphalt, probCompact, probPaving, probSett, probStanding);
 }

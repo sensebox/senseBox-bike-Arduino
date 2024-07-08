@@ -39,15 +39,13 @@ void SBDisplay::bicycleAnimationTask(void *pvParameter)
       display.println(loadingMessage);
       // drawBattery(0, 0, 16, 4);
       display.display();
-      delay(100);
+      vTaskDelay(pdMS_TO_TICKS(100));
 
       if (!isBicycleAnimationShowing)
       {
         vTaskDelete(xBicycleAnimationTaskHandle);
       }
     }
-
-    vTaskDelay(0);
   }
 }
 

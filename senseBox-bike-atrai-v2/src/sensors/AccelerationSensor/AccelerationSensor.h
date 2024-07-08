@@ -12,7 +12,7 @@ public:
 
 protected:
   void initSensor() override;
-  void notifyBLE(float x, float y, float z);
+  void notifyBLE(float probAsphalt, float probCompact, float probPaving, float probSett, float probStanding);
 };
 
 #endif // ACCELERATION_SENSOR_H

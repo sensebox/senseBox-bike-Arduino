@@ -15,8 +15,8 @@ AccelerationSensor accelerationSensor;
 BatterySensor batterySensor;
 
 BaseSensor *sensors[] = {
-    // &dustSensor,
-    // &tempHumiditySensor,
+    &dustSensor,
+    &tempHumiditySensor,
     &distanceSensor,
     &accelerationSensor,
     &batterySensor};
@@ -27,7 +27,7 @@ BLEModule bleModule;
 LED led(1, 1);
 
 unsigned long previousMillis = 0; // stores the last time the sensors were read
-const long interval = 1000;       // interval at which to read the temperature and fine dust sensors (1 second)
+const long interval = 3000;       // interval at which to read the temperature and fine dust sensors (1 second)
 
 void setup()
 {
@@ -43,7 +43,7 @@ void setup()
     pinMode(IO_ENABLE, OUTPUT);
     digitalWrite(IO_ENABLE, LOW);
 
-    SBDisplay::showLoading("Setup BLE...", 0.1);
+    SBDisplay::showLoading("Setup BLE...", 0.2);
     bleModule.begin();
 
     batterySensor.begin();
@@ -61,13 +61,15 @@ void setup()
     delay(100);
     digitalWrite(3, HIGH);
 
-    SBDisplay::showLoading("Start measurements...", 1);
 
+    SBDisplay::showLoading("Start measurements...", 0.8);
     // Start sensor measurements
     for (BaseSensor *sensor : sensors)
     {
         sensor->startSubscription();
     }
+
+    SBDisplay::showLoading("Enable BLE...", 1);
 
     // Start BLE advertising
     for (BaseSensor *sensor : sensors)
@@ -93,19 +95,19 @@ void loop()
     //     display.showConnectionScreen();
     // }
 
-    // unsigned long currentMillis = millis();
+    unsigned long currentMillis = millis();
 
     // // Read temperature and fine dust sensor data at defined interval
-    // if (currentMillis - previousMillis >= interval)
-    // {
-    //     previousMillis = currentMillis;
-    //     // dustSensor.readSensorData();
-    //     // tempHumiditySensor.readSensorData();
-    // }
-    accelerationSensor.readSensorData();
+    if (currentMillis - previousMillis >= interval)
+    {
+        previousMillis = currentMillis;
+        dustSensor.readSensorData();
+        tempHumiditySensor.readSensorData();
+    }
 
     // Read acceleration and distance sensor data as fast as possible
     distanceSensor.readSensorData();
+    accelerationSensor.readSensorData();
 
     // Perform BLE polling
     bleModule.blePoll();
