@@ -17,6 +17,8 @@ bool isBicycleAnimationShowing = false;
 String loadingMessage;
 float loadingProgress;
 
+String bleId = "";
+
 void SBDisplay::bicycleAnimationTask(void *pvParameter)
 {
   int dsplW = 128;
@@ -80,7 +82,6 @@ void SBDisplay::drawBattery(int x, int y, int width, int height)
     display.println("+");
     display.setCursor(0, 0);
   }
-  Serial.println(BatterySensor::getBatteryChargeRate());
 }
 
 void SBDisplay::showLoading(String msg, float val)
@@ -125,17 +126,20 @@ void SBDisplay::showConnectionScreen()
     isBicycleAnimationShowing = false;
   }
 
-  String id = SenseBoxBLE::getMCUId();
-  String bleId = "[" + SenseBoxBLE::getMCUId() + "]";
-  String name = "senseBox:bike " + bleId;
-  String bleIdBegin = bleId.substring(0, bleId.length() / 2);
-  String bleIdEnd = bleId.substring(bleId.length() / 2);
+  String bleIdBrackets = "[" + bleId + "]";
+  String name = "senseBox:bike " + bleIdBrackets;
+  String bleIdBegin = bleIdBrackets.substring(0, bleIdBrackets.length() / 2);
+  String bleIdEnd = bleIdBrackets.substring(bleIdBrackets.length() / 2);
   const char *message[] = {
       "senseBox",
       "bike",
       bleIdBegin.c_str(),
       bleIdEnd.c_str()};
+
   drawQrCode(name.c_str(), message);
+
+  drawBattery(0, 0, 16, 4);
+  display.display();
 }
 
 void SBDisplay::drawQrCode(const char *qrStr, const char *lines[])
@@ -183,6 +187,9 @@ void SBDisplay::drawQrCode(const char *qrStr, const char *lines[])
     display.setCursor(cursor_start_x, cursor_start_y + font_height * i);
     display.println(lines[i]);
   }
-  // drawBattery(0, 0, 16, 4);
-  display.display();
+}
+
+void SBDisplay::readBleId()
+{
+  bleId = SenseBoxBLE::getMCUId();
 }

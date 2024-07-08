@@ -27,6 +27,7 @@ public:
   static void drawProgressbar(int x, int y, int width, int height, int progress);
   static void drawBattery(int x, int y, int width, int height);
   static void bicycleAnimationTask(void *pvParams);
+  static void readBleId();
 
 private:
   static Adafruit_SSD1306 display;

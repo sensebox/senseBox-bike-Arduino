@@ -15,4 +15,4 @@ protected:
   void notifyBLE(float temperature, float humidity);
 };
 
-#endif // DISTANCESENSOR_H
+#endif // TEMP_HUMIDITY_SENSOR_H

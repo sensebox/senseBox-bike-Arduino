@@ -14,6 +14,13 @@ DistanceSensor distanceSensor;
 AccelerationSensor accelerationSensor;
 BatterySensor batterySensor;
 
+BaseSensor *sensors[] = {
+    // &dustSensor,
+    // &tempHumiditySensor,
+    &distanceSensor,
+    &accelerationSensor,
+    &batterySensor};
+
 SBDisplay display;
 
 BLEModule bleModule;
@@ -43,17 +50,11 @@ void setup()
 
     bleModule.createService("CF06A218F68EE0BEAD048EBC1EB0BC84");
 
-    SBDisplay::showLoading("Distance...", 0.2);
-    distanceSensor.begin();
-
-    SBDisplay::showLoading("Dust...", 0.3);
-    dustSensor.begin();
-
-    SBDisplay::showLoading("Acceleration...", 0.4);
-    accelerationSensor.begin();
-
-    SBDisplay::showLoading("Temperature...", 0.5);
-    tempHumiditySensor.begin();
+    SBDisplay::showLoading("Setup Sensors...", 0.4);
+    for (BaseSensor *sensor : sensors)
+    {
+        sensor->begin();
+    }
 
     SBDisplay::showLoading("Ventilation...", 0.6);
     pinMode(3, OUTPUT);
@@ -62,44 +63,50 @@ void setup()
 
     SBDisplay::showLoading("Start measurements...", 1);
 
-    dustSensor.startSubscription();
-    tempHumiditySensor.startSubscription();
-    distanceSensor.startSubscription();
-    accelerationSensor.startSubscription();
-    batterySensor.startSubscription();
+    // Start sensor measurements
+    for (BaseSensor *sensor : sensors)
+    {
+        sensor->startSubscription();
+    }
 
-    dustSensor.startBLE();
-    tempHumiditySensor.startBLE();
-    distanceSensor.startBLE();
-    accelerationSensor.startBLE();
-    batterySensor.startBLE();
+    // Start BLE advertising
+    for (BaseSensor *sensor : sensors)
+    {
+        sensor->startBLE();
+    }
 
-    display.showConnectionScreen();
+    display.readBleId();
 
     led.stopRainbow();
+
+    display.showConnectionScreen();
 }
 
 void loop()
 {
-    unsigned long currentMillis = millis();
+    // if (bleModule.isConnected())
+    // {
+    //     display.showSystemStatus();
+    // }
+    // else
+    // {
+    //     display.showConnectionScreen();
+    // }
 
-    // Read temperature and fine dust sensor data at defined interval
-    if (currentMillis - previousMillis >= interval)
-    {
-        previousMillis = currentMillis;
-        dustSensor.readSensorData();
-        tempHumiditySensor.readSensorData();
-    }
+    // unsigned long currentMillis = millis();
+
+    // // Read temperature and fine dust sensor data at defined interval
+    // if (currentMillis - previousMillis >= interval)
+    // {
+    //     previousMillis = currentMillis;
+    //     // dustSensor.readSensorData();
+    //     // tempHumiditySensor.readSensorData();
+    // }
+    accelerationSensor.readSensorData();
 
     // Read acceleration and distance sensor data as fast as possible
-    accelerationSensor.readSensorData();
     distanceSensor.readSensorData();
 
     // Perform BLE polling
     bleModule.blePoll();
-
-    if (bleModule.isConnected())
-    {
-        display.showSystemStatus();
-    }
 }
