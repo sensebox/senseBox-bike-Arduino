@@ -15,7 +15,7 @@ void SampleSensor::initSensor()
   // add more if needed
 }
 
-void SampleSensor::readSensorData()
+bool SampleSensor::readSensorData()
 {
   float sampleValue = 0.0;
   // read sensor data
@@ -29,6 +29,7 @@ void SampleSensor::readSensorData()
   {
     notifyBLE(sampleValue);
   }
+  return false;
 }
 
 void SampleSensor::notifyBLE(float sampleValue)

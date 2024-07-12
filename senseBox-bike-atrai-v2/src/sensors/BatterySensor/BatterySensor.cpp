@@ -24,7 +24,7 @@ void BatterySensor::initSensor()
   // add more if needed
 }
 
-void BatterySensor::readSensorData()
+bool BatterySensor::readSensorData()
 {
   // read sensor data
   float batteryCharge = maxlipo.cellPercent();
@@ -38,6 +38,7 @@ void BatterySensor::readSensorData()
   {
     notifyBLE(batteryCharge);
   }
+  return false;
 }
 
 void BatterySensor::notifyBLE(float batteryCharge)

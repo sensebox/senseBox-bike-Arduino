@@ -98,7 +98,7 @@ void DistanceSensor::initSensor()
     Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
 }
 
-void DistanceSensor::readSensorData()
+bool DistanceSensor::readSensorData()
 {
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
     VL53L8CX_ResultsData Results;
@@ -195,6 +195,7 @@ void DistanceSensor::readSensorData()
     // Serial.println(millis() - prevDistanceTime);
     prevDistanceTime = millis();
     Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
+    return false;
 }
 
 void DistanceSensor::notifyBLE(float distance, float overtakingPredictionPercentage)

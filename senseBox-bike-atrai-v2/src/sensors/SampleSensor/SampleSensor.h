@@ -12,7 +12,7 @@ public:
 
 protected:
   void initSensor() override;
-  void readSensorData() override;
+  bool readSensorData() override;
   void notifyBLE(float sampleValue); // change this to match the data type of the sensor data
 };
 

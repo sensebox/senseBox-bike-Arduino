@@ -9,7 +9,7 @@ class DistanceSensor : public BaseSensor
 {
 public:
   DistanceSensor();
-  void readSensorData() override;
+  bool readSensorData() override;
 
 protected:
   void initSensor() override;

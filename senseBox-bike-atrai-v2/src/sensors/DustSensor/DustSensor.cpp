@@ -41,7 +41,7 @@ void DustSensor::initSensor()
   dustCharacteristic = BLEModule::createCharacteristic(dustUUID.c_str());
 }
 
-void DustSensor::readSensorData()
+bool DustSensor::readSensorData()
 {
   Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
   struct sps30_measurement m;
@@ -83,6 +83,7 @@ void DustSensor::readSensorData()
         }
       }
     }
+  return false;
 }
 
 void DustSensor::notifyBLE(float pm1, float pm2_5, float pm4, float pm10)

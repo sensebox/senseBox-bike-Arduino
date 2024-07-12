@@ -11,7 +11,7 @@ class DustSensor : public BaseSensor
 {
 public:
   DustSensor();
-  void readSensorData() override;
+  bool readSensorData() override;
 
 protected:
   void initSensor() override;

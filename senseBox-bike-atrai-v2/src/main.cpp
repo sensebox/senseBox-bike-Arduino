@@ -15,11 +15,12 @@ AccelerationSensor accelerationSensor;
 BatterySensor batterySensor;
 
 BaseSensor *sensors[] = {
-    &dustSensor,
+    // &dustSensor,
     &tempHumiditySensor,
     &distanceSensor,
     &accelerationSensor,
-    &batterySensor};
+    &batterySensor
+    };
 
 SBDisplay display;
 
@@ -95,19 +96,16 @@ void loop()
     //     display.showConnectionScreen();
     // }
 
-    unsigned long currentMillis = millis();
+    // Read acceleration and distance sensor data as fast as possible
+    distanceSensor.readSensorData();
+    bool classified = accelerationSensor.readSensorData();
 
-    // // Read temperature and fine dust sensor data at defined interval
-    if (currentMillis - previousMillis >= interval)
+    // Read temperature and fine dust sensor data after a surface classification
+    if (classified)
     {
-        previousMillis = currentMillis;
         dustSensor.readSensorData();
         tempHumiditySensor.readSensorData();
     }
-
-    // Read acceleration and distance sensor data as fast as possible
-    distanceSensor.readSensorData();
-    accelerationSensor.readSensorData();
 
     // Perform BLE polling
     bleModule.blePoll();
