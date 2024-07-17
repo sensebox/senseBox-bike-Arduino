@@ -8,11 +8,11 @@ class TempHumiditySensor : public BaseSensor
 {
 public:
   TempHumiditySensor();
+  bool readSensorData() override;
 
 protected:
   void initSensor() override;
-  void readSensorData() override;
   void notifyBLE(float temperature, float humidity);
 };
 
-#endif // DISTANCESENSOR_H
+#endif // TEMP_HUMIDITY_SENSOR_H

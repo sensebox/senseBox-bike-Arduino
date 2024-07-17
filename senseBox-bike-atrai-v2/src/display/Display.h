@@ -3,10 +3,10 @@
 
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include <Adafruit_MAX1704X.h>
 #include <QRCodeGenerator.h>
 
 #include "../ble/BLEModule.h"
+#include "../sensors/BatterySensor/BatterySensor.h"
 
 #include <Arduino.h>
 #include "freertos/FreeRTOS.h"
@@ -27,10 +27,10 @@ public:
   static void drawProgressbar(int x, int y, int width, int height, int progress);
   static void drawBattery(int x, int y, int width, int height);
   static void bicycleAnimationTask(void *pvParams);
+  static void readBleId();
 
 private:
   static Adafruit_SSD1306 display;
   static QRCode qrcode;
-  static Adafruit_MAX17048 maxlipo;
 };
 #endif // MY_DISPLAY_H

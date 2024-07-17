@@ -9,12 +9,15 @@
 
 Adafruit_SSD1306 SBDisplay::display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 QRCode SBDisplay::qrcode;
-Adafruit_MAX17048 SBDisplay::maxlipo;
+
+float batteryCharge = 0;
 
 TaskHandle_t xBicycleAnimationTaskHandle;
 bool isBicycleAnimationShowing = false;
 String loadingMessage;
 float loadingProgress;
+
+String bleId = "";
 
 void SBDisplay::bicycleAnimationTask(void *pvParameter)
 {
@@ -34,17 +37,15 @@ void SBDisplay::bicycleAnimationTask(void *pvParameter)
       display.setTextSize(1);
       display.setTextColor(WHITE, BLACK);
       display.println(loadingMessage);
-      drawBattery(0, 0, 16, 4);
+      // drawBattery(0, 0, 16, 4);
       display.display();
-      delay(100);
+      vTaskDelay(pdMS_TO_TICKS(100));
 
       if (!isBicycleAnimationShowing)
       {
         vTaskDelete(xBicycleAnimationTaskHandle);
       }
     }
-
-    vTaskDelay(0);
   }
 }
 
@@ -55,13 +56,6 @@ void SBDisplay::begin()
   display.display();
   delay(100);
   display.clearDisplay();
-
-  if (!maxlipo.begin())
-  {
-    Serial.println(F("Couldnt find Adafruit MAX17048?\nMake sure a battery is plugged in!"));
-    while (1)
-      delay(10);
-  }
 }
 
 void SBDisplay::drawProgressbar(int x, int y, int width, int height, int progress)
@@ -75,9 +69,10 @@ void SBDisplay::drawProgressbar(int x, int y, int width, int height, int progres
 
 void SBDisplay::drawBattery(int x, int y, int width, int height)
 {
-  drawProgressbar(x, y, width, height, maxlipo.cellPercent());
+  batteryCharge = BatterySensor::getBatteryCharge();
+  drawProgressbar(x, y, width, height, batteryCharge);
   display.fillRect(x + width, y + 2, 2, height, WHITE);
-  if (maxlipo.chargeRate() > 0)
+  if (BatterySensor::getBatteryChargeRate() > 0)
   {
     display.setCursor(x + width + 4, y + 1);
     display.setTextSize(1);
@@ -114,16 +109,8 @@ void SBDisplay::showSystemStatus()
 
   display.println(F("Batt Percent: "));
   display.setTextSize(1);
-  display.print(maxlipo.cellPercent(), 1);
+  display.print(batteryCharge, 1);
   display.println(" %");
-
-  display.println("");
-
-  display.setTextSize(1);
-  display.println(F("(Dis)Charge rate : "));
-  display.setTextSize(1);
-  display.print(maxlipo.chargeRate(), 1);
-  display.println(" %/hr");
 
   drawBattery(0, 0, 16, 4);
 
@@ -137,17 +124,20 @@ void SBDisplay::showConnectionScreen()
     isBicycleAnimationShowing = false;
   }
 
-  String id = SenseBoxBLE::getMCUId();
-  String bleId = "[" + SenseBoxBLE::getMCUId() + "]";
-  String name = "senseBox:bike " + bleId;
-  String bleIdBegin = bleId.substring(0, bleId.length() / 2);
-  String bleIdEnd = bleId.substring(bleId.length() / 2);
+  String bleIdBrackets = "[" + bleId + "]";
+  String name = "senseBox:bike " + bleIdBrackets;
+  String bleIdBegin = bleIdBrackets.substring(0, bleIdBrackets.length() / 2);
+  String bleIdEnd = bleIdBrackets.substring(bleIdBrackets.length() / 2);
   const char *message[] = {
       "senseBox",
       "bike",
       bleIdBegin.c_str(),
       bleIdEnd.c_str()};
+
   drawQrCode(name.c_str(), message);
+
+  drawBattery(0, 0, 16, 4);
+  display.display();
 }
 
 void SBDisplay::drawQrCode(const char *qrStr, const char *lines[])
@@ -195,6 +185,9 @@ void SBDisplay::drawQrCode(const char *qrStr, const char *lines[])
     display.setCursor(cursor_start_x, cursor_start_y + font_height * i);
     display.println(lines[i]);
   }
-  drawBattery(0, 0, 16, 4);
-  display.display();
+}
+
+void SBDisplay::readBleId()
+{
+  bleId = SenseBoxBLE::getMCUId();
 }

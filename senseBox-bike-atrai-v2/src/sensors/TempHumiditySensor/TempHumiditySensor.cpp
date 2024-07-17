@@ -23,10 +23,16 @@ void TempHumiditySensor::initSensor()
   humidityCharacteristic = BLEModule::createCharacteristic(humUUID.c_str());
 }
 
-void TempHumiditySensor::readSensorData()
+bool TempHumiditySensor::readSensorData()
 {
   float temperature = hdc.readTemperature();
   float humidity = hdc.readHumidity();
+
+  if (temperature < -37 || humidity < 2)
+  {
+    Serial.println("Invalid temperature or humidity value");
+    return false;
+  }
 
   if (measurementCallback)
   {
@@ -37,6 +43,7 @@ void TempHumiditySensor::readSensorData()
   {
     notifyBLE(temperature, humidity);
   }
+  return false;
 }
 
 void TempHumiditySensor::notifyBLE(float temoperature, float humidity)

@@ -20,7 +20,7 @@ public:
 
 protected:
     virtual void initSensor() = 0;
-    virtual void readSensorData() = 0;
+    virtual bool readSensorData() = 0;
     static void sensorTask(void *pvParameters);
     bool activeSubscription;
     bool sendBLE;

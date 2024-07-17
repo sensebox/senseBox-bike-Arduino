@@ -9,10 +9,10 @@ class DistanceSensor : public BaseSensor
 {
 public:
   DistanceSensor();
+  bool readSensorData() override;
 
 protected:
   void initSensor() override;
-  void readSensorData() override;
   void notifyBLE(float distance, float overtakingPredictionPercentage);
 };
 

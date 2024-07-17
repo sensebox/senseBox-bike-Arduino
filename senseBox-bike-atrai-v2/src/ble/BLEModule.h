@@ -15,7 +15,11 @@ public:
     // Get the BLE module ID
     String getBLEName();
 
-    const char** getBLEConnectionString();
+    void blePoll();
+
+    const char **getBLEConnectionString();
+
+    static int createService(const char *uuid);
 
     // Create a BLE characteristic
     static int createCharacteristic(const char *uuid);
@@ -31,6 +35,8 @@ public:
 
     // Task function for polling BLE
     static void bleTask(void *pvParameters);
+
+    static bool isConnected();
 
 private:
     // BLEService* service;

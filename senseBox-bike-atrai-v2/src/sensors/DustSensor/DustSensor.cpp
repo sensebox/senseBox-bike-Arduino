@@ -41,8 +41,9 @@ void DustSensor::initSensor()
   dustCharacteristic = BLEModule::createCharacteristic(dustUUID.c_str());
 }
 
-void DustSensor::readSensorData()
+bool DustSensor::readSensorData()
 {
+  Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
   struct sps30_measurement m;
   char serial[SPS30_MAX_SERIAL_LEN];
   uint16_t data_ready;
@@ -51,8 +52,6 @@ void DustSensor::readSensorData()
   // retry 5 times until the sensor has data ready
   int retries = 5;
   int retryCount = 0;
-  do
-  {
     ret = sps30_read_data_ready(&data_ready);
     if (ret < 0)
     {
@@ -61,41 +60,30 @@ void DustSensor::readSensorData()
     }
     else if (!data_ready)
       Serial.print("data not ready, no new measurement available\n");
-    else
-      break;
-    retryCount++;
-    delay(100); /* retry in 100ms */
-  } while (retryCount <= retries);
+    else {
+      ret = sps30_read_measurement(&m);
+      if (ret < 0)
+      {
+        Serial.print("error reading measurement\n");
+      }
+      else
+      {
+        float pm1 = m.mc_1p0;
+        float pm2_5 = m.mc_2p5;
+        float pm4 = m.mc_4p0;
+        float pm10 = m.mc_10p0;
+        if (measurementCallback)
+        {
+          measurementCallback({pm1, pm2_5, pm4, pm10});
+        }
 
-  if (retryCount > retries)
-  {
-    Serial.print("No data available\n");
-    return;
-  }
-
-  ret = sps30_read_measurement(&m);
-  if (ret < 0)
-  {
-    Serial.print("error reading measurement\n");
-  }
-  else
-  {
-
-    float pm1 = m.mc_1p0;
-    float pm2_5 = m.mc_2p5;
-    float pm4 = m.mc_4p0;
-    float pm10 = m.mc_10p0;
-
-    if (measurementCallback)
-    {
-      measurementCallback({pm1, pm2_5, pm4, pm10});
+        if (sendBLE)
+        {
+          notifyBLE(pm1, pm2_5, pm4, pm10);
+        }
+      }
     }
-
-    if (sendBLE)
-    {
-      notifyBLE(pm1, pm2_5, pm4, pm10);
-    }
-  }
+  return false;
 }
 
 void DustSensor::notifyBLE(float pm1, float pm2_5, float pm4, float pm10)
