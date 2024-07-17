@@ -15,12 +15,11 @@ AccelerationSensor accelerationSensor;
 BatterySensor batterySensor;
 
 BaseSensor *sensors[] = {
-    // &dustSensor,
+    &dustSensor,
     &tempHumiditySensor,
     &distanceSensor,
     &accelerationSensor,
-    &batterySensor
-    };
+    &batterySensor};
 
 SBDisplay display;
 
@@ -62,7 +61,6 @@ void setup()
     delay(100);
     digitalWrite(3, HIGH);
 
-
     SBDisplay::showLoading("Start measurements...", 0.8);
     // Start sensor measurements
     for (BaseSensor *sensor : sensors)
@@ -87,15 +85,6 @@ void setup()
 
 void loop()
 {
-    // if (bleModule.isConnected())
-    // {
-    //     display.showSystemStatus();
-    // }
-    // else
-    // {
-    //     display.showConnectionScreen();
-    // }
-
     // Read acceleration and distance sensor data as fast as possible
     distanceSensor.readSensorData();
     bool classified = accelerationSensor.readSensorData();
@@ -105,6 +94,7 @@ void loop()
     {
         dustSensor.readSensorData();
         tempHumiditySensor.readSensorData();
+        display.showConnectionScreen();
     }
 
     // Perform BLE polling

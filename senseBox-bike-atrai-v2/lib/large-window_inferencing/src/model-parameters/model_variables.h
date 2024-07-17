@@ -107,7 +107,7 @@ const ei_learning_block_config_anomaly_kmeans_t ei_learning_block_config_8 = {
     .anom_axis = ei_classifier_anom_axes,
     .anom_axes_size = 4,
     .anom_clusters = ei_classifier_anom_clusters,
-    .anom_cluster_count = 8,
+    .anom_cluster_count = 10,
     .anom_scale = ei_classifier_anom_scale,
     .anom_mean = ei_classifier_anom_mean,
 };
@@ -157,7 +157,7 @@ const ei_impulse_t impulse_440960_0 = {
     .project_id = 440960,
     .project_owner = "Paula",
     .project_name = "large-window",
-    .deploy_version = 4,
+    .deploy_version = 7,
 
     .nn_input_frame_size = 78,
     .raw_sample_count = 31,
@@ -166,8 +166,8 @@ const ei_impulse_t impulse_440960_0 = {
     .input_width = 0,
     .input_height = 0,
     .input_frames = 0,
-    .interval_ms = 95.05703422053233,
-    .frequency = 10.52,
+    .interval_ms = 96,
+    .frequency = 10.416666666666666,
     .dsp_blocks_size = ei_dsp_blocks_size,
     .dsp_blocks = ei_dsp_blocks,
     

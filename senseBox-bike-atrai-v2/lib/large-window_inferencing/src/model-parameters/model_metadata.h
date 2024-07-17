@@ -71,7 +71,7 @@
 #define EI_CLASSIFIER_PROJECT_ID                 440960
 #define EI_CLASSIFIER_PROJECT_OWNER              "Paula"
 #define EI_CLASSIFIER_PROJECT_NAME               "large-window"
-#define EI_CLASSIFIER_PROJECT_DEPLOY_VERSION     4
+#define EI_CLASSIFIER_PROJECT_DEPLOY_VERSION     7
 #define EI_CLASSIFIER_NN_INPUT_FRAME_SIZE        78
 #define EI_CLASSIFIER_RAW_SAMPLE_COUNT           31
 #define EI_CLASSIFIER_RAW_SAMPLES_PER_FRAME      6
@@ -80,12 +80,12 @@
 #define EI_CLASSIFIER_INPUT_HEIGHT               0
 #define EI_CLASSIFIER_INPUT_FRAMES               0
 #define EI_CLASSIFIER_NN_OUTPUT_COUNT            5
-#define EI_CLASSIFIER_INTERVAL_MS                95.05703422053233
+#define EI_CLASSIFIER_INTERVAL_MS                96
 #define EI_CLASSIFIER_LABEL_COUNT                5
 #define EI_CLASSIFIER_HAS_ANOMALY                EI_ANOMALY_TYPE_KMEANS
 #define EI_CLASSIFIER_HAS_VISUAL_ANOMALY         0
 #define EI_CLASSIFIER_SINGLE_FEATURE_INPUT       1
-#define EI_CLASSIFIER_FREQUENCY                  10.52
+#define EI_CLASSIFIER_FREQUENCY                  10.416666666666666
 #define EI_CLASSIFIER_HAS_MODEL_VARIABLES        1
 #define EI_CLASSIFIER_THRESHOLD                  0.6
 
@@ -131,7 +131,7 @@
 
 #define EI_STUDIO_VERSION_MAJOR             1
 #define EI_STUDIO_VERSION_MINOR             53
-#define EI_STUDIO_VERSION_PATCH             13
+#define EI_STUDIO_VERSION_PATCH             14
 
 #define EI_CLASSIFIER_HR_ENABLED            0
 
