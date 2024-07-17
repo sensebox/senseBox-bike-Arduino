@@ -57,6 +57,7 @@ jobs:
             - name: "Adafruit MPU6050"
             - name: NewPing
             - name: "STM32duino VL53L8CX"
+              version: 1.0.4
             - name: "Adafruit GFX Library"
             - name: "Adafruit SSD1306"
             - source-url: https://github.com/felixerdy/QRCodeGenerator.git
