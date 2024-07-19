@@ -3,9 +3,10 @@
 
 AccelerationSensor::AccelerationSensor() : BaseSensor("accelerationSensorTask", 2048, 0) {}
 
-String accUUID = "B944AF10F4954560968F2F0D18CAB522";
+String surfaceClassificationUUID = "B944AF10F4954560968F2F0D18CAB521";
+// String accUUID = "B944AF10F4954560968F2F0D18CAB522";
 String anomalyUUID = "B944AF10F4954560968F2F0D18CAB523";
-int accCharacteristic = 0;
+int surfaceClassificationCharacteristic = 0;
 int anomalyCharacteristic = 0;
 
 Adafruit_MPU6050 mpu;
@@ -27,7 +28,7 @@ void AccelerationSensor::initSensor()
     delay(100);
   };
 
-  accCharacteristic = BLEModule::createCharacteristic(accUUID.c_str());
+  surfaceClassificationCharacteristic = BLEModule::createCharacteristic(surfaceClassificationUUID.c_str());
   anomalyCharacteristic = BLEModule::createCharacteristic(anomalyUUID.c_str());
 }
 
@@ -113,6 +114,6 @@ bool AccelerationSensor::readSensorData()
 
 void AccelerationSensor::notifyBLE(float probAsphalt, float probCompact, float probPaving, float probSett, float probStanding, float anomaly)
 {
-  BLEModule::writeBLE(accCharacteristic, probAsphalt, probCompact, probPaving, probSett, probStanding);
+  BLEModule::writeBLE(surfaceClassificationCharacteristic, probAsphalt, probCompact, probPaving, probSett, probStanding);
   BLEModule::writeBLE(anomalyCharacteristic, anomaly);
 }
