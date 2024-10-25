@@ -134,7 +134,9 @@ void SBDisplay::showConnectionScreen()
       bleIdBegin.c_str(),
       bleIdEnd.c_str()};
 
-  drawQrCode(name.c_str(), message);
+  String linkStr = "https://sensebox.de/deep/sensebox-bike?id=" + bleId;
+
+  drawQrCode(linkStr.c_str(), message);
 
   drawBattery(0, 0, 16, 4);
   display.display();

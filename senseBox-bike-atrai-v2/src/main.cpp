@@ -7,19 +7,22 @@
 #include "display/Display.h"
 #include "ble/BLEModule.h"
 #include "led/LED.h"
+#include "device/DeviceInfo.h"
 
-DustSensor dustSensor;
-TempHumiditySensor tempHumiditySensor;
-DistanceSensor distanceSensor;
-AccelerationSensor accelerationSensor;
-BatterySensor batterySensor;
+// DustSensor dustSensor;
+// TempHumiditySensor tempHumiditySensor;
+// DistanceSensor distanceSensor;
+// AccelerationSensor accelerationSensor;
+// BatterySensor batterySensor;
 
-BaseSensor *sensors[] = {
-    &dustSensor,
-    &tempHumiditySensor,
-    &distanceSensor,
-    &accelerationSensor,
-    &batterySensor};
+BaseSensor *sensors[] = {};
+// &dustSensor,
+// &tempHumiditySensor,
+// &distanceSensor,
+// &accelerationSensor,
+// &batterySensor};
+
+DeviceInfo deviceInfo("senseBox:bike", "1.0.0");
 
 SBDisplay display;
 
@@ -46,7 +49,7 @@ void setup()
     SBDisplay::showLoading("Setup BLE...", 0.2);
     bleModule.begin();
 
-    batterySensor.begin();
+    // batterySensor.begin();
 
     bleModule.createService("CF06A218F68EE0BEAD048EBC1EB0BC84");
 
@@ -55,6 +58,8 @@ void setup()
     {
         sensor->begin();
     }
+
+    deviceInfo.begin();
 
     SBDisplay::showLoading("Ventilation...", 0.6);
     pinMode(3, OUTPUT);
@@ -85,16 +90,24 @@ void setup()
 
 void loop()
 {
-    // Read acceleration and distance sensor data as fast as possible
-    distanceSensor.readSensorData();
-    bool classified = accelerationSensor.readSensorData();
+    // // Read acceleration and distance sensor data as fast as possible
+    // distanceSensor.readSensorData();
+    // bool classified = accelerationSensor.readSensorData();
 
-    // Read temperature and fine dust sensor data after a surface classification
-    if (classified)
+    // // Read temperature and fine dust sensor data after a surface classification
+    // if (classified)
+    // {
+    //     dustSensor.readSensorData();
+    //     tempHumiditySensor.readSensorData();
+    //     display.showConnectionScreen();
+    // }
+
+    // // Read battery sensor data every 5 seconds
+    unsigned long currentMillis = millis();
+    if (currentMillis - previousMillis >= interval)
     {
-        dustSensor.readSensorData();
-        tempHumiditySensor.readSensorData();
-        display.showConnectionScreen();
+        previousMillis = currentMillis;
+        deviceInfo.notifyBLE();
     }
 
     // Perform BLE polling

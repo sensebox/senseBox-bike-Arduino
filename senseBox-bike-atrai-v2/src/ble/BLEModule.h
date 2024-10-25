@@ -24,6 +24,7 @@ public:
     // Create a BLE characteristic
     static int createCharacteristic(const char *uuid);
 
+    static bool writeBLE(int characteristicId, String value);
     static bool writeBLE(int characteristicId, float value);
     static bool writeBLE(int characteristicId, float value, float value2);
     static bool writeBLE(int characteristicId, float value, float value2, float value3);
