@@ -50,7 +50,7 @@ int BLEModule::createService(const char *uuid)
 
 int BLEModule::createCharacteristic(const char *uuid)
 {
-    BLECharacteristic *pCharacteristic = pService->createCharacteristic(uuid, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
+    BLECharacteristic *pCharacteristic = pService->createCharacteristic(uuid, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_INDICATE| BLECharacteristic::PROPERTY_NOTIFY);
     return 1;
 }
 
@@ -58,7 +58,7 @@ bool BLEModule::writeBLE(const char * characteristicId, float value)
 {
     BLECharacteristic *pCharacteristic = pService->getCharacteristic(characteristicId);
     pCharacteristic->setValue(value);
-    // pCharacteristic->notify(); ??
+    pCharacteristic->notify();
     return true;
 }
 
