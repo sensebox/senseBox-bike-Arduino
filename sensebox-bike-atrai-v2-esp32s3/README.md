@@ -22,11 +22,10 @@ Threading with mutex
 - linear: 68ms
 - threading: 123ms
 
-# Some lessons learnt
+# Some notes
 - I had to rename the edge impulse library (the previous name was too long)
 - ESP32 BLE
     - expects different format for characteristic/service ids
     - no need to actively regularly poll, it does that on its own somehow
-
-# Open Issues
-- How to set and get BLE device id like its done for senseBox?
+    - I used the BLE-MacAddress for the name (because Im not sure where to get the MCUId from, like it was done with the senseBox-ble library)
+- I had to adjust the partitions because flash was flowing over
