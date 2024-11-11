@@ -1,13 +1,13 @@
 #include "Display.h"
 #include <SPI.h>
-// #include <Wire.h>
+#include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <QRCodeGenerator.h>
 #include <Adafruit_MAX1704X.h>
 #include "bicycle_loading_bitmap.h"
 
-// Adafruit_SSD1306 SBDisplay::display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+Adafruit_SSD1306 SBDisplay::display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 QRCode SBDisplay::qrcode;
 
 float batteryCharge = 0;
@@ -117,24 +117,14 @@ void SBDisplay::showSystemStatus()
   display.display();
 }
 
-void SBDisplay::showConnectionScreen()
+void SBDisplay::showConnectionScreen(String name, const char *message[])
 {
   if (isBicycleAnimationShowing)
   {
     isBicycleAnimationShowing = false;
   }
 
-  // String bleIdBrackets = "[" + bleId + "]";
-  // String name = "senseBox:bike " + bleIdBrackets;
-  // String bleIdBegin = bleIdBrackets.substring(0, bleIdBrackets.length() / 2);
-  // String bleIdEnd = bleIdBrackets.substring(bleIdBrackets.length() / 2);
-  // const char *message[] = {
-  //     "senseBox",
-  //     "bike",
-  //     bleIdBegin.c_str(),
-  //     bleIdEnd.c_str()};
-
-  // drawQrCode(name.c_str(), message);
+  drawQrCode(name.c_str(), message);
 
   drawBattery(0, 0, 16, 4);
   display.display();

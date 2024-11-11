@@ -21,7 +21,7 @@ class SBDisplay
 public:
   static void begin();
   static void showSystemStatus();
-  static void showConnectionScreen();
+  static void showConnectionScreen(String name, const char *message[]);
   static void drawQrCode(const char *qrStr, const char *lines[]);
   static void showLoading(String msg, float val);
   static void drawProgressbar(int x, int y, int width, int height, int progress);

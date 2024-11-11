@@ -40,6 +40,8 @@ public:
 
     static bool isConnected();
 
+    const char *getMacAddress();
+
 private:
     // BLEService* service;
     String bleName;
