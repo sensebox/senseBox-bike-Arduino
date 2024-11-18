@@ -1,9 +1,9 @@
 #include "TempHumiditySensor.h"
 
-TempHumiditySensor::TempHumiditySensor() : BaseSensor("temperatureHumidityTask", 2048, 1000) {}
+TempHumiditySensor::TempHumiditySensor() : BaseSensor("temperatureHumidityTask", 8192, 0) {}
 
-String tempUUID = "2CDF217435BEFDC44CA26FD173F8B3A8";
-String humUUID = "772DF7EC8CDC4EA986AF410ABE0BA257";
+String tempUUID = "2cdf2174-35be-fdc4-4Ca2-6fd173f8b3a8";
+String humUUID = "772df7ec-8cdc-4ea9-86af-410abe0ba257";
 
 int temperatureCharacteristic = 0;
 int humidityCharacteristic = 0;
@@ -19,8 +19,8 @@ void TempHumiditySensor::initSensor()
       ;
   }
 
-  // temperatureCharacteristic = BLEModule::createCharacteristic(tempUUID.c_str());
-  // humidityCharacteristic = BLEModule::createCharacteristic(humUUID.c_str());
+  temperatureCharacteristic = BLEModule::createCharacteristic(tempUUID.c_str());
+  humidityCharacteristic = BLEModule::createCharacteristic(humUUID.c_str());
 }
 
 bool TempHumiditySensor::readSensorData()
@@ -46,8 +46,8 @@ bool TempHumiditySensor::readSensorData()
   return false;
 }
 
-void TempHumiditySensor::notifyBLE(float temoperature, float humidity)
+void TempHumiditySensor::notifyBLE(float temperature, float humidity)
 {
-  // BLEModule::writeBLE(temperatureCharacteristic, temoperature);
-  // BLEModule::writeBLE(humidityCharacteristic, humidity);
+  BLEModule::writeBLE(tempUUID.c_str(), temperature);
+  BLEModule::writeBLE(humUUID.c_str(), humidity);
 }

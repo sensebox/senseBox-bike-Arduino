@@ -1,8 +1,8 @@
 #include "DustSensor.h"
 
-DustSensor::DustSensor() : BaseSensor("DustSensorTask", 2048, 1000) {}
+DustSensor::DustSensor() : BaseSensor("DustSensorTask", 8192, 1000) {}
 
-String dustUUID = "7E14E07084EA489FB45AE1317364B979";
+String dustUUID = "7e14e070-84ea-489f-b45a-e1317364b979";
 int dustCharacteristic = 0;
 
 // add more if needed
@@ -38,7 +38,7 @@ void DustSensor::initSensor()
 
   Serial.print("measurements started\n");
 
-  // dustCharacteristic = BLEModule::createCharacteristic(dustUUID.c_str());
+  dustCharacteristic = BLEModule::createCharacteristic(dustUUID.c_str());
 }
 
 bool DustSensor::readSensorData()
@@ -88,5 +88,5 @@ bool DustSensor::readSensorData()
 
 void DustSensor::notifyBLE(float pm1, float pm2_5, float pm4, float pm10)
 {
-  // BLEModule::writeBLE(dustCharacteristic, pm1, pm2_5, pm4, pm10);
+  BLEModule::writeBLE(dustUUID.c_str(), pm1, pm2_5, pm4, pm10);
 }

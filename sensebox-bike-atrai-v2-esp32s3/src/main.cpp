@@ -8,15 +8,15 @@
 #include "ble/BLEModule.h"
 // #include "led/LED.h"
 
-// DustSensor dustSensor;
-// TempHumiditySensor tempHumiditySensor;
+DustSensor dustSensor;
+TempHumiditySensor tempHumiditySensor;
 DistanceSensor distanceSensor;
 AccelerationSensor accelerationSensor;
 // BatterySensor batterySensor;
 
 BaseSensor *sensors[] = {
-    // &dustSensor,
-    // &tempHumiditySensor,
+    &dustSensor,
+    &tempHumiditySensor,
     &distanceSensor,
     &accelerationSensor,
     // &batterySensor
@@ -57,7 +57,7 @@ void setup()
         sensor->begin();
     }
 
-    // SBDisplay::showLoading("Ventilation...", 0.6);
+    SBDisplay::showLoading("Ventilation...", 0.6);
     // pinMode(3, OUTPUT);
     // delay(100);
     // digitalWrite(3, HIGH);
@@ -77,7 +77,7 @@ void setup()
         sensor->startBLE();
     }
 
-    // display.readBleId();
+    display.readBleId();
 
     // led.stopRainbow();
 
@@ -90,7 +90,8 @@ void setup()
       "senseBox",
       "bike",
       bleIdBegin.c_str(),
-      bleIdEnd.c_str()};
+      bleIdEnd.c_str()
+    };
 
     display.showConnectionScreen(name, message);
     bleModule.bleStartPoll("4fafc201-1fb5-459e-8fcc-c5c9c331914b");
