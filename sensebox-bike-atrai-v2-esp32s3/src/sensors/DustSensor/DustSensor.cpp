@@ -88,5 +88,5 @@ bool DustSensor::readSensorData()
 
 void DustSensor::notifyBLE(float pm1, float pm2_5, float pm4, float pm10)
 {
-  BLEModule::writeBLE(dustUUID.c_str(), pm1, pm2_5, pm4, pm10);
+  BLEModule::writeBLE(dustUUID.c_str(), pm1*100, pm2_5*100, pm4*100, pm10*100);
 }

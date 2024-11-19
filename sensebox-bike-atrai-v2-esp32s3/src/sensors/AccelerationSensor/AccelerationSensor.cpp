@@ -1,7 +1,7 @@
 #include "AccelerationSensor.h"
 #include "edge-impulse-sdk/classifier/ei_run_classifier.h"
 
-AccelerationSensor::AccelerationSensor() : BaseSensor("accelerationSensorTask", 2048, 0) {}
+AccelerationSensor::AccelerationSensor() : BaseSensor("accelerationSensorTask", 8192, 0) {}
 
 String surfaceClassificationUUID = "b944af10-f495-4560-968f-2f0d18cab521";
 // String accUUID = "B944AF10F4954560968F2F0D18CAB522";
@@ -34,7 +34,7 @@ void AccelerationSensor::initSensor()
   anomalyCharacteristic = BLEModule::createCharacteristic(anomalyUUID.c_str());
 }
 
-float buffer[6] = {};
+float buffer[EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE] = {};
 size_t ix = 0;
 float probAsphalt = 0.0;
 float probCompact = 0.0;
@@ -52,12 +52,12 @@ bool AccelerationSensor::readSensorData()
 
   mpu.getEvent(&a, &g, &temp);
 
-  buffer[0] = 1.0;
-  buffer[1] = 1.0;
-  buffer[2] = 1.0;
-  buffer[3] = 1.0;
-  buffer[4] = 1.0;
-  buffer[5] = 1.0;
+  buffer[ix++] = 1.0;
+  buffer[ix++] = 1.0;
+  buffer[ix++] = 1.0;
+  buffer[ix++] = 1.0;
+  buffer[ix++] = 1.0;
+  buffer[ix++] = 1.0;
 
   // Serial.println(millis() - prevAccTime);
   prevAccTime = millis();
@@ -97,7 +97,6 @@ bool AccelerationSensor::readSensorData()
 
     if (sendBLE)
     {
-
       notifyBLE(probAsphalt, probCompact, probPaving, probSett, probStanding, anomaly);
     }
 
@@ -116,6 +115,6 @@ bool AccelerationSensor::readSensorData()
 
 void AccelerationSensor::notifyBLE(float probAsphalt, float probCompact, float probPaving, float probSett, float probStanding, float anomaly)
 {
-  BLEModule::writeBLE(surfaceClassificationUUID.c_str(), probAsphalt, probCompact, probPaving, probSett, probStanding);
+  BLEModule::writeBLE(surfaceClassificationUUID.c_str(), probAsphalt*100, probCompact*100, probPaving*100, probSett*100, probStanding*100);
   BLEModule::writeBLE(anomalyUUID.c_str(), anomaly);
 }
