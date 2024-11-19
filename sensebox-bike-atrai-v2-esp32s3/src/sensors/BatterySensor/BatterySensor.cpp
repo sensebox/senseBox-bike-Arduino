@@ -1,10 +1,8 @@
 #include "BatterySensor.h"
 
-BatterySensor::BatterySensor() : BaseSensor("batterySensorTask", 2048, 10000) {}
+BatterySensor::BatterySensor() : BaseSensor("batterySensorTask", 8192, 1000) {}
 
-// 5b262dea-4565-4ea0-912f-1e453bda0ca7
-// String batteryUUID = "5B262DEA45654EA0912F1E453BDA0CA7";
-String batteryUUID = "2A19";
+String batteryUUID = "5b262dea-4565-4ea0-912f-1e453bda0ca7";
 int batteryCharacteristic = 0;
 
 Adafruit_MAX17048 maxlipo;
@@ -18,9 +16,8 @@ void BatterySensor::initSensor()
     Serial.println(F("Couldnt find Adafruit MAX17048?\nMake sure a battery is plugged in!"));
     delay(2000);
   }
-
   // BLEModule::createService("180F");
-  // batteryCharacteristic = BLEModule::createCharacteristic(batteryUUID.c_str());
+  batteryCharacteristic = BLEModule::createCharacteristic(batteryUUID.c_str());
   // add more if needed
 }
 
@@ -43,7 +40,7 @@ bool BatterySensor::readSensorData()
 
 void BatterySensor::notifyBLE(float batteryCharge)
 {
-  // BLEModule::writeBLE(batteryCharacteristic, batteryCharge);
+  BLEModule::writeBLE(batteryUUID.c_str(), batteryCharge);
 }
 
 float BatterySensor::getBatteryCharge()

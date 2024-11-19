@@ -3,7 +3,7 @@
 
 #include "../BaseSensor.h"
 
-// include necceary libraries
+// include necessary libraries
 
 class SampleSensor : public BaseSensor
 {

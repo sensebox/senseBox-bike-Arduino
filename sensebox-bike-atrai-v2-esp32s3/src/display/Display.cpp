@@ -112,7 +112,7 @@ void SBDisplay::showSystemStatus()
   display.print(batteryCharge, 1);
   display.println(" %");
 
-  drawBattery(0, 0, 16, 4);
+  // drawBattery(0, 0, 16, 4);
 
   display.display();
 }

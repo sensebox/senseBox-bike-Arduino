@@ -4,7 +4,7 @@
 #include "../BaseSensor.h"
 #include <Adafruit_MAX1704X.h>
 
-// include necceary libraries
+// include necessary libraries
 
 class BatterySensor : public BaseSensor
 {
