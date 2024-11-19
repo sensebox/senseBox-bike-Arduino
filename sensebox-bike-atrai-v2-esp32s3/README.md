@@ -28,4 +28,5 @@ Threading with mutex
     - expects different format for characteristic/service ids
     - no need to actively regularly poll, it does that on its own somehow
     - I used the BLE-MacAddress for the name (because Im not sure where to get the MCUId from, like it was done with the senseBox-ble library)
+    - I think it only accepts int values for characteristics with multiple values
 - I had to adjust the partitions because flash was flowing over
