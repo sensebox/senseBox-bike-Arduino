@@ -77,6 +77,7 @@ bool BLEModule::writeBLE(const char * characteristicId, uint8_t value, uint8_t v
     BLECharacteristic *pCharacteristic = pService->getCharacteristic(characteristicId);
     uint8_t buf[2] = {value, value2};
     pCharacteristic->setValue(buf,1);
+    pCharacteristic->notify();
     return true;
 }
 
@@ -85,6 +86,7 @@ bool BLEModule::writeBLE(const char * characteristicId, uint8_t value, uint8_t v
     BLECharacteristic *pCharacteristic = pService->getCharacteristic(characteristicId);
     uint8_t buf[3] = {value, value2, value3};
     pCharacteristic->setValue(buf,1);
+    pCharacteristic->notify();
     return true;
 }
 
@@ -93,6 +95,7 @@ bool BLEModule::writeBLE(const char * characteristicId, uint8_t value, uint8_t v
     BLECharacteristic *pCharacteristic = pService->getCharacteristic(characteristicId);
     uint8_t buf[4] = {value, value2, value3, value4};
     pCharacteristic->setValue(buf,1);
+    pCharacteristic->notify();
     return true;
 }
 
@@ -101,6 +104,7 @@ bool BLEModule::writeBLE(const char * characteristicId, uint8_t value, uint8_t v
     BLECharacteristic *pCharacteristic = pService->getCharacteristic(characteristicId);
     uint8_t buf[5] = {value, value2, value3, value4};
     pCharacteristic->setValue(buf,1);
+    pCharacteristic->notify();
     return true;
 }
 
