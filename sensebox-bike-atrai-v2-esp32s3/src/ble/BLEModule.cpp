@@ -72,37 +72,51 @@ bool BLEModule::writeBLE(const char * characteristicId, float value)
     return true;
 }
 
-bool BLEModule::writeBLE(const char * characteristicId, uint8_t value, uint8_t value2)
+bool BLEModule::writeBLE(const char * characteristicId, float value, float value2)
 {
     BLECharacteristic *pCharacteristic = pService->getCharacteristic(characteristicId);
-    uint8_t buf[2] = {value, value2};
+    uint8_t buf[8];
+    memcpy(&buf[0], &value, sizeof(float));
+    memcpy(&buf[4], &value2, sizeof(float));
     pCharacteristic->setValue(buf,2);
     pCharacteristic->notify();
     return true;
 }
 
-bool BLEModule::writeBLE(const char * characteristicId, uint8_t value, uint8_t value2, uint8_t value3)
+bool BLEModule::writeBLE(const char * characteristicId, float value, float value2, float value3)
 {
     BLECharacteristic *pCharacteristic = pService->getCharacteristic(characteristicId);
-    uint8_t buf[3] = {value, value2, value3};
+    uint8_t buf[12];
+    memcpy(&buf[0], &value, sizeof(float));
+    memcpy(&buf[4], &value2, sizeof(float));
+    memcpy(&buf[8], &value3, sizeof(float));
     pCharacteristic->setValue(buf,3);
     pCharacteristic->notify();
     return true;
 }
 
-bool BLEModule::writeBLE(const char * characteristicId, uint8_t value, uint8_t value2, uint8_t value3, uint8_t value4)
+bool BLEModule::writeBLE(const char * characteristicId, float value, float value2, float value3, float value4)
 {
     BLECharacteristic *pCharacteristic = pService->getCharacteristic(characteristicId);
-    uint8_t buf[4] = {value, value2, value3, value4};
+    uint8_t buf[16];
+    memcpy(&buf[0], &value, sizeof(float));
+    memcpy(&buf[4], &value2, sizeof(float));
+    memcpy(&buf[8], &value3, sizeof(float));
+    memcpy(&buf[12], &value4, sizeof(float));
     pCharacteristic->setValue(buf,4);
     pCharacteristic->notify();
     return true;
 }
 
-bool BLEModule::writeBLE(const char * characteristicId, uint8_t value, uint8_t value2, uint8_t value3, uint8_t value4, uint8_t value5)
+bool BLEModule::writeBLE(const char * characteristicId, float value, float value2, float value3, float value4, float value5)
 {
     BLECharacteristic *pCharacteristic = pService->getCharacteristic(characteristicId);
-    uint8_t buf[5] = {value, value2, value3, value4, value5};
+    uint8_t buf[20];
+    memcpy(&buf[0], &value, sizeof(float));
+    memcpy(&buf[4], &value2, sizeof(float));
+    memcpy(&buf[8], &value3, sizeof(float));
+    memcpy(&buf[12], &value4, sizeof(float));
+    memcpy(&buf[16], &value5, sizeof(float));
     pCharacteristic->setValue(buf,5);
     pCharacteristic->notify();
     return true;

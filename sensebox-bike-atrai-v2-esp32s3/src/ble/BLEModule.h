@@ -27,10 +27,10 @@ public:
     static int createCharacteristic(const char *uuid);
 
     static bool writeBLE(const char * characteristicId, float value);
-    static bool writeBLE(const char * characteristicId, uint8_t value, uint8_t value2);
-    static bool writeBLE(const char * characteristicId, uint8_t value, uint8_t value2, uint8_t value3);
-    static bool writeBLE(const char * characteristicId, uint8_t value, uint8_t value2, uint8_t value3, uint8_t value4);
-    static bool writeBLE(const char * characteristicId, uint8_t value, uint8_t value2, uint8_t value3, uint8_t value4, uint8_t value5);
+    static bool writeBLE(const char * characteristicId, float value, float value2);
+    static bool writeBLE(const char * characteristicId, float value, float value2, float value3);
+    static bool writeBLE(const char * characteristicId, float value, float value2, float value3, float value4);
+    static bool writeBLE(const char * characteristicId, float value, float value2, float value3, float value4, float value5);
 
     // Set callback for receiving data
     // void setReceiveCallback(void (*callback)(BLEDevice, BLECharacteristic));
