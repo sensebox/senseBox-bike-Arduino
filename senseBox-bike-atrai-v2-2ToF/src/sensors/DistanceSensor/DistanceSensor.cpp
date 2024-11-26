@@ -61,7 +61,7 @@ void DistanceSensor::initSensor()
     Wire.endTransmission();
 
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
-    sensor_vl53l8cx_top.vl53l8cx_set_i2c_address(0x51); // need to change address, because default address is shared with other sensor
+    // sensor_vl53l8cx_top.vl53l8cx_set_i2c_address(0x51); // need to change address, because default address is shared with other sensor
 
     sensor_vl53l8cx_top.begin();
     sensor_vl53l8cx_top.init_sensor();
@@ -74,7 +74,7 @@ void DistanceSensor::initSensor()
     Wire.endTransmission();
 
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
-    sensor_vl53l8cx_top.vl53l8cx_set_i2c_address(0x51); // need to change address, because default address is shared with other sensor
+    // sensor_vl53l8cx_top.vl53l8cx_set_i2c_address(0x51); // need to change address, because default address is shared with other sensor
 
     sensor_vl53l8cx_top.begin();
     sensor_vl53l8cx_top.init_sensor();
