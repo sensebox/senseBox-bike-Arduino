@@ -22,7 +22,9 @@ void BaseSensor::startSubscription()
 {
     if (this->taskHandle == NULL)
     {
-        xTaskCreate(sensorTask, taskName, taskStackSize, this, 1, &this->taskHandle);
+        // https://docs.espressif.com/projects/esp-idf/en/v5.2.3/esp32s3/api-guides/performance/speed.html#choosing-task-priorities-of-the-application
+        xTaskCreate(sensorTask, taskName, taskStackSize, this, 17, &this->taskHandle);
+        // very important tasks could run on priority 20 on core 0
     }
     activeSubscription = true;
 }
