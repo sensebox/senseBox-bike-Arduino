@@ -15,6 +15,9 @@ protected:
   void initSensor() override;
   void notifyBLE(float distance, float overtakingPredictionPercentage);
   void notifyBLERight(float distance);
+
+private:
+  void tcaselect(uint8_t i);
 };
 
 #endif // DISTANCESENSOR_H

@@ -47,8 +47,15 @@ bool pending_initial_data = true;
 
 long prevDistanceTime = millis();
 
-byte multiplexAddress = 0x77;
-byte channels[] = {0,1};
+#define TCAADDR 0x70
+
+void DistanceSensor::tcaselect(uint8_t i) {
+  if (i > 7) return;
+ 
+  Wire.beginTransmission(TCAADDR);
+  Wire.write(1 << i);
+  Wire.endTransmission();  
+}
 
 void DistanceSensor::initSensor()
 {
@@ -56,30 +63,36 @@ void DistanceSensor::initSensor()
     Serial.println("setting up VL53L8CX...");
     Wire.begin();
 
-    Wire.beginTransmission(0x77);
-    Wire.write(1 << channels[0]);
-    Wire.endTransmission();
+    tcaselect(1);
 
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
     // sensor_vl53l8cx_top.vl53l8cx_set_i2c_address(0x51); // need to change address, because default address is shared with other sensor
 
+    Serial.println("begin...");
     sensor_vl53l8cx_top.begin();
+    Serial.println("init...");
     sensor_vl53l8cx_top.init_sensor();
+    Serial.println("set range...");
     sensor_vl53l8cx_top.vl53l8cx_set_ranging_frequency_hz(30);
+    Serial.println("set res...");
     sensor_vl53l8cx_top.vl53l8cx_set_resolution(VL53L8CX_RESOLUTION_8X8);
+    Serial.println("start...");
     sensor_vl53l8cx_top.vl53l8cx_start_ranging();
 
-    Wire.beginTransmission(0x77);
-    Wire.write(1 << channels[1]);
-    Wire.endTransmission();
+    tcaselect(0);
 
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
     // sensor_vl53l8cx_top.vl53l8cx_set_i2c_address(0x51); // need to change address, because default address is shared with other sensor
 
+    Serial.println("begin...");
     sensor_vl53l8cx_top.begin();
+    Serial.println("init...");
     sensor_vl53l8cx_top.init_sensor();
+    Serial.println("set range...");
     sensor_vl53l8cx_top.vl53l8cx_set_ranging_frequency_hz(30);
+    Serial.println("set res...");
     sensor_vl53l8cx_top.vl53l8cx_set_resolution(VL53L8CX_RESOLUTION_8X8);
+    Serial.println("start...");
     sensor_vl53l8cx_top.vl53l8cx_start_ranging();
     // -------------------------- setup tensorflow model --------------------------
     Serial.println("setting up tensorflow...");
@@ -128,9 +141,7 @@ void DistanceSensor::initSensor()
 bool DistanceSensor::readSensorData()
 {
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
-    Wire.beginTransmission(0x77);
-    Wire.write(1 << channels[1]);
-    Wire.endTransmission();
+    tcaselect(1);
 
     // ------------------- RIGHT -------------------
     VL53L8CX_ResultsData Results;
@@ -166,13 +177,14 @@ bool DistanceSensor::readSensorData()
         }
         distanceRight = (min == 10000.0) ? 0.0 : min;
         // Serial.printf("distanceRight: %f\n", distanceRight);
-        notifyBLERight(distanceRight);
+        if (sendBLE)
+        {
+            notifyBLERight(distanceRight);
+        }
     }
     // ------------------- LEFT -------------------
 
-    Wire.beginTransmission(0x77);
-    Wire.write(1 << channels[0]);
-    Wire.endTransmission();
+    tcaselect(0);
 
     NewDataReady = 0;
     status = sensor_vl53l8cx_top.vl53l8cx_check_data_ready(&NewDataReady);
@@ -253,6 +265,7 @@ bool DistanceSensor::readSensorData()
 
         if (sendBLE)
         {
+            // Serial.printf("distance: %f, overtaking: %f\n", distance, overtakingPredictionPercentage);
             notifyBLE(distance, overtakingPredictionPercentage);
         }
     }
