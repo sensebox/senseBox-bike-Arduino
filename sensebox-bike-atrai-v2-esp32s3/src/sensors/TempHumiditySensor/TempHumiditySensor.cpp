@@ -1,6 +1,11 @@
 #include "TempHumiditySensor.h"
 
-TempHumiditySensor::TempHumiditySensor() : BaseSensor("temperatureHumidityTask", 8192, 0) {}
+TempHumiditySensor::TempHumiditySensor() : BaseSensor("temperatureHumidityTask", 
+4096, // taskStackSize
+1000, // taskDelay
+1, // taskPriority
+1 // core
+) {}
 
 String tempUUID = "2cdf2174-35be-fdc4-4Ca2-6fd173f8b3a8";
 String humUUID = "772df7ec-8cdc-4ea9-86af-410abe0ba257";
@@ -22,7 +27,7 @@ void TempHumiditySensor::initSensor()
   temperatureCharacteristic = BLEModule::createCharacteristic(tempUUID.c_str());
   humidityCharacteristic = BLEModule::createCharacteristic(humUUID.c_str());
 }
-
+unsigned long startTemTime = millis();
 bool TempHumiditySensor::readSensorData()
 {
   float temperature = hdc.readTemperature();
@@ -39,6 +44,9 @@ bool TempHumiditySensor::readSensorData()
     measurementCallback({temperature, humidity});
   }
 
+  unsigned long endTemTime = millis();
+  Serial.printf("temperature/humidity: %lu ms\n", endTemTime - startTemTime);
+  startTemTime = millis();
   if (sendBLE)
   {
     notifyBLE(temperature, humidity);

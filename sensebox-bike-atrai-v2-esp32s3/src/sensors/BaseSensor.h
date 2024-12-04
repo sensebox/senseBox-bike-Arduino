@@ -9,7 +9,7 @@
 class BaseSensor
 {
 public:
-    BaseSensor(const char *taskName, uint32_t taskStackSize = 8192, uint32_t taskDelay = 1000);
+    BaseSensor(const char *taskName, uint32_t taskStackSize = 8192, uint32_t taskDelay = 1000, uint32_t taskPriority = 1, uint16_t core = 1);
 
     void begin();
     void subscribe(std::function<void(std::vector<float>)> callback);
@@ -31,6 +31,8 @@ private:
     uint32_t taskStackSize;
     uint32_t taskDelay;
     TaskHandle_t taskHandle;
+    uint32_t taskPriority;
+    uint16_t core;
 };
 
 #endif // BASESENSOR_H

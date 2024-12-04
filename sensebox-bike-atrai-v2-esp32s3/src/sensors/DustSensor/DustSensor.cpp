@@ -1,6 +1,11 @@
 #include "DustSensor.h"
 
-DustSensor::DustSensor() : BaseSensor("DustSensorTask", 8192, 1000) {}
+DustSensor::DustSensor() : BaseSensor("DustSensorTask", 
+4096, // taskStackSize,
+1000, // taskDelay,
+1, // taskPriority,
+1 // core
+) {}
 
 String dustUUID = "7e14e070-84ea-489f-b45a-e1317364b979";
 int dustCharacteristic = 0;
@@ -41,6 +46,7 @@ void DustSensor::initSensor()
   dustCharacteristic = BLEModule::createCharacteristic(dustUUID.c_str());
 }
 
+unsigned long startDusTime = millis();
 bool DustSensor::readSensorData()
 {
   // Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
@@ -76,6 +82,10 @@ bool DustSensor::readSensorData()
         {
           measurementCallback({pm1, pm2_5, pm4, pm10});
         }
+
+        unsigned long endDusTime = millis();
+        Serial.printf("dust: %lu ms\n", endDusTime - startDusTime);
+        startDusTime = millis();
 
         if (sendBLE)
         {

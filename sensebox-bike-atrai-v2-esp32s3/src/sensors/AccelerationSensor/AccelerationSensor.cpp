@@ -1,7 +1,12 @@
 #include "AccelerationSensor.h"
 #include "edge-impulse-sdk/classifier/ei_run_classifier.h"
 
-AccelerationSensor::AccelerationSensor() : BaseSensor("accelerationSensorTask", 8192, 0) {}
+AccelerationSensor::AccelerationSensor() : BaseSensor("accelerationSensorTask", 
+4096, // taskStackSize,
+30, // taskDelay,
+17, // taskPriority,
+1 // core
+) {}
 
 String surfaceClassificationUUID = "b944af10-f495-4560-968f-2f0d18cab521";
 // String accUUID = "B944AF10F4954560968F2F0D18CAB522";
@@ -43,8 +48,7 @@ float probSett = 0.0;
 float probStanding = 0.0;
 float anomaly = 0.0;
 
-float prevAccTime = millis();
-
+unsigned long startAccTime = millis();
 bool AccelerationSensor::readSensorData()
 {
   bool classified = false;
@@ -59,8 +63,9 @@ bool AccelerationSensor::readSensorData()
   buffer[ix++] = 1.0;
   buffer[ix++] = 1.0;
 
-  // Serial.println(millis() - prevAccTime);
-  prevAccTime = millis();
+  unsigned long endAccTime = millis();
+  Serial.printf("acceleration: %lu ms\n", endAccTime - startAccTime);
+  startAccTime = millis();
 
   // one second inverval
   if (EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE <= ix)
@@ -103,6 +108,8 @@ bool AccelerationSensor::readSensorData()
     ix = 0;
 
     buffer[EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE] = {};
+
+    startAccTime = millis();
   }
 
   if (measurementCallback)

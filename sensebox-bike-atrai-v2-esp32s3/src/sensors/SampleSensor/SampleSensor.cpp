@@ -1,6 +1,11 @@
 #include "SampleSensor.h"
 
-SampleSensor::SampleSensor() : BaseSensor("sampleSensorTask", 2048, 1000) {}
+SampleSensor::SampleSensor() : BaseSensor("sampleSensorTask", 
+2048, // taskStackSize
+1000, // taskDelay
+1, // taskPriority
+1 // core
+) {}
 
 String sampleUUID = "00000000000000000";
 int sampleCharacteristic = 0;

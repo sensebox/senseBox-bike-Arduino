@@ -1,6 +1,11 @@
 #include "BatterySensor.h"
 
-BatterySensor::BatterySensor() : BaseSensor("batterySensorTask", 8192, 1000) {}
+BatterySensor::BatterySensor() : BaseSensor("batterySensorTask", 
+4096, // taskStackSize, 
+1000, // taskDelay,
+1, // taskPriority,
+1 // core
+) {}
 
 String batteryUUID = "5b262dea-4565-4ea0-912f-1e453bda0ca7";
 int batteryCharacteristic = 0;
@@ -21,6 +26,7 @@ void BatterySensor::initSensor()
   // add more if needed
 }
 
+unsigned long startBatTime = millis();
 bool BatterySensor::readSensorData()
 {
   // read sensor data
@@ -31,6 +37,9 @@ bool BatterySensor::readSensorData()
     measurementCallback({batteryCharge});
   }
 
+  unsigned long endBatTime = millis();
+  Serial.printf("battery: %lu ms\n", endBatTime - startBatTime);
+  startBatTime = millis();
   if (sendBLE)
   {
     notifyBLE(batteryCharge);

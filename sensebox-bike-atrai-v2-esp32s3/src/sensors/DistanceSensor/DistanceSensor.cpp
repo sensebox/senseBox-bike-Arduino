@@ -21,7 +21,12 @@
 #include "edge-impulse-sdk/tensorflow/lite/schema/schema_generated.h"
 #include <edge-impulse-sdk/tensorflow/lite/micro/micro_error_reporter.h>
 
-DistanceSensor::DistanceSensor() : BaseSensor("distanceTask", 8192, 0) {}
+DistanceSensor::DistanceSensor() : BaseSensor("distanceTask", 
+8192, // taskStackSize,
+0, // taskDelay,
+20, // taskPriority,
+0 // core
+) {}
 
 // String distanceUUID = "B3491B60C0F34306A30D49C91F37A62B";
 String distanceUUID = "b3491b60-c0f3-4306-a30d-49c91f37a62b";
@@ -110,6 +115,7 @@ void DistanceSensor::initSensor()
     Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
 }
 
+unsigned long startDisTime = millis();
 bool DistanceSensor::readSensorData()
 {
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
@@ -123,7 +129,7 @@ bool DistanceSensor::readSensorData()
     if ((!status) && (NewDataReady != 0))
     {
         // Serial.println("data ready");
-        Serial.println(millis()-prevDistanceTime);
+        // Serial.println(millis()-prevDistanceTime);
         prevDistanceTime = millis();
         sensor_vl53l8cx_top.get_ranging_data(&Results);
         float overtakingPredictionPercentage = -1.0;
@@ -188,8 +194,8 @@ bool DistanceSensor::readSensorData()
             {
                 const float *prediction_scores = interpreter->output(0)->data.f;
                 overtakingPredictionPercentage = prediction_scores[0];
-                Serial.print(overtakingPredictionPercentage);
-                Serial.print(" ");
+                // Serial.print(overtakingPredictionPercentage);
+                // Serial.print(" ");
             }
         }
 
@@ -202,15 +208,19 @@ bool DistanceSensor::readSensorData()
             measurementCallback({distance, overtakingPredictionPercentage});
         }
 
+        unsigned long endDisTime = millis();
+        Serial.printf("distance: %lu ms\n", endDisTime - startDisTime);
+        startDisTime = millis();
+
         if (sendBLE)
         {
             notifyBLE(distance, overtakingPredictionPercentage);
         }
     }
-    if ((millis() - prevDistanceTime) < 65)
-    {
-        vTaskDelay(pdMS_TO_TICKS(65 - (millis() - prevDistanceTime)));
-    }
+    // if ((millis() - prevDistanceTime) < 65)
+    // {
+    //     vTaskDelay(pdMS_TO_TICKS(65 - (millis() - prevDistanceTime)));
+    // }
     // Serial.print("distance: ");
     // Serial.println(millis() - prevDistanceTime);
     return false;
