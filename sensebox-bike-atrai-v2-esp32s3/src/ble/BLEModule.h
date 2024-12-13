@@ -25,6 +25,7 @@ public:
 
     // Create a BLE characteristic
     static int createCharacteristic(const char *uuid);
+    static int createCharacteristicWithCallback(const char *uuid);
 
     static bool writeBLE(const char * characteristicId, float value);
     static bool writeBLE(const char * characteristicId, float value, float value2);

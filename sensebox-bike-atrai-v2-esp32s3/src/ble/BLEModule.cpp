@@ -6,6 +6,20 @@ BLEService *pService;
 
 char macString[32]; // Enough space for the MAC string
 
+class CustomBLECallbacks : public BLECharacteristicCallbacks {
+  void onWrite(BLECharacteristic *pCharacteristic) override {
+    std::string value = pCharacteristic->getValue();
+
+    if (value.length() > 0) {
+      Serial.println("Received data:");
+      for (int i = 0; i < value.length(); i++) {
+        Serial.print(value[i]);
+      }
+      Serial.println();
+    }
+  }
+};
+
 BLEModule::BLEModule()
 {
     bleName = "";
@@ -61,6 +75,21 @@ int BLEModule::createService(const char *uuid)
 int BLEModule::createCharacteristic(const char *uuid)
 {
     BLECharacteristic *pCharacteristic = pService->createCharacteristic(uuid, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_INDICATE| BLECharacteristic::PROPERTY_NOTIFY);
+    return 1;
+}
+
+// for receiving data
+int BLEModule::createCharacteristicWithCallback(const char *uuid) {
+    BLECharacteristic *pCharacteristic = pService->createCharacteristic(
+        uuid,
+        BLECharacteristic::PROPERTY_READ |
+        BLECharacteristic::PROPERTY_WRITE |
+        BLECharacteristic::PROPERTY_INDICATE |
+        BLECharacteristic::PROPERTY_NOTIFY
+    );
+
+    // Attach the callback to handle incoming data
+    pCharacteristic->setCallbacks(new CustomBLECallbacks());
     return 1;
 }
 
