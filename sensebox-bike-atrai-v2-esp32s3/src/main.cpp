@@ -16,10 +16,10 @@ BatterySensor batterySensor;
 
 BaseSensor *sensors[] = {
     &dustSensor,
-    &tempHumiditySensor,
-    &distanceSensor,
     &accelerationSensor,
-    &batterySensor
+    &distanceSensor,
+    &batterySensor,
+    &tempHumiditySensor,
     };
 
 SBDisplay display;
@@ -54,6 +54,7 @@ void setup()
     {
         sensor->begin();
     }
+    Serial.println("Setup complete");
 
     SBDisplay::showLoading("Ventilation...", 0.6);
     // pinMode(3, OUTPUT);
@@ -66,6 +67,7 @@ void setup()
     {
         sensor->startSubscription();
     }
+    Serial.println("Subscriptions started");
 
     SBDisplay::showLoading("Enable BLE...", 1);
 
@@ -74,6 +76,7 @@ void setup()
     {
         sensor->startBLE();
     }
+    Serial.println("BLE enabled");
 
     display.readBleId();
 

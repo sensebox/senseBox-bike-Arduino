@@ -22,11 +22,11 @@ void BaseSensor::startSubscription()
 {
     if (this->taskHandle == NULL)
     {
+        activeSubscription = true;
         // https://docs.espressif.com/projects/esp-idf/en/v5.2.3/esp32s3/api-guides/performance/speed.html#choosing-task-priorities-of-the-application
         xTaskCreatePinnedToCore(sensorTask, taskName, taskStackSize, this, taskPriority, &this->taskHandle, core);
         // very important tasks could run on priority 20 on core 0
     }
-    activeSubscription = true;
 }
 
 void BaseSensor::stopSubscription()
@@ -64,10 +64,10 @@ void BaseSensor::sensorTask(void *pvParameters)
             }
         }
 
-        if ((millis() - prevTime) < sensor->taskDelay)
-        {
-            vTaskDelay(pdMS_TO_TICKS(sensor->taskDelay - (millis() - prevTime)));
-        }
-        // vTaskDelay(pdMS_TO_TICKS(sensor->taskDelay));
+        // if (sensor->taskDelay > 0 && (millis() - prevTime) < sensor->taskDelay)
+        // {
+        //     vTaskDelay(pdMS_TO_TICKS(sensor->taskDelay - (millis() - prevTime)));
+        // }
+        vTaskDelay(pdMS_TO_TICKS(sensor->taskDelay));
     }
 }
