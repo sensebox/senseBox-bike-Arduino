@@ -48,6 +48,25 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "cinttypes": "cpp",
-        "typeinfo": "cpp"
-    }
+        "typeinfo": "cpp",
+        "chrono": "cpp",
+        "codecvt": "cpp",
+        "complex": "cpp",
+        "condition_variable": "cpp",
+        "list": "cpp",
+        "unordered_set": "cpp",
+        "ratio": "cpp",
+        "iostream": "cpp",
+        "mutex": "cpp",
+        "thread": "cpp"
+    },
+    "idf.port": "/dev/ttyACM0",
+    "idf.customExtraVars": {
+        "OPENOCD_SCRIPTS": "/home/paula/.espressif/tools/openocd-esp32/v0.12.0-esp32-20230921/openocd-esp32/share/openocd/scripts",
+        "ESP_ROM_ELF_DIR": "/home/paula/.espressif/tools/esp-rom-elfs/20230320/",
+        "IDF_TARGET": "esp32s2"
+    },
+    "idf.openOcdConfigs": [
+        "board/esp32s2-kaluga-1.cfg"
+    ]
 }

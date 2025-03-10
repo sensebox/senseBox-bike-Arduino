@@ -1,8 +1,8 @@
 #include <Arduino.h>
 // #include "sensors/TempHumiditySensor/TempHumiditySensor.h"
 // #include "sensors/DustSensor/DustSensor.h"
-#include "sensors/DistanceSensor/DistanceSensor.h"
-// #include "sensors/AccelerationSensor/AccelerationSensor.h"
+
+#include "AccelerationDistanceSensor/AccelerationDistanceSensor.h"
 #include "sensors/BatterySensor/BatterySensor.h"
 // #include "display/Display.h"
 #include "ble/BLEModule.h"
@@ -10,14 +10,11 @@
 
 // DustSensor dustSensor;
 // TempHumiditySensor tempHumiditySensor;
-DistanceSensor distanceSensor;
-// AccelerationSensor accelerationSensor;
-BatterySensor batterySensor;
+AccelerationDistanceSensor accelerationDistanceSensor;
+// BatterySensor batterySensor;
 
 BaseSensor *sensors[] = {
     // &dustSensor,
-    // &accelerationSensor,
-    &distanceSensor,
     // &batterySensor,
     // &tempHumiditySensor,
     };
@@ -54,6 +51,7 @@ void setup()
     {
         sensor->begin();
     }
+    accelerationDistanceSensor.begin();
     Serial.println("Setup complete");
 
     // SBDisplay::showLoading("Ventilation...", 0.6);
@@ -67,6 +65,7 @@ void setup()
     {
         sensor->startSubscription();
     }
+    accelerationDistanceSensor.startSubscription();
     Serial.println("Subscriptions started");
 
     // SBDisplay::showLoading("Enable BLE...", 1);
@@ -76,6 +75,7 @@ void setup()
     {
         sensor->startBLE();
     }
+    accelerationDistanceSensor.startBLE();
     Serial.println("BLE enabled");
 
     // display.readBleId();

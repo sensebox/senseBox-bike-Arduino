@@ -6,7 +6,7 @@
 #include <vector>
 #include "../ble/BLEModule.h"
 
-#include <edge-impulse-sdk/classifier/ei_run_classifier.h>
+
 
 class BaseSensor
 {

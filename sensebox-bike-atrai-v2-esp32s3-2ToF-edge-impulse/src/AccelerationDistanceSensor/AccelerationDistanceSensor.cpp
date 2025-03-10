@@ -1,20 +1,133 @@
-#include "DistanceSensor.h"
+#include "AccelerationDistanceSensor.h"
+#include <edge-impulse-sdk/classifier/ei_run_classifier.h>
 
-#include "model_data.h"
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
+AccelerationDistanceSensor::AccelerationDistanceSensor() {}
 
-#include <Wire.h>
+static SemaphoreHandle_t i2c_mutex;
 
-#include <vl53l8cx_class.h>
+void AccelerationDistanceSensor::begin()
+{
+    i2c_mutex = xSemaphoreCreateMutex();
+    accInitSensor();
+    delay(500);
+    distInitSensor();
+    delay(500);
+    // xTaskCreate(sensorTask, taskName, taskStackSize, this, 1, NULL);
+}
+
+void AccelerationDistanceSensor::startSubscription()
+{
+    if (this->accHandle == NULL || this->distHandle == NULL)
+    {
+        activeSubscription = true;
+        // https://docs.espressif.com/projects/esp-idf/en/v5.2.3/esp32s3/api-guides/performance/speed.html#choosing-task-priorities-of-the-application
+        xTaskCreatePinnedToCore(accTask, "accelerationSensorTask", 4096, this, 17, &this->accHandle, 1);
+        xTaskCreatePinnedToCore(distTask, "distanceSensorTask", 8192, this, 20, &this->distHandle, 0);
+        // very important tasks could run on priority 20 on core 0
+    }
+}
+
+void AccelerationDistanceSensor::stopSubscription()
+{
+    if (this->accHandle != NULL)
+    {
+        vTaskDelete(this->accHandle);
+    }
+    if (this->distHandle != NULL)
+    {
+        vTaskDelete(this->distHandle);
+    }
+    activeSubscription = false;
+}
+
+void AccelerationDistanceSensor::startBLE()
+{
+    sendBLE = true;
+}
+
+void AccelerationDistanceSensor::stopBLE()
+{
+    sendBLE = false;
+}
 
 
-DistanceSensor::DistanceSensor() : BaseSensor("distanceTask", 
-8192, // taskStackSize,
-0, // taskDelay,
-20, // taskPriority,
-0 // core
-) {}
+void AccelerationDistanceSensor::accTask(void* pvParameters)
+{
+    AccelerationDistanceSensor* sensor = static_cast<AccelerationDistanceSensor*>(pvParameters);
+    while (true)
+    {
+        unsigned long prevTime = millis();
+        if (sensor->activeSubscription)
+        {
+            if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
+            {
+                sensor->accReadSensorData();
+                xSemaphoreGive(i2c_mutex);
+            }
+        }
+
+        // if (sensor->taskDelay > 0 && (millis() - prevTime) < sensor->taskDelay)
+        // {
+        //     vTaskDelay(pdMS_TO_TICKS(sensor->taskDelay - (millis() - prevTime)));
+        // }
+        vTaskDelay(pdMS_TO_TICKS(1));
+    }
+}
+
+void AccelerationDistanceSensor::distTask(void* pvParameters)
+{
+    AccelerationDistanceSensor* sensor = static_cast<AccelerationDistanceSensor*>(pvParameters);
+    while (true)
+    {
+        unsigned long prevTime = millis();
+        if (sensor->activeSubscription)
+        {
+            if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
+            {
+                sensor->distReadSensorData();
+                xSemaphoreGive(i2c_mutex);
+            }
+        }
+
+        // if (sensor->taskDelay > 0 && (millis() - prevTime) < sensor->taskDelay)
+        // {
+        //     vTaskDelay(pdMS_TO_TICKS(sensor->taskDelay - (millis() - prevTime)));
+        // }
+        vTaskDelay(pdMS_TO_TICKS(0));
+    }
+}
+
+
+String surfaceClassificationUUID = "b944af10-f495-4560-968f-2f0d18cab521";
+// String accUUID = "B944AF10F4954560968F2F0D18CAB522";
+String anomalyUUID = "b944af10-f495-4560-968f-2f0d18cab523";
+int surfaceClassificationCharacteristic = 0;
+int anomalyCharacteristic = 0;
+
+Adafruit_MPU6050 mpu;
+
+void AccelerationDistanceSensor::accInitSensor()
+{
+    Serial.println("setting up MPU6050...");
+
+  if (!mpu.begin(0x68, &Wire))
+  {
+    Serial.println("MPU6050 Chip wurde nicht gefunden");
+    delay(500);
+    return;
+  }
+  else
+  {
+    Serial.println("MPU6050 Found!");
+    mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
+    mpu.setGyroRange(MPU6050_RANGE_500_DEG);
+    mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+    delay(100);
+  };
+
+  surfaceClassificationCharacteristic = BLEModule::createCharacteristic(surfaceClassificationUUID.c_str());
+  anomalyCharacteristic = BLEModule::createCharacteristic(anomalyUUID.c_str());
+}
 
 // String distanceUUID = "B3491B60C0F34306A30D49C91F37A62B";
 String distanceUUID = "7e14e070-84ea-489f-b45a-e1317364b979";
@@ -57,7 +170,7 @@ long prevDistanceTime = millis();
 
 #define TCAADDR 0x70
 
-void DistanceSensor::tcaselect(uint8_t i) {
+void AccelerationDistanceSensor::tcaselect(uint8_t i) {
   if (i > 7) return;
  
   Wire.beginTransmission(TCAADDR);
@@ -65,7 +178,7 @@ void DistanceSensor::tcaselect(uint8_t i) {
   Wire.endTransmission();  
 }
 
-void DistanceSensor::initSensor()
+void AccelerationDistanceSensor::distInitSensor()
 {
 
     distanceCharacteristic = BLEModule::createCharacteristic(distanceUUID.c_str());
@@ -115,6 +228,102 @@ void DistanceSensor::initSensor()
     // ----------------------------- setup complete -----------------------------
 }
 
+int acc_input_frame_size = impulse_440960_0.dsp_input_frame_size;
+float* accBuffer = new float[acc_input_frame_size]();
+size_t ix = 0;
+float probAsphalt = 0.0;
+float probCompact = 0.0;
+float probPaving = 0.0;
+float probSett = 0.0;
+float probStanding = 0.0;
+float anomaly = 0.0;
+
+static int get_signal_data_440960(size_t offset, size_t length, float *out_ptr) {
+    for (size_t i = 0; i < length; i++) {
+        out_ptr[i] = (accBuffer + offset)[i];
+    }
+    return EIDSP_OK;
+}
+
+unsigned long startAccTime = millis();
+bool AccelerationDistanceSensor::accReadSensorData()
+{
+  bool classified = false;
+  sensors_event_t a, g, temp;
+
+  mpu.getEvent(&a, &g, &temp);
+
+  accBuffer[ix++] = 1.0;
+  accBuffer[ix++] = 1.0;
+  accBuffer[ix++] = 1.0;
+  accBuffer[ix++] = 1.0;
+  accBuffer[ix++] = 1.0;
+  accBuffer[ix++] = 1.0;
+
+  unsigned long endAccTime = millis();
+  if ((endAccTime - startAccTime) < 30)
+  {
+    vTaskDelay(pdMS_TO_TICKS(30 - (endAccTime - startAccTime)));
+  }
+  Serial.printf("acceleration: %lu ms\n", endAccTime - startAccTime);
+  startAccTime = millis();
+
+  // one second inverval
+  if (acc_input_frame_size <= ix)
+  {
+    classified = true;
+    // Turn the raw buffer in a signal which we can the classify
+    signal_t signal;
+    signal.total_length = acc_input_frame_size;
+    signal.get_data = &get_signal_data_440960;
+    // int err = numpy::signal_from_buffer(accBuffer, acc_input_frame_size, &signal);
+    // if (err != 0)
+    // {
+    //   ei_printf("Failed to create signal from buffer (%d)\n", err);
+    //   accBuffer[acc_input_frame_size] = {};
+    //   return classified;
+    // }
+
+    // Run the classifier
+    ei_impulse_result_t result = {};
+
+    int err = process_impulse(&impulse_handle_440960_0, &signal, &result, false);
+    if (err != EI_IMPULSE_OK)
+    {
+      ei_printf("ERR: Failed to run classifier (%d)\n", err);
+      accBuffer[acc_input_frame_size] = {};
+      return classified;
+    }
+
+    probAsphalt = result.classification[0].value;
+    probCompact = result.classification[1].value;
+    probPaving = result.classification[2].value;
+    probSett = result.classification[3].value;
+    probStanding = result.classification[4].value;
+
+    anomaly = result.anomaly;
+    Serial.printf("Asphalt: %f, Compact: %f, Paving: %f, Sett: %f, Standing: %f, Anomaly: %f\n", probAsphalt, probCompact, probPaving, probSett, probStanding, anomaly);
+
+    if (sendBLE)
+    {
+      accNotifyBLE(probAsphalt, probCompact, probPaving, probSett, probStanding, anomaly);
+    }
+
+    ix = 0;
+
+    accBuffer[acc_input_frame_size] = {};
+
+    startAccTime = millis();
+  }
+
+  if (measurementCallback)
+  {
+    measurementCallback({probAsphalt, probCompact, probPaving, probSett, probStanding});
+  }
+
+  return classified;
+}
+
 static int get_signal_data_587727(size_t offset, size_t length, float *out_ptr) {
     for (size_t i = 0; i < length; i++) {
         out_ptr[i] = (buffer + offset)[i];
@@ -130,7 +339,7 @@ static int get_signal_data_587727_2(size_t offset, size_t length, float *out_ptr
 }
 
 unsigned long startDisTime = millis();
-bool DistanceSensor::readSensorData()
+bool AccelerationDistanceSensor::distReadSensorData()
 {
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
     VL53L8CX_ResultsData Results;
@@ -236,7 +445,7 @@ bool DistanceSensor::readSensorData()
         if (sendBLE)
         {
             // Serial.printf("distance: %f, overtaking: %f\n", distance, overtakingPredictionPercentage);
-            notifyBLE(distance, overtakingPredictionPercentage);
+            distNotifyBLE(distance, overtakingPredictionPercentage);
         }
     }
     // ------------------- RIGHT -------------------
@@ -330,7 +539,7 @@ bool DistanceSensor::readSensorData()
         if (sendBLE)
         {
             // Serial.printf("distanceRight: %f, overtakingRight: %f\n", distanceRight, overtakingPredictionPercentage);
-            notifyBLERight(distanceRight, overtakingPredictionPercentage);
+            distNotifyBLERight(distanceRight, overtakingPredictionPercentage);
         }
     }
     // -----------------------------------------------------------
@@ -345,13 +554,19 @@ bool DistanceSensor::readSensorData()
     return false;
 }
 
-void DistanceSensor::notifyBLE(float distance, float overtakingPredictionPercentage)
+void AccelerationDistanceSensor::accNotifyBLE(float probAsphalt, float probCompact, float probPaving, float probSett, float probStanding, float anomaly)
+{
+  BLEModule::writeBLE(surfaceClassificationUUID.c_str(), probAsphalt*100, probCompact*100, probPaving*100, probSett*100, probStanding*100);
+  BLEModule::writeBLE(anomalyUUID.c_str(), anomaly);
+}
+
+void AccelerationDistanceSensor::distNotifyBLE(float distance, float overtakingPredictionPercentage)
 {
     BLEModule::writeBLE(distanceUUID.c_str(), distance);
     BLEModule::writeBLE(overtakingUUID.c_str(), overtakingPredictionPercentage);
 }
 
-void DistanceSensor::notifyBLERight(float distanceRight, float overtakingPredictionPercentage)
+void AccelerationDistanceSensor::distNotifyBLERight(float distanceRight, float overtakingPredictionPercentage)
 {
     BLEModule::writeBLE(distanceUUID.c_str(), distanceRight);
     BLEModule::writeBLE(overtakingUUID.c_str(), overtakingPredictionPercentage);
