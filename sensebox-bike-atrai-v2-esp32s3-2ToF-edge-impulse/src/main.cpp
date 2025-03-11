@@ -1,5 +1,5 @@
 #include <Arduino.h>
-// #include "sensors/TempHumiditySensor/TempHumiditySensor.h"
+#include "sensors/TempHumiditySensor/TempHumiditySensor.h"
 // #include "sensors/DustSensor/DustSensor.h"
 
 #include "AccelerationDistanceSensor/AccelerationDistanceSensor.h"
@@ -9,14 +9,14 @@
 // #include "led/LED.h"
 
 // DustSensor dustSensor;
-// TempHumiditySensor tempHumiditySensor;
+TempHumiditySensor tempHumiditySensor;
 AccelerationDistanceSensor accelerationDistanceSensor;
 // BatterySensor batterySensor;
 
 BaseSensor *sensors[] = {
     // &dustSensor,
     // &batterySensor,
-    // &tempHumiditySensor,
+    &tempHumiditySensor,
     };
 
 // SBDisplay display;

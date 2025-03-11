@@ -302,7 +302,7 @@ bool AccelerationDistanceSensor::accReadSensorData()
     probStanding = result.classification[4].value;
 
     anomaly = result.anomaly;
-    Serial.printf("Asphalt: %f, Compact: %f, Paving: %f, Sett: %f, Standing: %f, Anomaly: %f\n", probAsphalt, probCompact, probPaving, probSett, probStanding, anomaly);
+    // Serial.printf("Asphalt: %f, Compact: %f, Paving: %f, Sett: %f, Standing: %f, Anomaly: %f\n", probAsphalt, probCompact, probPaving, probSett, probStanding, anomaly);
 
     if (sendBLE)
     {
@@ -341,7 +341,6 @@ static int get_signal_data_587727_2(size_t offset, size_t length, float *out_ptr
 unsigned long startDisTime = millis();
 bool AccelerationDistanceSensor::distReadSensorData()
 {
-    Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
     VL53L8CX_ResultsData Results;
 
     // ------------------- LEFT -------------------
@@ -349,11 +348,15 @@ bool AccelerationDistanceSensor::distReadSensorData()
     tcaselect(0);
 
     uint8_t NewDataReady = 0;
+    Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
     uint8_t status = sensor_vl53l8cx_top.vl53l8cx_check_data_ready(&NewDataReady);
+    Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
 
     if ((!status) && (NewDataReady != 0))
     {
+        Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
         sensor_vl53l8cx_top.vl53l8cx_get_ranging_data(&Results);
+        Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
         float overtakingPredictionPercentage = -1.0;
         float distance = -1.0;
         float min = 10000.0;
@@ -434,7 +437,7 @@ bool AccelerationDistanceSensor::distReadSensorData()
                 buffer[input_frame_size] = {};
                 return false;
             }
-            Serial.printf("Left: %f\n", result.classification[0].value);
+            // Serial.printf("Left: %f\n", result.classification[0].value);
         }
 
         if (measurementCallback)
@@ -451,11 +454,15 @@ bool AccelerationDistanceSensor::distReadSensorData()
     // ------------------- RIGHT -------------------
     tcaselect(1);
     uint8_t NewDataReady2 = 0;
+    Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
     uint8_t status2 = sensor_vl53l8cx_top.vl53l8cx_check_data_ready(&NewDataReady2);
+    Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
 
     if ((!status2) && (NewDataReady2 != 0))
     {
+        Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
         sensor_vl53l8cx_top.vl53l8cx_get_ranging_data(&Results);
+        Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
         float overtakingPredictionPercentage = -1.0;
         float distanceRight = -1.0;
         float min = 10000.0;
@@ -534,7 +541,7 @@ bool AccelerationDistanceSensor::distReadSensorData()
                 buffer2[input_frame_size] = {};
                 return false;
             }
-            Serial.printf("Right: %f\n", result2.classification[0].value);
+            // Serial.printf("Right: %f\n", result2.classification[0].value);
         }
         if (sendBLE)
         {
@@ -543,14 +550,13 @@ bool AccelerationDistanceSensor::distReadSensorData()
         }
     }
     // -----------------------------------------------------------
-    // if ((millis() - prevDistanceTime) < 65)
-    // {
-    //     vTaskDelay(pdMS_TO_TICKS(65 - (millis() - prevDistanceTime)));
-    // }
-    // Serial.print("distance: ");
-    // Serial.println(millis() - prevDistanceTime);
+    if ((millis() - prevDistanceTime) < 65)
+    {
+        vTaskDelay(pdMS_TO_TICKS(65 - (millis() - prevDistanceTime)));
+    }
+    Serial.print("distance: ");
+    Serial.println(millis() - prevDistanceTime);
     prevDistanceTime = millis();
-    Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
     return false;
 }
 
