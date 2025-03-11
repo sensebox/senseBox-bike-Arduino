@@ -21,8 +21,8 @@ void AccelerationDistanceSensor::startSubscription()
     {
         activeSubscription = true;
         // https://docs.espressif.com/projects/esp-idf/en/v5.2.3/esp32s3/api-guides/performance/speed.html#choosing-task-priorities-of-the-application
-        xTaskCreatePinnedToCore(accTask, "accelerationSensorTask", 4096, this, 17, &this->accHandle, 1);
         xTaskCreatePinnedToCore(distTask, "distanceSensorTask", 8192, this, 20, &this->distHandle, 0);
+        xTaskCreatePinnedToCore(accTask, "accelerationSensorTask", 4096, this, 17, &this->accHandle, 1);
         // very important tasks could run on priority 20 on core 0
     }
 }
@@ -226,6 +226,7 @@ void AccelerationDistanceSensor::distInitSensor()
     sensor_vl53l8cx_top.vl53l8cx_start_ranging();
     Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
     // ----------------------------- setup complete -----------------------------
+    Serial.printf("frame size: %d\n", impulse_440960_0.dsp_input_frame_size);
 }
 
 int acc_input_frame_size = impulse_440960_0.dsp_input_frame_size;
@@ -249,78 +250,77 @@ unsigned long startAccTime = millis();
 bool AccelerationDistanceSensor::accReadSensorData()
 {
   bool classified = false;
-  sensors_event_t a, g, temp;
+  if ((millis() - startAccTime) >= 40) {
+    sensors_event_t a, g, temp;
 
-  mpu.getEvent(&a, &g, &temp);
+    mpu.getEvent(&a, &g, &temp);
 
-  accBuffer[ix++] = 1.0;
-  accBuffer[ix++] = 1.0;
-  accBuffer[ix++] = 1.0;
-  accBuffer[ix++] = 1.0;
-  accBuffer[ix++] = 1.0;
-  accBuffer[ix++] = 1.0;
+    buffer[ix++] = a.acceleration.x;
+    buffer[ix++] = a.acceleration.y;
+    buffer[ix++] = a.acceleration.z;
+    buffer[ix++] = g.gyro.x;
+    buffer[ix++] = g.gyro.y;
+    buffer[ix++] = g.gyro.z;
 
-  unsigned long endAccTime = millis();
-  if ((endAccTime - startAccTime) < 30)
-  {
-    vTaskDelay(pdMS_TO_TICKS(30 - (endAccTime - startAccTime)));
-  }
-  Serial.printf("acceleration: %lu ms\n", endAccTime - startAccTime);
-  startAccTime = millis();
+    // one second inverval
+    if (acc_input_frame_size <= ix)
+    {
+        classified = true;
+        // Turn the raw buffer in a signal which we can the classify
+        signal_t signal;
+        signal.total_length = acc_input_frame_size;
+        signal.get_data = &get_signal_data_440960;
+        // int err = numpy::signal_from_buffer(accBuffer, acc_input_frame_size, &signal);
+        // if (err != 0)
+        // {
+        //   ei_printf("Failed to create signal from buffer (%d)\n", err);
+        //   accBuffer[acc_input_frame_size] = {};
+        //   return classified;
+        // }
 
-  // one second inverval
-  if (acc_input_frame_size <= ix)
-  {
-    classified = true;
-    // Turn the raw buffer in a signal which we can the classify
-    signal_t signal;
-    signal.total_length = acc_input_frame_size;
-    signal.get_data = &get_signal_data_440960;
-    // int err = numpy::signal_from_buffer(accBuffer, acc_input_frame_size, &signal);
-    // if (err != 0)
+        // Run the classifier
+        ei_impulse_result_t result = {};
+
+        int err = process_impulse(&impulse_handle_440960_0, &signal, &result, false);
+        if (err != EI_IMPULSE_OK)
+        {
+        ei_printf("ERR: Failed to run classifier (%d)\n", err);
+        accBuffer[acc_input_frame_size] = {};
+        return classified;
+        }
+
+        probAsphalt = result.classification[0].value;
+        probCompact = result.classification[1].value;
+        probPaving = result.classification[2].value;
+        probSett = result.classification[3].value;
+        probStanding = result.classification[4].value;
+
+        anomaly = result.anomaly;
+        Serial.printf("Asphalt: %f, Compact: %f, Paving: %f, Sett: %f, Standing: %f, Anomaly: %f\n", probAsphalt, probCompact, probPaving, probSett, probStanding, anomaly);
+
+        if (sendBLE)
+        {
+        accNotifyBLE(probAsphalt, probCompact, probPaving, probSett, probStanding, anomaly);
+        }
+
+        ix = 0;
+
+        accBuffer[acc_input_frame_size] = {};
+    }
+
+    if (measurementCallback)
+    {
+        measurementCallback({probAsphalt, probCompact, probPaving, probSett, probStanding});
+    }
+
+    // if ((millis() - startAccTime) < 30)
     // {
-    //   ei_printf("Failed to create signal from buffer (%d)\n", err);
-    //   accBuffer[acc_input_frame_size] = {};
-    //   return classified;
+    //     Serial.println(30 - (millis() - startAccTime));
+    //     vTaskDelay(pdMS_TO_TICKS(30 - (millis() - startAccTime)));
     // }
-
-    // Run the classifier
-    ei_impulse_result_t result = {};
-
-    int err = process_impulse(&impulse_handle_440960_0, &signal, &result, false);
-    if (err != EI_IMPULSE_OK)
-    {
-      ei_printf("ERR: Failed to run classifier (%d)\n", err);
-      accBuffer[acc_input_frame_size] = {};
-      return classified;
-    }
-
-    probAsphalt = result.classification[0].value;
-    probCompact = result.classification[1].value;
-    probPaving = result.classification[2].value;
-    probSett = result.classification[3].value;
-    probStanding = result.classification[4].value;
-
-    anomaly = result.anomaly;
-    // Serial.printf("Asphalt: %f, Compact: %f, Paving: %f, Sett: %f, Standing: %f, Anomaly: %f\n", probAsphalt, probCompact, probPaving, probSett, probStanding, anomaly);
-
-    if (sendBLE)
-    {
-      accNotifyBLE(probAsphalt, probCompact, probPaving, probSett, probStanding, anomaly);
-    }
-
-    ix = 0;
-
-    accBuffer[acc_input_frame_size] = {};
-
+    Serial.printf("acceleration: %lu ms\n", millis() - startAccTime);
     startAccTime = millis();
   }
-
-  if (measurementCallback)
-  {
-    measurementCallback({probAsphalt, probCompact, probPaving, probSett, probStanding});
-  }
-
   return classified;
 }
 
@@ -341,222 +341,224 @@ static int get_signal_data_587727_2(size_t offset, size_t length, float *out_ptr
 unsigned long startDisTime = millis();
 bool AccelerationDistanceSensor::distReadSensorData()
 {
-    VL53L8CX_ResultsData Results;
+    if ((millis() - prevDistanceTime) >= 65) {
+        VL53L8CX_ResultsData Results;
 
-    // ------------------- LEFT -------------------
+        // ------------------- LEFT -------------------
 
-    tcaselect(0);
+        tcaselect(0);
 
-    uint8_t NewDataReady = 0;
-    Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
-    uint8_t status = sensor_vl53l8cx_top.vl53l8cx_check_data_ready(&NewDataReady);
-    Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
-
-    if ((!status) && (NewDataReady != 0))
-    {
+        uint8_t NewDataReady = 0;
         Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
-        sensor_vl53l8cx_top.vl53l8cx_get_ranging_data(&Results);
+        uint8_t status = sensor_vl53l8cx_top.vl53l8cx_check_data_ready(&NewDataReady);
         Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
-        float overtakingPredictionPercentage = -1.0;
-        float distance = -1.0;
-        float min = 10000.0;
-        for (int j = 0; j < VL53L8CX_RESOLUTION_8X8; j += 8)
+
+        if ((!status) && (NewDataReady != 0))
         {
-            for (int l = 0; l < VL53L8CX_NB_TARGET_PER_ZONE; l++)
+            Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
+            sensor_vl53l8cx_top.vl53l8cx_get_ranging_data(&Results);
+            Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
+            float overtakingPredictionPercentage = -1.0;
+            float distance = -1.0;
+            float min = 10000.0;
+            for (int j = 0; j < VL53L8CX_RESOLUTION_8X8; j += 8)
             {
-                for (int k = (8 - 1); k >= 0; k--)
+                for (int l = 0; l < VL53L8CX_NB_TARGET_PER_ZONE; l++)
                 {
-                    if ((float)(&Results)->target_status[(VL53L8CX_NB_TARGET_PER_ZONE * (j + k)) + l] != 255)
+                    for (int k = (8 - 1); k >= 0; k--)
                     {
-                        if ((float)(&Results)->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j + k)) + l] > 2000.0)
+                        if ((float)(&Results)->target_status[(VL53L8CX_NB_TARGET_PER_ZONE * (j + k)) + l] != 255)
+                        {
+                            if ((float)(&Results)->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j + k)) + l] > 2000.0)
+                            {
+                                save_data[begin_index++] = 0.0;
+                            }
+                            else
+                            {
+                                save_data[begin_index++] = (float)(&Results)->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j + k)) + l];
+                            }
+                            float distance = ((&Results)->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j + k)) + l]) / 10;
+                            if (min > distance)
+                            {
+                                min = distance;
+                            }
+                        }
+                        else
                         {
                             save_data[begin_index++] = 0.0;
                         }
-                        else
-                        {
-                            save_data[begin_index++] = (float)(&Results)->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j + k)) + l];
-                        }
-                        float distance = ((&Results)->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j + k)) + l]) / 10;
-                        if (min > distance)
-                        {
-                            min = distance;
-                        }
-                    }
-                    else
-                    {
-                        save_data[begin_index++] = 0.0;
                     }
                 }
             }
-        }
-        distance = (min == 10000.0) ? 0.0 : min;
+            distance = (min == 10000.0) ? 0.0 : min;
 
-        // If we reached the end of the circle buffer, reset
-        if (begin_index >= (RING_BUFFER_SIZE))
-        {
-            begin_index = 0;
-            // Check if we are ready for prediction or still pending more initial data
-            if (pending_initial_data)
+            // If we reached the end of the circle buffer, reset
+            if (begin_index >= (RING_BUFFER_SIZE))
             {
-                pending_initial_data = false;
-            }
-        }
-        if (!pending_initial_data)
-        {
-            for (int i = 0; i < input_frame_size; ++i)
-            {   
-                int ring_array_index = begin_index + i - input_frame_size;
-                if (ring_array_index < 0)
+                begin_index = 0;
+                // Check if we are ready for prediction or still pending more initial data
+                if (pending_initial_data)
                 {
-                    ring_array_index += (RING_BUFFER_SIZE);
+                    pending_initial_data = false;
                 }
-                // normalize
-                buffer[i] = save_data[ring_array_index];
             }
-            signal_t signal;
-            signal.total_length = input_frame_size;
-            signal.get_data = &get_signal_data_587727;
-            // int err = numpy::signal_from_buffer(buffer, input_frame_size, &signal);
-            // if (err != 0)
-            // {
-            //     ei_printf("Failed to create signal from buffer (%d)\n", err);
-            //     buffer[input_frame_size] = {};
-            //     delete[] buffer;
-            //     return false;
-            // }
-
-            // Run the classifier
-            ei_impulse_result_t result = {};
-
-            int err = process_impulse(&impulse_handle_587727_0, &signal, &result, false);
-            if (err != EI_IMPULSE_OK)
+            if (!pending_initial_data)
             {
-                Serial.printf("ERR: Failed to run classifier (%d)\n", err);
-                Serial.printf("buffersize %d\n", input_frame_size);
-                ei_printf("ERR: Failed to run classifier (%d)\n", err);
-                buffer[input_frame_size] = {};
-                return false;
+                for (int i = 0; i < input_frame_size; ++i)
+                {   
+                    int ring_array_index = begin_index + i - input_frame_size;
+                    if (ring_array_index < 0)
+                    {
+                        ring_array_index += (RING_BUFFER_SIZE);
+                    }
+                    // normalize
+                    buffer[i] = save_data[ring_array_index];
+                }
+                signal_t signal;
+                signal.total_length = input_frame_size;
+                signal.get_data = &get_signal_data_587727;
+                // int err = numpy::signal_from_buffer(buffer, input_frame_size, &signal);
+                // if (err != 0)
+                // {
+                //     ei_printf("Failed to create signal from buffer (%d)\n", err);
+                //     buffer[input_frame_size] = {};
+                //     delete[] buffer;
+                //     return false;
+                // }
+
+                // Run the classifier
+                ei_impulse_result_t result = {};
+
+                int err = process_impulse(&impulse_handle_587727_0, &signal, &result, false);
+                if (err != EI_IMPULSE_OK)
+                {
+                    Serial.printf("ERR: Failed to run classifier (%d)\n", err);
+                    Serial.printf("buffersize %d\n", input_frame_size);
+                    ei_printf("ERR: Failed to run classifier (%d)\n", err);
+                    buffer[input_frame_size] = {};
+                    return false;
+                }
+                // Serial.printf("Left: %f\n", result.classification[0].value);
             }
-            // Serial.printf("Left: %f\n", result.classification[0].value);
-        }
 
-        if (measurementCallback)
-        {
-            measurementCallback({distance, overtakingPredictionPercentage});
-        }
+            if (measurementCallback)
+            {
+                measurementCallback({distance, overtakingPredictionPercentage});
+            }
 
-        if (sendBLE)
-        {
-            // Serial.printf("distance: %f, overtaking: %f\n", distance, overtakingPredictionPercentage);
-            distNotifyBLE(distance, overtakingPredictionPercentage);
+            if (sendBLE)
+            {
+                // Serial.printf("distance: %f, overtaking: %f\n", distance, overtakingPredictionPercentage);
+                distNotifyBLE(distance, overtakingPredictionPercentage);
+            }
         }
-    }
-    // ------------------- RIGHT -------------------
-    tcaselect(1);
-    uint8_t NewDataReady2 = 0;
-    Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
-    uint8_t status2 = sensor_vl53l8cx_top.vl53l8cx_check_data_ready(&NewDataReady2);
-    Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
-
-    if ((!status2) && (NewDataReady2 != 0))
-    {
+        // ------------------- RIGHT -------------------
+        tcaselect(1);
+        uint8_t NewDataReady2 = 0;
         Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
-        sensor_vl53l8cx_top.vl53l8cx_get_ranging_data(&Results);
+        uint8_t status2 = sensor_vl53l8cx_top.vl53l8cx_check_data_ready(&NewDataReady2);
         Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
-        float overtakingPredictionPercentage = -1.0;
-        float distanceRight = -1.0;
-        float min = 10000.0;
-        for (int j = 0; j < VL53L8CX_RESOLUTION_8X8; j += 8)
+
+        if ((!status2) && (NewDataReady2 != 0))
         {
-            for (int l = 0; l < VL53L8CX_NB_TARGET_PER_ZONE; l++)
+            Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
+            sensor_vl53l8cx_top.vl53l8cx_get_ranging_data(&Results);
+            Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
+            float overtakingPredictionPercentage = -1.0;
+            float distanceRight = -1.0;
+            float min = 10000.0;
+            for (int j = 0; j < VL53L8CX_RESOLUTION_8X8; j += 8)
             {
-                for (int k = 0; k < 8; k++)
+                for (int l = 0; l < VL53L8CX_NB_TARGET_PER_ZONE; l++)
                 {
-                    if ((float)(&Results)->target_status[(VL53L8CX_NB_TARGET_PER_ZONE * (j + k)) + l] != 255)
+                    for (int k = 0; k < 8; k++)
                     {
-                        if ((float)(&Results)->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j + k)) + l] > 2000.0)
+                        if ((float)(&Results)->target_status[(VL53L8CX_NB_TARGET_PER_ZONE * (j + k)) + l] != 255)
+                        {
+                            if ((float)(&Results)->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j + k)) + l] > 2000.0)
+                            {
+                                save_data2[begin_index2++] = 0.0;
+                            }
+                            else
+                            {
+                                save_data2[begin_index2++] = (float)(&Results)->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j + k)) + l];
+                            }
+                            float distance = ((&Results)->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j + k)) + l]) / 10;
+                            if (min > distance)
+                            {
+                                min = distance;
+                            }
+                        }
+                        else
                         {
                             save_data2[begin_index2++] = 0.0;
                         }
-                        else
-                        {
-                            save_data2[begin_index2++] = (float)(&Results)->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j + k)) + l];
-                        }
-                        float distance = ((&Results)->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j + k)) + l]) / 10;
-                        if (min > distance)
-                        {
-                            min = distance;
-                        }
-                    }
-                    else
-                    {
-                        save_data2[begin_index2++] = 0.0;
                     }
                 }
             }
-        }
-        distanceRight = (min == 10000.0) ? 0.0 : min;
-        // If we reached the end of the circle buffer, reset
-        if (begin_index2 >= (RING_BUFFER_SIZE))
-        {
-            begin_index2 = 0;
-            // Check if we are ready for prediction or still pending more initial data
-            if (pending_initial_data2)
+            distanceRight = (min == 10000.0) ? 0.0 : min;
+            // If we reached the end of the circle buffer, reset
+            if (begin_index2 >= (RING_BUFFER_SIZE))
             {
-                pending_initial_data2 = false;
-            }
-        }
-        if (!pending_initial_data2)
-        {
-            for (int i = 0; i < input_frame_size; ++i)
-            {   
-                int ring_array_index = begin_index2 + i - input_frame_size;
-                if (ring_array_index < 0)
+                begin_index2 = 0;
+                // Check if we are ready for prediction or still pending more initial data
+                if (pending_initial_data2)
                 {
-                    ring_array_index += (RING_BUFFER_SIZE);
+                    pending_initial_data2 = false;
                 }
-                // normalize
-                buffer2[i] = save_data2[ring_array_index];
             }
-            signal_t signal2;
-            signal2.total_length = input_frame_size;
-            signal2.get_data = &get_signal_data_587727_2;
-            // if (err != 0)
-            // {
-            //     ei_printf("Failed to create signal from buffer (%d)\n", err);
-            //     buffer2[input_frame_size] = {};
-            //     delete[] buffer2;
-            //     return false;
-            // }
-
-            // Run the classifier
-            ei_impulse_result_t result2 = {};
-
-            int err = process_impulse(&impulse_handle_587727_0, &signal2, &result2, false);
-            if (err != EI_IMPULSE_OK)
+            if (!pending_initial_data2)
             {
-                Serial.printf("ERR: Failed to run classifier (%d)\n", err);
-                Serial.printf("buffersize %d\n", input_frame_size);
-                ei_printf("ERR: Failed to run classifier (%d)\n", err);
-                buffer2[input_frame_size] = {};
-                return false;
+                for (int i = 0; i < input_frame_size; ++i)
+                {   
+                    int ring_array_index = begin_index2 + i - input_frame_size;
+                    if (ring_array_index < 0)
+                    {
+                        ring_array_index += (RING_BUFFER_SIZE);
+                    }
+                    // normalize
+                    buffer2[i] = save_data2[ring_array_index];
+                }
+                signal_t signal2;
+                signal2.total_length = input_frame_size;
+                signal2.get_data = &get_signal_data_587727_2;
+                // if (err != 0)
+                // {
+                //     ei_printf("Failed to create signal from buffer (%d)\n", err);
+                //     buffer2[input_frame_size] = {};
+                //     delete[] buffer2;
+                //     return false;
+                // }
+
+                // Run the classifier
+                ei_impulse_result_t result2 = {};
+
+                int err = process_impulse(&impulse_handle_587727_0, &signal2, &result2, false);
+                if (err != EI_IMPULSE_OK)
+                {
+                    Serial.printf("ERR: Failed to run classifier (%d)\n", err);
+                    Serial.printf("buffersize %d\n", input_frame_size);
+                    ei_printf("ERR: Failed to run classifier (%d)\n", err);
+                    buffer2[input_frame_size] = {};
+                    return false;
+                }
+                // Serial.printf("Right: %f\n", result2.classification[0].value);
             }
-            // Serial.printf("Right: %f\n", result2.classification[0].value);
+            if (sendBLE)
+            {
+                // Serial.printf("distanceRight: %f, overtakingRight: %f\n", distanceRight, overtakingPredictionPercentage);
+                distNotifyBLERight(distanceRight, overtakingPredictionPercentage);
+            }
         }
-        if (sendBLE)
-        {
-            // Serial.printf("distanceRight: %f, overtakingRight: %f\n", distanceRight, overtakingPredictionPercentage);
-            distNotifyBLERight(distanceRight, overtakingPredictionPercentage);
-        }
+        // -----------------------------------------------------------
+        // if ((millis() - prevDistanceTime) < 65)
+        // {
+        //     vTaskDelay(pdMS_TO_TICKS(65 - (millis() - prevDistanceTime)));
+        // }
+        Serial.print("distance: ");
+        Serial.println(millis() - prevDistanceTime);
+        prevDistanceTime = millis();
     }
-    // -----------------------------------------------------------
-    if ((millis() - prevDistanceTime) < 65)
-    {
-        vTaskDelay(pdMS_TO_TICKS(65 - (millis() - prevDistanceTime)));
-    }
-    Serial.print("distance: ");
-    Serial.println(millis() - prevDistanceTime);
-    prevDistanceTime = millis();
     return false;
 }
 

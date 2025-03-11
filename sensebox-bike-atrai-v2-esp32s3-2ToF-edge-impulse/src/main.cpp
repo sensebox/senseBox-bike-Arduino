@@ -4,7 +4,7 @@
 
 #include "AccelerationDistanceSensor/AccelerationDistanceSensor.h"
 #include "sensors/BatterySensor/BatterySensor.h"
-// #include "display/Display.h"
+#include "display/Display.h"
 #include "ble/BLEModule.h"
 // #include "led/LED.h"
 
@@ -19,7 +19,7 @@ BaseSensor *sensors[] = {
     &tempHumiditySensor,
     };
 
-// SBDisplay display;
+SBDisplay display;
 
 BLEModule bleModule;
 // LED led(1, 1);
@@ -36,17 +36,17 @@ void setup()
 
     // led.startRainbow();
 
-    // SBDisplay::begin();
+    SBDisplay::begin();
 
     // pinMode(IO_ENABLE, OUTPUT);
     // digitalWrite(IO_ENABLE, LOW);
 
-    // SBDisplay::showLoading("Setup BLE...", 0.2);
+    SBDisplay::showLoading("Setup BLE...", 0.2);
     bleModule.begin();
 
     bleModule.createService("4fafc201-1fb5-459e-8fcc-c5c9c331914b");
 
-    // SBDisplay::showLoading("Setup Sensors...", 0.4);
+    SBDisplay::showLoading("Setup Sensors...", 0.4);
     for (BaseSensor *sensor : sensors)
     {
         sensor->begin();
@@ -54,12 +54,12 @@ void setup()
     accelerationDistanceSensor.begin();
     Serial.println("Setup complete");
 
-    // SBDisplay::showLoading("Ventilation...", 0.6);
+    SBDisplay::showLoading("Ventilation...", 0.6);
     // pinMode(3, OUTPUT);
     // delay(100);
     // digitalWrite(3, HIGH);
 
-    // SBDisplay::showLoading("Start measurements...", 0.8);
+    SBDisplay::showLoading("Start measurements...", 0.8);
     // Start sensor measurements
     for (BaseSensor *sensor : sensors)
     {
@@ -68,7 +68,7 @@ void setup()
     accelerationDistanceSensor.startSubscription();
     Serial.println("Subscriptions started");
 
-    // SBDisplay::showLoading("Enable BLE...", 1);
+    SBDisplay::showLoading("Enable BLE...", 1);
 
     // Start BLE advertising
     for (BaseSensor *sensor : sensors)
@@ -78,7 +78,7 @@ void setup()
     accelerationDistanceSensor.startBLE();
     Serial.println("BLE enabled");
 
-    // display.readBleId();
+    display.readBleId();
 
     // led.stopRainbow();
 
@@ -94,7 +94,7 @@ void setup()
       bleIdEnd.c_str()
     };
 
-    // display.showConnectionScreen(name, message);
+    display.showConnectionScreen(name, message);
     bleModule.bleStartPoll("4fafc201-1fb5-459e-8fcc-c5c9c331914b");
 }
 
