@@ -15,7 +15,7 @@ Adafruit_MAX17048 maxlipo;
 // add more if needed
 
 void BatterySensor::initSensor()
-{
+{ 
   while (!maxlipo.begin())
   {
     Serial.println(F("Couldnt find Adafruit MAX17048?\nMake sure a battery is plugged in!"));

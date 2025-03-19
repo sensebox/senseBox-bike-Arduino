@@ -37,7 +37,7 @@ void SBDisplay::bicycleAnimationTask(void *pvParameter)
       display.setTextSize(1);
       display.setTextColor(WHITE, BLACK);
       display.println(loadingMessage);
-      // drawBattery(0, 0, 16, 4);
+      drawBattery(0, 0, 16, 4);
       display.display();
       vTaskDelay(pdMS_TO_TICKS(100));
 
@@ -112,7 +112,7 @@ void SBDisplay::showSystemStatus()
   display.print(batteryCharge, 1);
   display.println(" %");
 
-  // drawBattery(0, 0, 16, 4);
+  drawBattery(0, 0, 16, 4);
 
   display.display();
 }

@@ -1,3 +1,6 @@
+#include "globals.h"
+SemaphoreHandle_t i2c_mutex;
+
 #include <Arduino.h>
 #include "sensors/TempHumiditySensor/TempHumiditySensor.h"
 // #include "sensors/DustSensor/DustSensor.h"
@@ -11,11 +14,11 @@
 // DustSensor dustSensor;
 TempHumiditySensor tempHumiditySensor;
 AccelerationDistanceSensor accelerationDistanceSensor;
-// BatterySensor batterySensor;
+BatterySensor batterySensor;
 
 BaseSensor *sensors[] = {
     // &dustSensor,
-    // &batterySensor,
+    &batterySensor,
     &tempHumiditySensor,
     };
 
@@ -36,6 +39,11 @@ void setup()
 
     // led.startRainbow();
 
+    i2c_mutex = xSemaphoreCreateMutex();
+    if (i2c_mutex == NULL) {
+        // Handle error: Mutex creation failed
+    }
+
     SBDisplay::begin();
 
     // pinMode(IO_ENABLE, OUTPUT);
@@ -45,6 +53,8 @@ void setup()
     bleModule.begin();
 
     bleModule.createService("4fafc201-1fb5-459e-8fcc-c5c9c331914b");
+
+    // batterySensor.begin();
 
     SBDisplay::showLoading("Setup Sensors...", 0.4);
     for (BaseSensor *sensor : sensors)

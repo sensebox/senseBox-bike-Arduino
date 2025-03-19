@@ -1,13 +1,11 @@
+#include "../globals.h"
 #include "AccelerationDistanceSensor.h"
 #include <edge-impulse-sdk/classifier/ei_run_classifier.h>
 
 AccelerationDistanceSensor::AccelerationDistanceSensor() {}
 
-static SemaphoreHandle_t i2c_mutex;
-
 void AccelerationDistanceSensor::begin()
 {
-    i2c_mutex = xSemaphoreCreateMutex();
     accInitSensor();
     delay(500);
     distInitSensor();
@@ -190,18 +188,12 @@ void AccelerationDistanceSensor::distInitSensor()
 
     // Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
     // sensor_vl53l8cx_top.set_i2c_address(0x51); // need to change address, because default address is shared with other sensor
-    // Serial.println(-5);
-
+    
     // sensor_vl53l8cx_top.begin();
-    // Serial.println(-4);
     // sensor_vl53l8cx_top.init();
-    // Serial.println(-3);
     // sensor_vl53l8cx_top.set_ranging_frequency_hz(30);
-    // Serial.println(-2);
     // sensor_vl53l8cx_top.set_resolution(VL53L8CX_RESOLUTION_8X8);
-    // Serial.println(-1);
     // sensor_vl53l8cx_top.start_ranging();
-    // Serial.println(0);
 
     tcaselect(1);
     delay(50);

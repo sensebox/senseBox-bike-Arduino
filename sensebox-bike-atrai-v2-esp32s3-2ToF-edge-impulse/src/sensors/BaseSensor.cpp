@@ -1,13 +1,11 @@
+#include "../globals.h"
 #include "BaseSensor.h"
 
 BaseSensor::BaseSensor(const char *taskName, uint32_t taskStackSize, uint32_t taskDelay, uint32_t taskPriority, uint16_t core)
     : activeSubscription(false), sendBLE(false), taskStackSize(taskStackSize), taskDelay(taskDelay), taskPriority(taskPriority), core(core) {}
-    
-static SemaphoreHandle_t i2c_mutex;
 
 void BaseSensor::begin()
 {
-    i2c_mutex = xSemaphoreCreateMutex();
     initSensor();
     delay(500);
     // xTaskCreate(sensorTask, taskName, taskStackSize, this, 1, NULL);
