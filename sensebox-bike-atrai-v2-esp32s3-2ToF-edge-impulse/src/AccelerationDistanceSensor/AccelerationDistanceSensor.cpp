@@ -183,7 +183,7 @@ void AccelerationDistanceSensor::distInitSensor()
     overtakingCharacteristic = BLEModule::createCharacteristic(overtakingUUID.c_str());
     // ------------------------------ setup VL53L8CX ------------------------------
     Serial.println("setting up VL53L8CX...");
-    Wire.begin();
+    Wire.begin(2,1);
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
 
     // Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
@@ -288,7 +288,7 @@ bool AccelerationDistanceSensor::accReadSensorData()
         probStanding = result.classification[4].value;
 
         anomaly = result.anomaly;
-        Serial.printf("Asphalt: %f, Compact: %f, Paving: %f, Sett: %f, Standing: %f, Anomaly: %f\n", probAsphalt, probCompact, probPaving, probSett, probStanding, anomaly);
+        // Serial.printf("Asphalt: %f, Compact: %f, Paving: %f, Sett: %f, Standing: %f, Anomaly: %f\n", probAsphalt, probCompact, probPaving, probSett, probStanding, anomaly);
 
         if (sendBLE)
         {
@@ -556,6 +556,7 @@ bool AccelerationDistanceSensor::distReadSensorData()
 
 void AccelerationDistanceSensor::accNotifyBLE(float probAsphalt, float probCompact, float probPaving, float probSett, float probStanding, float anomaly)
 {
+  Serial.printf("Asphalt: %f, Compact: %f, Paving: %f, Sett: %f, Standing: %f, Anomaly: %f\n", probAsphalt*100, probCompact*100, probPaving*100, probSett*100, probStanding*100, anomaly*100);
   BLEModule::writeBLE(surfaceClassificationUUID.c_str(), probAsphalt*100, probCompact*100, probPaving*100, probSett*100, probStanding*100);
   BLEModule::writeBLE(anomalyUUID.c_str(), anomaly);
 }

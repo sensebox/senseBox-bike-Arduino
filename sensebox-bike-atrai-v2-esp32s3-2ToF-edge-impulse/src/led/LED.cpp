@@ -1,30 +1,55 @@
+#include "../globals.h"
 #include "LED.h"
 
 // Constructor
-LED::LED(uint8_t pin, uint16_t numPixels, uint8_t brightness)
-    : pixels(numPixels, pin, NEO_GRB + NEO_KHZ800), hue(0), taskHandle(NULL)
+LED::LED(uint16_t numPixels, uint8_t pin, uint8_t brightness)
+    : pixels(1, 14, NEO_GRB + NEO_KHZ800), hue(0), taskHandle(NULL)
 {
-    pixels.setBrightness(brightness);
+    // pixels.setBrightness(brightness);
 }
 
 // Initialize the NeoPixel strip
 void LED::begin()
 {
     pixels.begin();
+    pixels.setBrightness(30);  
+}
+
+// Show a green on the LED
+void LED::showGreen()
+{
+    pixels.setPixelColor(0, pixels.Color(0, 255, 0));
+    pixels.show();
+}
+// Show a yellow on the LED
+void LED::showYellow()
+{
+    pixels.setPixelColor(0, pixels.Color(150, 150, 0));
+    pixels.show();
+}
+// Show a red on the LED
+void LED::showRed()
+{
+    pixels.setPixelColor(0, pixels.Color(255, 0, 0));
+    pixels.show();
 }
 
 // Start the FreeRTOS task to update the LED color
 void LED::startRainbow()
 {
+        
     // Create the LED update task
-    xTaskCreate(
+    xTaskCreatePinnedToCore(
         LEDTask,    // Task function
         "LED Task", // Name of the task (for debugging)
         1024,       // Stack size (in words)
         this,       // Task input parameter (this LED instance)
         1,          // Priority of the task
-        &taskHandle // Task handle
+        &this->taskHandle, // Task handle
+        0           // Core to run the task on (0 or 1)
     );
+    Serial.println("task done");
+    delay(5);
 }
 
 // Stop the FreeRTOS task
@@ -48,8 +73,13 @@ void LED::LEDTask(void *pvParameters)
     // Infinite loop to continuously update the LED color
     while (true)
     {
-        ledInstance->update();
-        vTaskDelay(pdMS_TO_TICKS(5)); // Delay of 10 milliseconds
+        Serial.println("hi");
+        // if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
+        // {
+            ledInstance->update();
+            // xSemaphoreGive(i2c_mutex);
+        // }
+        vTaskDelay(pdMS_TO_TICKS(100)); // Delay of 10 milliseconds
     }
 }
 

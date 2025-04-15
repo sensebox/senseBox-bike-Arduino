@@ -1,3 +1,4 @@
+#include "../globals.h"
 #include "Display.h"
 #include <SPI.h>
 #include <Wire.h>
@@ -30,15 +31,21 @@ void SBDisplay::bicycleAnimationTask(void *pvParameter)
   {
     for (int i = 0; i < 36; i++)
     {
-      display.clearDisplay();
-      display.drawBitmap(32, -10, bicycle_loading_bitmap[i], 64, 64, 1); // this displays each frame hex value
-      drawProgressbar(4, (dsplH - 12) - prgsH - 8, prgsW, prgsH, loadingProgress * 100);
-      display.setCursor(4, dsplH - 12);
-      display.setTextSize(1);
-      display.setTextColor(WHITE, BLACK);
-      display.println(loadingMessage);
-      drawBattery(0, 0, 16, 4);
-      display.display();
+      if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
+      {
+        display.clearDisplay();
+        display.drawBitmap(32, -10, bicycle_loading_bitmap[i], 64, 64, 1); // this displays each frame hex value
+        drawProgressbar(4, (dsplH - 12) - prgsH - 8, prgsW, prgsH, loadingProgress * 100);
+        display.setCursor(4, dsplH - 12);
+        display.setTextSize(1);
+        display.setTextColor(WHITE, BLACK);
+        display.println(loadingMessage);
+        // drawBattery(0, 0, 16, 4); 
+        // to show battery status during setup the battery sensor has to be started beforehand
+        // it is somehow not possible so I commented the battery out
+        display.display();
+        xSemaphoreGive(i2c_mutex);
+      }
       vTaskDelay(pdMS_TO_TICKS(100));
 
       if (!isBicycleAnimationShowing)
@@ -123,6 +130,8 @@ void SBDisplay::showConnectionScreen(String name, const char *message[])
   {
     isBicycleAnimationShowing = false;
   }
+
+  display.clearDisplay();
 
   drawQrCode(name.c_str(), message);
 

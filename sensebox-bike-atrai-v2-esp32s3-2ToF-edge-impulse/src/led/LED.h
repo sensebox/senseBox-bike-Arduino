@@ -7,8 +7,11 @@
 class LED
 {
 public:
-    LED(uint8_t pin, uint16_t numPixels, uint8_t brightness = 50);
+    LED(uint16_t numPixels, uint8_t pin, uint8_t brightness = 50);
     void begin();
+    void showGreen();
+    void showYellow();
+    void showRed();
     void startRainbow();
     void stopRainbow();
 

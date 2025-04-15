@@ -20,6 +20,19 @@ class CustomBLECallbacks : public BLECharacteristicCallbacks {
   }
 };
 
+class CustomServerCallbacks : public BLEServerCallbacks {
+  void onConnect(BLEServer* pServer) override {
+    Serial.println("Client connected");
+    pServer->getAdvertising()->start();  // Restart advertising
+  }
+
+  void onDisconnect(BLEServer* pServer) override {
+    Serial.println("Client disconnected, restarting advertising...");
+    delay(500);  // Give the BLE stack some time
+    pServer->getAdvertising()->start();  // Restart advertising
+  }
+};
+
 BLEModule::BLEModule()
 {
     bleName = "";
@@ -36,6 +49,7 @@ bool BLEModule::begin()
 
     BLEDevice::init(bleName);
     pServer = BLEDevice::createServer();
+    pServer->setCallbacks(new CustomServerCallbacks());
 
     return true;
 }
@@ -68,6 +82,11 @@ const char **BLEModule::getBLEConnectionString()
 int BLEModule::createService(const char *uuid)
 {
     pService = pServer->createService(uuid);
+    return 1;
+}
+
+int BLEModule::startService()
+{
     pService->start();
     return 1;
 }

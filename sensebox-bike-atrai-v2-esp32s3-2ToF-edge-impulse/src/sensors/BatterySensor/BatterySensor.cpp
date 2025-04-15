@@ -12,6 +12,8 @@ int batteryCharacteristic = 0;
 
 Adafruit_MAX17048 maxlipo;
 
+float BatterySensor::batteryCharge;
+
 // add more if needed
 
 void BatterySensor::initSensor()
@@ -30,7 +32,7 @@ unsigned long startBatTime = millis();
 bool BatterySensor::readSensorData()
 {
   // read sensor data
-  float batteryCharge = maxlipo.cellPercent();
+  batteryCharge = maxlipo.cellPercent();
 
   if (measurementCallback)
   {
@@ -54,7 +56,11 @@ void BatterySensor::notifyBLE(float batteryCharge)
 
 float BatterySensor::getBatteryCharge()
 {
-  float batteryCharge = maxlipo.cellPercent();
+  // Serial.println("a");
+  // delay(5);
+  // float batteryCharge = maxlipo.cellPercent();
+  // Serial.println("b");
+  // delay(5);
   return batteryCharge;
 }
 

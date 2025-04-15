@@ -22,6 +22,7 @@ public:
     const char **getBLEConnectionString();
 
     static int createService(const char *uuid);
+    static int startService();
 
     // Create a BLE characteristic
     static int createCharacteristic(const char *uuid);

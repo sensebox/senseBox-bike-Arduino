@@ -62,10 +62,10 @@ void BaseSensor::sensorTask(void *pvParameters)
             }
         }
 
-        // if (sensor->taskDelay > 0 && (millis() - prevTime) < sensor->taskDelay)
-        // {
-        //     vTaskDelay(pdMS_TO_TICKS(sensor->taskDelay - (millis() - prevTime)));
-        // }
-        vTaskDelay(pdMS_TO_TICKS(sensor->taskDelay));
+        if (sensor->taskDelay > 0 && (millis() - prevTime) < sensor->taskDelay)
+        {
+            vTaskDelay(pdMS_TO_TICKS(sensor->taskDelay - (millis() - prevTime)));
+        }
+        // vTaskDelay(pdMS_TO_TICKS(sensor->taskDelay));
     }
 }

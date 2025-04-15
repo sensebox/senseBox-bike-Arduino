@@ -17,6 +17,7 @@ protected:
   void initSensor() override;
   bool readSensorData() override;
   void notifyBLE(float batteryCharge); // change this to match the data type of the sensor data
+  static float batteryCharge;
 };
 
 #endif // SAMPLE_SENSOR_H
