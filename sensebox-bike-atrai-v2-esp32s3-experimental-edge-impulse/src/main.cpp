@@ -1,0 +1,131 @@
+#include "globals.h"
+SemaphoreHandle_t i2c_mutex;
+
+#include <Arduino.h>
+#include "sensors/TempHumiditySensor/TempHumiditySensor.h"
+#include "sensors/DustSensor/DustSensor.h"
+
+#include "AccelerationDistanceSensor/AccelerationDistanceSensor.h"
+#include "sensors/BatterySensor/BatterySensor.h"
+// #include "display/Display.h"
+#include "ble/BLEModule.h"
+#include "led/LED.h"
+#include <Wire.h>
+
+DustSensor dustSensor;
+TempHumiditySensor tempHumiditySensor;
+AccelerationDistanceSensor accelerationDistanceSensor;
+BatterySensor batterySensor;
+
+BaseSensor *sensors[] = {
+    // &dustSensor,
+    // &batterySensor,
+    // &tempHumiditySensor,
+    };
+
+// SBDisplay display;
+
+BLEModule bleModule;
+LED led(1, 14);
+
+unsigned long previousMillis = 0; // stores the last time the sensors were read
+const long interval = 3000;       // interval at which to read the temperature and fine dust sensors (1 second)
+
+void setup()
+{
+    Serial.begin(115200);
+    Wire.begin(2,1);
+    delay(1500);
+    Serial.println("Starting setup");
+
+    i2c_mutex = xSemaphoreCreateMutex();
+    if (i2c_mutex == NULL) {
+        Serial.println("Mutex failed");
+    }
+    Serial.println("Mutex created");
+
+    led.begin();
+    led.showYellow();
+
+    // led.startRainbow();
+
+    // SBDisplay::begin();
+
+    // pinMode(IO_ENABLE, OUTPUT);
+    // digitalWrite(IO_ENABLE, LOW);
+
+    // SBDisplay::showLoading("Setup BLE...", 0.2);
+    bleModule.begin();
+
+    bleModule.createService("cf06a218-f68e-e0be-ad04-8ebc1eb0bc84");
+    Serial.println("BLE setup complete");
+
+    // SBDisplay::showLoading("Setup Sensors...", 0.4);
+    for (BaseSensor *sensor : sensors)
+    {
+        sensor->begin();
+    }
+    // SBDisplay::showLoading("Setup Sensors...", 0.7);
+    accelerationDistanceSensor.begin();
+    Serial.println("Setup complete");
+
+    // SBDisplay::showLoading("Ventilation...", 0.6);
+    // pinMode(3, OUTPUT);
+    // delay(100);
+    // digitalWrite(3, HIGH);
+
+    // display.readBleId();
+    const char* macString = bleModule.getMacAddress();
+    String bleId = "[" + String(macString) + "]";
+    String bleIdBegin = bleId.substring(0, bleId.length() / 2);
+    String bleIdEnd = bleId.substring(bleId.length() / 2);
+    String name = "senseBox:bike " + bleId;
+    const char *message[] = {
+      "senseBox",
+      "bike",
+      bleIdBegin.c_str(),
+      bleIdEnd.c_str()
+    };
+    // display.showConnectionScreen(name, message);
+
+    // Start sensor measurements
+    for (BaseSensor *sensor : sensors)
+    {
+        sensor->startSubscription();
+    }
+    accelerationDistanceSensor.startSubscription();
+    Serial.println("Subscriptions started");
+
+    // SBDisplay::showLoading("Enable BLE...", 1);
+
+    // Start BLE advertising
+    for (BaseSensor *sensor : sensors)
+    {
+        sensor->startBLE();
+    }
+    accelerationDistanceSensor.startBLE();
+    bleModule.startService();
+    Serial.println("BLE enabled");
+
+
+    led.showGreen();
+
+    bleModule.bleStartPoll("cf06a218-f68e-e0be-ad04-8ebc1eb0bc84");
+}
+
+void loop()
+{
+    // Read acceleration and distance sensor data as fast as possible
+    // distanceSensor.readSensorData();
+    // bool classified = accelerationSensor.readSensorData();
+
+    // Read temperature and fine dust sensor data after a surface classification
+    // if (classified)
+    // {
+    //     dustSensor.readSensorData();
+    //     tempHumiditySensor.readSensorData();
+    //     display.showConnectionScreen();
+    // }
+
+    // Perform BLE polling
+}
