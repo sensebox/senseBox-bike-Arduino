@@ -19,15 +19,17 @@ void AccelerationSensor::initSensor()
     mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
     activeSensor = MPU6050;
   }
-  else if (icm.begin_I2C(0x68, &Wire1))
+  else if (icm.begin() == 0)
   {
-    // If MPU6050 fails, try ICM20948
-    Serial.println("ICM20948 Found!");
-    activeSensor = ICM20948;
+    // If MPU6050 fails, try ICM42670P
+    Serial.println("ICM42670P Found!");
+    icm.startAccel(100, 16); // Accel ODR = 100 Hz, Full Scale Range = 16G
+    icm.startGyro(100, 2000); // Gyro ODR = 100 Hz, Full Scale Range = 2000 dps
+    activeSensor = ICM42670X;
   }
   else
   {
-    Serial.println("No compatible sensor found");
+    Serial.println("No compatible acceleration sensor found");
     return;
   }
 
@@ -49,10 +51,11 @@ float prevAccTime = millis();
 bool AccelerationSensor::readSensorData()
 {
   bool classified = false;
-  sensors_event_t a, g, temp;
+  
 
   if (activeSensor == MPU6050)
   {
+    sensors_event_t a, g, temp;
     mpu.getEvent(&a, &g, &temp);
     buffer[ix++] = a.acceleration.x;
     buffer[ix++] = a.acceleration.y;
@@ -61,15 +64,16 @@ bool AccelerationSensor::readSensorData()
     buffer[ix++] = g.gyro.y;
     buffer[ix++] = g.gyro.z;
   }
-  else if (activeSensor == ICM20948)
+  else if (activeSensor == ICM42670X)
   {
-    icm.getEvent(&a, &g, &temp);
-    buffer[ix++] = a.acceleration.x;
-    buffer[ix++] = a.acceleration.y;
-    buffer[ix++] = a.acceleration.z;
-    buffer[ix++] = g.gyro.x;
-    buffer[ix++] = g.gyro.y;
-    buffer[ix++] = g.gyro.z;
+    inv_imu_sensor_event_t imu_event;
+    icm.getDataFromRegisters(imu_event);
+    buffer[ix++] = imu_event.accel[0];
+    buffer[ix++] = imu_event.accel[1];
+    buffer[ix++] = imu_event.accel[2];
+    buffer[ix++] = imu_event.gyro[0];
+    buffer[ix++] = imu_event.gyro[1];
+    buffer[ix++] = imu_event.gyro[2];
   }
   else
   {
