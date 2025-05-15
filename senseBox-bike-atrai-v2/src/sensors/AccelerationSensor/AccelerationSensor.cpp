@@ -68,12 +68,12 @@ bool AccelerationSensor::readSensorData()
   {
     inv_imu_sensor_event_t imu_event;
     icm.getDataFromRegisters(imu_event);
-    buffer[ix++] = imu_event.accel[0];
-    buffer[ix++] = imu_event.accel[1];
-    buffer[ix++] = imu_event.accel[2];
-    buffer[ix++] = imu_event.gyro[0];
-    buffer[ix++] = imu_event.gyro[1];
-    buffer[ix++] = imu_event.gyro[2];
+    buffer[ix++] = (imu_event.accel[0]*9.81)/4096.0;
+    buffer[ix++] = (imu_event.accel[1]*9.81)/4096.0;
+    buffer[ix++] = (imu_event.accel[2]*9.81)/4096.0;
+    buffer[ix++] = (imu_event.gyro[0]*500.0)/32768.0;
+    buffer[ix++] = (imu_event.gyro[1]*500.0)/32768.0;
+    buffer[ix++] = (imu_event.gyro[2]*500.0)/32768.0;
   }
   else
   {
