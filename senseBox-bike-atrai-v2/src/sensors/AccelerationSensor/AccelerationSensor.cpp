@@ -23,8 +23,8 @@ void AccelerationSensor::initSensor()
   {
     // If MPU6050 fails, try ICM42670P
     Serial.println("ICM42670P Found!");
-    icm.startAccel(100, 16); // Accel ODR = 100 Hz, Full Scale Range = 16G
-    icm.startGyro(100, 2000); // Gyro ODR = 100 Hz, Full Scale Range = 2000 dps
+    icm.startAccel(21, 8); // Accel ODR = 100 Hz, Full Scale Range = 16G
+    icm.startGyro(21, 500); // Gyro ODR = 100 Hz, Full Scale Range = 2000 dps
     activeSensor = ICM42670X;
   }
   else
@@ -71,9 +71,9 @@ bool AccelerationSensor::readSensorData()
     buffer[ix++] = (imu_event.accel[0]*9.81)/4096.0;
     buffer[ix++] = (imu_event.accel[1]*9.81)/4096.0;
     buffer[ix++] = (imu_event.accel[2]*9.81)/4096.0;
-    buffer[ix++] = (imu_event.gyro[0]*500.0)/32768.0;
-    buffer[ix++] = (imu_event.gyro[1]*500.0)/32768.0;
-    buffer[ix++] = (imu_event.gyro[2]*500.0)/32768.0;
+    buffer[ix++] = (imu_event.gyro[0]*2.0)/6550.0;
+    buffer[ix++] = (imu_event.gyro[1]*2.0)/6550.0;
+    buffer[ix++] = (imu_event.gyro[2]*2.0)/6550.0;
   }
   else
   {
