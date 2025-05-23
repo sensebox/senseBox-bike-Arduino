@@ -54,6 +54,7 @@ jobs:
             - name: SenseBoxBLE
             - name: "Adafruit HDC1000 Library"
             - name: sensirion-sps
+              version: v1.1.2
             - name: "Adafruit MPU6050"
             - name: NewPing
             - name: "STM32duino VL53L8CX"
