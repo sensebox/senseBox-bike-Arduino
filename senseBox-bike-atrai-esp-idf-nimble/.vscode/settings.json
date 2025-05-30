@@ -1,0 +1,13 @@
+{
+    "idf.flashType": "UART",
+    "idf.port": "/dev/ttyACM0",
+    "cmake.buildEnvironment": {
+        "LD_LIBRARY_PATH": ""
+    },
+    "idf.build.environment": {
+        "LD_LIBRARY_PATH": ""
+    },
+    "idf.espIdfPath": "/home/paula/esp/v5.4/esp-idf",
+    "idf.toolsPath": "/home/paula/.espressif",
+    "idf.pythonInstallPath": "/usr/bin/python3"
+}
