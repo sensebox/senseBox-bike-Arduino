@@ -133,7 +133,7 @@ extern "C" void app_main(void)
     snprintf(dir, sizeof(dir), "%s/espdl_models", CONFIG_BSP_SD_MOUNT_POINT);
     dl::Model* model = new dl::Model((const char *)espdl_model, dir);
     while(1==1) {
-        ESP_LOGI(TAG, "Free heap: %lu", esp_get_free_heap_size());
+        ESP_LOGI(TAG, "Free heap: %lu", esp_get_free_heap_size()); // TODO: small memory leak somewhere in the loop...
         camera_fb_t *pic = esp_camera_fb_get();
 
         // use pic->buf to access the image
@@ -155,7 +155,7 @@ extern "C" void app_main(void)
         float delta;
         t0 = esp_timer_get_time();
 
-        dl::image::ImagePreprocessor* m_image_preprocessor = new dl::image::ImagePreprocessor(model, {123.675, 116.28, 103.53}, {58.395, 57.12, 57.375});
+        dl::image::ImagePreprocessor* m_image_preprocessor = new dl::image::ImagePreprocessor(model, {123.675, 116.28, 103.53}, {58.395, 57.12, 57.375}); // TODO: the mean and std need to be adjusted for our usecase
         ESP_LOGI(TAG, "picture width and height: %zu %zu", img.width, img.height);
         m_image_preprocessor->preprocess(img);
 
