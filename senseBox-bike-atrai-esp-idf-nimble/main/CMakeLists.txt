@@ -7,7 +7,8 @@ set(include_dirs    ./
 list(APPEND requires esp32_s3_eye_noglib
                          esp_lcd
                          esp-dl
-                         bt nvs_flash)
+                         bt nvs_flash
+                         arduino)
 
 file(GLOB embed_imgs "${CMAKE_CURRENT_SOURCE_DIR}/data/*")
 file(GLOB embed_models "${CMAKE_CURRENT_SOURCE_DIR}/models/*")

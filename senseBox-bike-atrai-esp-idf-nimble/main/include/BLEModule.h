@@ -43,7 +43,7 @@ extern "C" {
     int gap_event(struct ble_gap_event *event, void *arg);
     void on_sync(void);
     void on_reset(int reason);
-    void notify_surface_classification(uint8_t *value1, uint8_t *value2, uint8_t *value3, uint8_t *value4, uint8_t *value5);
+    void notify_surface_classification(uint8_t values[5]);
 
 #ifdef __cplusplus
 }

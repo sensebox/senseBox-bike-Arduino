@@ -132,19 +132,12 @@ on_reset(int reason)
 }
 
 void
-notify_surface_classification(uint8_t *value1, uint8_t *value2, uint8_t *value3, uint8_t *value4, uint8_t *value5)
+notify_surface_classification(uint8_t values[5])
 {
     int rc;
 
     if (notify_state) {
-        uint8_t buf[5];
-        buf[0] = *value1;
-        buf[1] = *value2;
-        buf[2] = *value3;
-        buf[3] = *value4;
-        buf[4] = *value5;
-
-        struct os_mbuf *om = ble_hs_mbuf_from_flat(buf, sizeof(buf));
+        struct os_mbuf *om = ble_hs_mbuf_from_flat(values, 5);
         if (om == NULL) {
             MODLOG_DFLT(ERROR, "error allocating mbuf for notification\n");
             return;

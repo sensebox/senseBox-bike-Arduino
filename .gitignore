@@ -4,3 +4,4 @@ BIKE.CFG
 
 **/build/*
 **/.DS_Store
+**/managed_components/*
