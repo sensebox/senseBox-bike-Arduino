@@ -111,6 +111,7 @@ bool DistanceSensor::readSensorData()
     {
         sensor_vl53l8cx_top.vl53l8cx_get_ranging_data(&Results);
         float overtakingPredictionPercentage = -1.0;
+        float bikeOvertakingPredictionPercentage = -1.0;
         float oldVl53l8cxMin = -1.0;
         float min = 10000.0;
         for (int j = 0; j < VL53L8CX_RESOLUTION_8X8; j += 8)
@@ -171,7 +172,8 @@ bool DistanceSensor::readSensorData()
             if (invoke_status == kTfLiteOk)
             {
                 const float *prediction_scores = interpreter->output(0)->data.f;
-                overtakingPredictionPercentage = prediction_scores[0];
+                overtakingPredictionPercentage = prediction_scores[1];
+                bikeOvertakingPredictionPercentage = prediction_scores[2];
             }
         }
 
@@ -184,7 +186,7 @@ bool DistanceSensor::readSensorData()
 
         if (sendBLE)
         {
-            notifyBLE(distance, overtakingPredictionPercentage);
+            notifyBLE(distance, overtakingPredictionPercentage, bikeOvertakingPredictionPercentage);
         }
     }
     if ((millis() - prevDistanceTime) < 65)
@@ -198,8 +200,8 @@ bool DistanceSensor::readSensorData()
     return false;
 }
 
-void DistanceSensor::notifyBLE(float distance, float overtakingPredictionPercentage)
+void DistanceSensor::notifyBLE(float distance, float overtakingPredictionPercentage, float bikeOvertakingPredictionPercentage)
 {
     BLEModule::writeBLE(distanceCharacteristic, distance);
-    BLEModule::writeBLE(overtakingCharacteristic, overtakingPredictionPercentage);
+    BLEModule::writeBLE(overtakingCharacteristic, overtakingPredictionPercentage, bikeOvertakingPredictionPercentage);
 }
