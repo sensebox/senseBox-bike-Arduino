@@ -15,7 +15,6 @@ jobs:
       matrix:
         project:
           - senseBox-bike-atrai-v2
-          - senseBox-bike-atrai-v2-bicycle
 
     steps:
       - uses: actions/checkout@v3
