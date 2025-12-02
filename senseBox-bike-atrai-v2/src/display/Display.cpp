@@ -134,8 +134,17 @@ void SBDisplay::showConnectionScreen()
       bleIdBegin.c_str(),
       bleIdEnd.c_str()};
 
-  drawQrCode(name.c_str(), message);
+  // drawQrCode(name.c_str(), message);
 
+  display.clearDisplay();
+  display.setTextSize(1);
+  
+  display.setCursor(4, 22);
+  display.println("senseBox:bike");
+  
+  display.setCursor(4, 34);
+  display.println(bleIdBrackets);
+  
   drawBattery(0, 0, 16, 4);
   display.display();
 }
