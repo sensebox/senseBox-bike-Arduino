@@ -2,10 +2,10 @@
 #define DUST_SENSOR_H
 
 #include "../BaseSensor.h"
-#include <sps30.h>
+#include <SensirionI2cSps30.h>
 #include <Wire.h>
 
-// include necceary libraries
+// include necessary libraries
 
 class DustSensor : public BaseSensor
 {
