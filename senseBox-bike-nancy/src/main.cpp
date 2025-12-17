@@ -16,7 +16,7 @@ BaseSensor *sensors[] = {
     &dustSensor,
     &distanceSensor,
     &accelerationSensor,
-    // &batterySensor
+    &batterySensor
     };
 
 SBDisplay display;
@@ -44,7 +44,7 @@ void setup()
     SBDisplay::showLoading("Setup BLE...", 0.2);
     bleModule.begin();
 
-    // batterySensor.begin();
+    batterySensor.begin();
 
     bleModule.createService("CF06A218F68EE0BEAD048EBC1EB0BC84");
 
