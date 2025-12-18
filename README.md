@@ -11,6 +11,7 @@ A mobile measurement station that measures temperature, relative humidity, parti
 | [senseBox:bike](senseBox-bike)                        | senseBox MCU S2 | BLE          |    | Used for the [senseBox:bike to buy](https://sensebox.kaufen/product/sensebox-bike) |
 | [senseBox:bike Atrai Bike](senseBox-bike-atrai)       | senseBox MCU S2 | BLE          |    | Initial draft for [Atrai Bike](https://atrai.bike/) project                        |
 | [senseBox:bike Atrai Bike v2](senseBox-bike-atrai-v2) | senseBox MCU S2 | BLE          | ✅  | AI powered version for [Atrai Bike](https://atrai.bike/) project                   |
+| [senseBox:bike Atrai Bike v2 ESP32S2](sensebox-bike-atrai-v2-esp32s3) | Adafruit Feather ESP32S3 (with 2MB PSRAM) | BLE          | ✅  | Testing the AI powered version for [Atrai Bike](https://atrai.bike/) project with an ESP32S3 chip                  |
 
 ### License
 
