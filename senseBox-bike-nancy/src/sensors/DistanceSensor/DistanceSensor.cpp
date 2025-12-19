@@ -18,10 +18,8 @@ DistanceSensor::DistanceSensor() : BaseSensor("distanceTask", 8192, 0) {}
 String distanceUUID = "B3491B60C0F34306A30D49C91F37A62B";
 int distanceCharacteristic = 0;
 
-String distanceRightUUID = "2CDF217435BEFDC44CA26FD173F8B3A8";
+String distanceRightUUID = "2CDF217435BEFDC44CA26FD173F8B3A8"; // this used to be the uuid of the temperature
 int distanceRightCharacteristic = 0;
-String distanceRightUUID2 = "772DF7EC8CDC4EA986AF410ABE0BA257";
-int distanceRightCharacteristic2 = 0;
 
 String overtakingUUID = "FC01C6882C444965AE18373AF9FED18D";
 int overtakingCharacteristic = 0;
@@ -48,17 +46,6 @@ int begin_index = 0;
 bool pending_initial_data = true;
 
 long prevDistanceTime = millis();
-
-// 77 for sensebox multiplexer, 70 for adafruit multiplexer
-#define TCAADDR 0x70
-
-void DistanceSensor::tcaselect(uint8_t i) {
-  if (i > 7) return;
- 
-  Wire.beginTransmission(TCAADDR);
-  Wire.write(1 << i);
-  Wire.endTransmission();  
-}
 
 void DistanceSensor::initSensor()
 {
@@ -135,7 +122,6 @@ void DistanceSensor::initSensor()
 
     distanceCharacteristic = BLEModule::createCharacteristic(distanceUUID.c_str());
     distanceRightCharacteristic = BLEModule::createCharacteristic(distanceRightUUID.c_str());
-    distanceRightCharacteristic2 = BLEModule::createCharacteristic(distanceRightUUID2.c_str());
     overtakingCharacteristic = BLEModule::createCharacteristic(overtakingUUID.c_str());
     Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
 }
@@ -145,19 +131,15 @@ bool DistanceSensor::readSensorData()
     tcaselect(1);
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
     // sensor_vl53l8cx.set_i2c_address(0x51);
-    // Serial.println("0) set address...");
 
     // ------------------- RIGHT -------------------
     VL53L8CX_ResultsData Results;
     uint8_t NewDataReady = 0;
     uint8_t status = sensor_vl53l8cx.check_data_ready(&NewDataReady);
-    // Serial.println("0) check data ready...");
 
     if ((!status) && (NewDataReady != 0))
     {
-        // Serial.println("0) getting ranging data...");
         sensor_vl53l8cx.get_ranging_data(&Results);
-        // Serial.println("0) got ranging data...");
         float overtakingPredictionPercentage = -1.0;
         float distanceRight = -1.0;
         float min = 10000.0;
@@ -170,7 +152,7 @@ bool DistanceSensor::readSensorData()
                     if ((float)(&Results)->target_status[(VL53L8CX_NB_TARGET_PER_ZONE * (j + k)) + l] != 255)
                     {
                         float distance = ((&Results)->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j + k)) + l]) / 10;
-                        if (min > distance)
+                        if (distance > 0 && min > distance)
                         {
                             min = distance;
                         }
@@ -189,23 +171,18 @@ bool DistanceSensor::readSensorData()
             notifyBLERight(distanceRight);
         }
     }
-    // Serial.println("0) done...");
     Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
     // ------------------- LEFT -------------------
 
     tcaselect(0);
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
     // sensor_vl53l8cx.set_i2c_address(0x52);
-    // Serial.println("1) set address...");
     NewDataReady = 0;
     status = sensor_vl53l8cx.check_data_ready(&NewDataReady);
-    // Serial.println("1) check data ready...");
 
     if ((!status) && (NewDataReady != 0))
     {
-        // Serial.println("1) getting ranging data...");
         sensor_vl53l8cx.get_ranging_data(&Results);
-        // Serial.println("1) got ranging data...");
         float overtakingPredictionPercentage = -1.0;
         float bikeOvertakingPredictionPercentage = -1.0;
         float distance = -1.0;
@@ -227,7 +204,7 @@ bool DistanceSensor::readSensorData()
                             save_data[begin_index++] = (float)(&Results)->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j + k)) + l];
                         }
                         float distance = ((&Results)->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j + k)) + l]) / 10;
-                        if (min > distance)
+                        if (distance > 0 && min > distance)
                         {
                             min = distance;
                         }
@@ -240,6 +217,7 @@ bool DistanceSensor::readSensorData()
             }
         }
         distance = (min == 10000.0) ? 0.0 : min;
+        // Serial.printf("distanceLeft: %f\n", distance);
 
         // If we reached the end of the circle buffer, reset
         if (begin_index >= (RING_BUFFER_SIZE))
@@ -282,8 +260,6 @@ bool DistanceSensor::readSensorData()
         {
             notifyBLE(distance, overtakingPredictionPercentage, bikeOvertakingPredictionPercentage);
         }
-
-        // Serial.println("1) done...");
     }
     if ((millis() - prevDistanceTime) < 65)
     {
@@ -305,5 +281,4 @@ void DistanceSensor::notifyBLE(float distance, float overtakingPredictionPercent
 void DistanceSensor::notifyBLERight(float distanceRight)
 {
     BLEModule::writeBLE(distanceRightCharacteristic, distanceRight);
-    BLEModule::writeBLE(distanceRightCharacteristic2, distanceRight);
 }

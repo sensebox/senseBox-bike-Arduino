@@ -3,7 +3,6 @@
 
 #include "../BaseSensor.h"
 #include <SensirionI2cSps30.h>
-#include <Wire.h>
 
 // include necessary libraries
 

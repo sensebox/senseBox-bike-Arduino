@@ -2,7 +2,6 @@
 #define DISTANCESENSOR_H
 
 #include "../BaseSensor.h"
-#include <Wire.h>
 #include <vl53l8cx.h>
 
 class DistanceSensor : public BaseSensor
@@ -15,9 +14,6 @@ protected:
   void initSensor() override;
   void notifyBLE(float distance, float overtakingPredictionPercentage, float bikeOvertakingPredictionPercentage);
   void notifyBLERight(float distance);
-
-private:
-  void tcaselect(uint8_t i);
 };
 
 #endif // DISTANCESENSOR_H

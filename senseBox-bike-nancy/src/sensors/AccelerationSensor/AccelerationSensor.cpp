@@ -46,7 +46,7 @@ float probSett = 0.0;
 float probStanding = 0.0;
 float anomaly = 0.0;
 
-float prevAccTime = millis();
+// float prevAccTime = millis();
 
 bool AccelerationSensor::readSensorData()
 {
@@ -80,9 +80,9 @@ bool AccelerationSensor::readSensorData()
     return false; // No sensor active
   }
 
-  Serial.print("acc: ");
-  Serial.println(millis() - prevAccTime);
-  prevAccTime = millis();
+  // Serial.print("acc: ");
+  // Serial.println(millis() - prevAccTime);
+  // prevAccTime = millis();
 
   // one second interval
   if (EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE <= ix)

@@ -10,11 +10,13 @@ int batteryCharacteristic = 0;
 
 Adafruit_MAX17048 maxlipo;
 
-// add more if needed
-
 void BatterySensor::initSensor()
 {
-  while (!maxlipo.begin())
+  maxlipo.begin();
+  delay(100);
+  tcaselect(2);
+  delay(100);
+  while (!maxlipo.isDeviceReady())
   {
     SBDisplay::showLoading("MAX17048 Error",  0);
     Serial.println(F("Couldnt find Adafruit MAX17048?\nMake sure a battery is plugged in!"));
@@ -28,6 +30,7 @@ void BatterySensor::initSensor()
 
 bool BatterySensor::readSensorData()
 {
+  tcaselect(2);
   // read sensor data
   float batteryCharge = maxlipo.cellPercent();
 

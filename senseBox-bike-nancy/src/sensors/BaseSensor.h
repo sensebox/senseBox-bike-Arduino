@@ -5,6 +5,7 @@
 #include <functional>
 #include <vector>
 #include "../ble/BLEModule.h"
+#include <Wire.h>
 
 class BaseSensor
 {
@@ -25,6 +26,7 @@ protected:
     bool activeSubscription;
     bool sendBLE;
     std::function<void(std::vector<float>)> measurementCallback;
+    void tcaselect(uint8_t i);
 
 private:
     const char *taskName;

@@ -17,7 +17,7 @@ BaseSensor *sensors[] = {
     &distanceSensor,
     &accelerationSensor,
     &batterySensor
-    };
+};
 
 SBDisplay display;
 

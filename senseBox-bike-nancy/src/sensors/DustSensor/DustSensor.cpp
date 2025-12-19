@@ -16,7 +16,9 @@ static int16_t error;
 
 void DustSensor::initSensor()
 {
+  tcaselect(3);
   sensor.begin(Wire, SPS30_I2C_ADDR_69);
+  tcaselect(3);
   sensor.stopMeasurement();
   sensor.startMeasurement(SPS30_OUTPUT_FORMAT_OUTPUT_FORMAT_FLOAT);
   delay(100);
@@ -27,6 +29,7 @@ void DustSensor::initSensor()
 
 bool DustSensor::readSensorData()
 {
+  tcaselect(3);
   Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
 
   uint16_t dataReadyFlag = 0;
