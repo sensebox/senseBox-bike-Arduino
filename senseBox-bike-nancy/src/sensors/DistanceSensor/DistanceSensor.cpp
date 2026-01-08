@@ -18,7 +18,7 @@ DistanceSensor::DistanceSensor() : BaseSensor("distanceTask", 8192, 0) {}
 String distanceUUID = "B3491B60C0F34306A30D49C91F37A62B";
 int distanceCharacteristic = 0;
 
-String distanceRightUUID = "2CDF217435BEFDC44CA26FD173F8B3A8"; // this used to be the uuid of the temperature
+String distanceRightUUID = "B3491B60C0F34306A30D49C91F37A62C";
 int distanceRightCharacteristic = 0;
 
 String overtakingUUID = "FC01C6882C444965AE18373AF9FED18D";
