@@ -1,0 +1,20 @@
+#ifndef DUST_SENSOR_H
+#define DUST_SENSOR_H
+
+#include "../BaseSensor.h"
+#include <SensirionI2cSps30.h>
+
+// include necessary libraries
+
+class DustSensor : public BaseSensor
+{
+public:
+  DustSensor();
+  bool readSensorData() override;
+
+protected:
+  void initSensor() override;
+  void notifyBLE(float pm1, float pm2_5, float pm4, float pm10);
+};
+
+#endif // DUST_SENSOR_H

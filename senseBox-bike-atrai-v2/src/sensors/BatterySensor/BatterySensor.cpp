@@ -1,4 +1,5 @@
 #include "BatterySensor.h"
+#include <display/Display.h>
 
 BatterySensor::BatterySensor() : BaseSensor("batterySensorTask", 2048, 10000) {}
 
@@ -15,6 +16,7 @@ void BatterySensor::initSensor()
 {
   while (!maxlipo.begin())
   {
+    SBDisplay::showLoading("MAX17048 Error",  0);
     Serial.println(F("Couldnt find Adafruit MAX17048?\nMake sure a battery is plugged in!"));
     delay(2000);
   }
