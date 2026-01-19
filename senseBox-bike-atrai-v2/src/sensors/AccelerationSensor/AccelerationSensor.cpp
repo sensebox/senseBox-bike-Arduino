@@ -27,6 +27,12 @@ void AccelerationSensor::initSensor()
     icm.startGyro(21, 500); // Gyro ODR = 100 Hz, Full Scale Range = 2000 dps
     activeSensor = ICM42670X;
   }
+  else if (icm2.begin_I2C(0x68, &Wire1))
+  {
+    icm2.setAccelRange(ICM20948_ACCEL_RANGE_8_G);
+    icm2.setAccelRateDivisor(10.25); // 100 Hz sample rate
+    activeSensor = ICM20948;
+  }
   else
   {
     Serial.println("No compatible acceleration sensor found");
@@ -46,7 +52,7 @@ float probSett = 0.0;
 float probStanding = 0.0;
 float anomaly = 0.0;
 
-float prevAccTime = millis();
+// float prevAccTime = millis();
 
 bool AccelerationSensor::readSensorData()
 {
@@ -75,13 +81,25 @@ bool AccelerationSensor::readSensorData()
     buffer[ix++] = (imu_event.gyro[1]*2.0)/6550.0;
     buffer[ix++] = (imu_event.gyro[2]*2.0)/6550.0;
   }
+  else if (activeSensor == ICM20948)
+  {
+    sensors_event_t a, g, m, temp;
+    icm2.getEvent(&a, &g, &m, &temp);
+    buffer[ix++] = a.acceleration.x;
+    buffer[ix++] = a.acceleration.y;
+    buffer[ix++] = a.acceleration.z;
+    buffer[ix++] = g.gyro.x;
+    buffer[ix++] = g.gyro.y;
+    buffer[ix++] = g.gyro.z;
+  }
   else
   {
     return false; // No sensor active
   }
 
-  Serial.println(millis() - prevAccTime);
-  prevAccTime = millis();
+  // Serial.print("acc: ");
+  // Serial.println(millis() - prevAccTime);
+  // prevAccTime = millis();
 
   // one second interval
   if (EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE <= ix)
