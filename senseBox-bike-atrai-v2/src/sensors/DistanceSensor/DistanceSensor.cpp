@@ -13,7 +13,9 @@
 #include "edge-impulse-sdk/tensorflow/lite/schema/schema_generated.h"
 #include <edge-impulse-sdk/tensorflow/lite/micro/micro_error_reporter.h>
 
-DistanceSensor::DistanceSensor() : BaseSensor("distanceTask", 8192, 0) {}
+DistanceSensor::DistanceSensor() : BaseSensor("distanceTask", 8192, 0) {
+  name = "Distance Sensor";
+}
 
 String distanceUUID = "B3491B60C0F34306A30D49C91F37A62B";
 int distanceCharacteristic = 0;
@@ -51,7 +53,12 @@ void DistanceSensor::initSensor()
     Wire.begin();
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
     sensor_vl53l8cx_top.begin();
-    sensor_vl53l8cx_top.init_sensor();
+    initialized = sensor_vl53l8cx_top.init_sensor() == 0;
+    if (!initialized)
+    {
+        Serial.println("VL53L8CX initialization failed");
+        return;
+    }
     sensor_vl53l8cx_top.vl53l8cx_set_ranging_frequency_hz(30);
     sensor_vl53l8cx_top.vl53l8cx_set_resolution(VL53L8CX_RESOLUTION_8X8);
     sensor_vl53l8cx_top.vl53l8cx_start_ranging();
@@ -63,6 +70,7 @@ void DistanceSensor::initSensor()
         Serial.printf("Model provided is schema version %d not equal "
                       "to supported version %d.",
                       model->version(), TFLITE_SCHEMA_VERSION);
+        initialized = false;
         return;
     }
     // This imports all operations, which is more intensive, than just importing the ones we need.
@@ -87,10 +95,12 @@ void DistanceSensor::initSensor()
         Serial.println(model_input->dims->data[2]);
         Serial.println(model_input->type);
         Serial.println("Bad input tensor parameters in model");
+        initialized = false;
         return;
     }
     input_length = model_input->bytes / sizeof(float);
     // ----------------------------- setup complete -----------------------------
+    initialized = true;
     Serial.println("setup complete");
 
     distanceCharacteristic = BLEModule::createCharacteristic(distanceUUID.c_str());
@@ -100,6 +110,11 @@ void DistanceSensor::initSensor()
 
 bool DistanceSensor::readSensorData()
 {
+    if (!initialized)
+    {
+        Serial.println("Distance sensor not initialized");
+        return false;
+    }
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
     VL53L8CX_ResultsData Results;
     uint8_t NewDataReady = 0;

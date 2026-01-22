@@ -5,7 +5,7 @@
 #include <Adafruit_SSD1306.h>
 #include <QRCodeGenerator.h>
 #include <Adafruit_MAX1704X.h>
-#include "bicycle_loading_bitmap.h"
+#include "bitmaps.h"
 
 Adafruit_SSD1306 SBDisplay::display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 QRCode SBDisplay::qrcode;
@@ -30,6 +30,10 @@ void SBDisplay::bicycleAnimationTask(void *pvParameter)
   {
     for (int i = 0; i < 36; i++)
     {
+      if (!isBicycleAnimationShowing)
+      {
+        vTaskDelete(xBicycleAnimationTaskHandle);
+      }
       display.clearDisplay();
       display.drawBitmap(32, -10, bicycle_loading_bitmap[i], 64, 64, 1); // this displays each frame hex value
       drawProgressbar(4, (dsplH - 12) - prgsH - 8, prgsW, prgsH, loadingProgress * 100);
@@ -39,12 +43,11 @@ void SBDisplay::bicycleAnimationTask(void *pvParameter)
       display.println(loadingMessage);
       // drawBattery(0, 0, 16, 4);
       display.display();
-      vTaskDelay(pdMS_TO_TICKS(100));
-
       if (!isBicycleAnimationShowing)
       {
         vTaskDelete(xBicycleAnimationTaskHandle);
       }
+      vTaskDelay(pdMS_TO_TICKS(100));
     }
   }
 }
@@ -199,4 +202,40 @@ void SBDisplay::drawQrCode(const char *qrStr, const char *lines[])
 void SBDisplay::readBleId()
 {
   bleId = SenseBoxBLE::getMCUId();
+}
+
+void SBDisplay::showError(String msg)
+{
+  // Stop animation task and wait for it to complete
+  if (isBicycleAnimationShowing)
+  {
+    isBicycleAnimationShowing = false;
+    delay(150);  // Wait for animation task to finish its cycle and delete itself
+  }
+
+  // Clear display buffer completely
+  display.clearDisplay();
+  display.display();
+  delay(10);  // Brief delay to ensure display is cleared
+  
+  display.clearDisplay();
+  
+  // Draw warning symbol centered at the top
+  int symbolX = (SCREEN_WIDTH - 32) / 2;  // Center horizontally (32 is symbol width)
+  int symbolY = 8;  // Position from top
+  display.drawBitmap(symbolX, symbolY, warning_symbol, 32, 32, WHITE);
+  
+  // Draw text lines at the bottom
+  display.setTextSize(1);
+  display.setTextColor(WHITE, BLACK);
+  
+  // First text line
+  display.setCursor(0, SCREEN_HEIGHT - 20);
+  display.print("ERROR:");
+  
+  // Second text line
+  display.setCursor(0, SCREEN_HEIGHT - 10);
+  display.print(msg);
+  
+  display.display();
 }

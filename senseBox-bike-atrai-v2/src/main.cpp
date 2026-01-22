@@ -54,6 +54,10 @@ void setup()
     for (BaseSensor *sensor : sensors)
     {
         sensor->begin();
+        if (!sensor->isInitialized()) {
+            SBDisplay::showError(sensor->name);
+            delay(1500);
+        }
     }
 
     SBDisplay::showLoading("Ventilation...", 0.6);
@@ -65,7 +69,9 @@ void setup()
     // Start sensor measurements
     for (BaseSensor *sensor : sensors)
     {
-        sensor->startSubscription();
+        if (sensor->isInitialized()) {
+            sensor->startSubscription();
+        }
     }
 
     SBDisplay::showLoading("Enable BLE...", 1);
@@ -73,7 +79,9 @@ void setup()
     // Start BLE advertising
     for (BaseSensor *sensor : sensors)
     {
-        sensor->startBLE();
+        if (sensor->isInitialized()) {
+            sensor->startBLE();
+        }
     }
 
     display.readBleId();
@@ -87,7 +95,7 @@ void loop()
 {
     // Read acceleration and distance sensor data as fast as possible
     distanceSensor.readSensorData();
-    bool classified = accelerationSensor.readSensorData();
+    bool classified = !accelerationSensor.isInitialized() || accelerationSensor.readSensorData();
 
     // Read temperature and fine dust sensor data after a surface classification
     if (classified)

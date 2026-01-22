@@ -1,6 +1,8 @@
 #include "DustSensor.h"
 
-DustSensor::DustSensor() : BaseSensor("DustSensorTask", 2048, 1000) {}
+DustSensor::DustSensor() : BaseSensor("DustSensorTask", 2048, 1000) {
+  name = "Dust Sensor";
+}
 
 String dustUUID = "7E14E07084EA489FB45AE1317364B979";
 int dustCharacteristic = 0;
@@ -15,12 +17,14 @@ void DustSensor::initSensor()
 
   sensirion_i2c_init();
 
-  while (sps30_probe() != 0)
-  {
+  for (int i = 0; i < maxInitAttempts && !initialized; i++) {
     Serial.print("SPS sensor probing failed\n");
-    delay(500);
+    initialized = (sps30_probe() == 0);
+    delay(100);
   }
-
+  if (!initialized) {
+    return;
+  }
   Serial.print("SPS sensor probing successful\n");
 
   ret = sps30_set_fan_auto_cleaning_interval_days(auto_clean_days);
@@ -34,15 +38,21 @@ void DustSensor::initSensor()
   if (ret < 0)
   {
     Serial.print("error starting measurement\n");
+    initialized = false;
+    return;
   }
 
   Serial.print("measurements started\n");
-
   dustCharacteristic = BLEModule::createCharacteristic(dustUUID.c_str());
 }
 
 bool DustSensor::readSensorData()
 {
+  if (!initialized)
+  {
+    Serial.println("SPS30 not initialized");
+    return false;
+  }
   Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
   struct sps30_measurement m;
   char serial[SPS30_MAX_SERIAL_LEN];
