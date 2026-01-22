@@ -47,3 +47,8 @@ void BaseSensor::sensorTask(void *pvParameters)
         vTaskDelay(pdMS_TO_TICKS(sensor->taskDelay));
     }
 }
+
+bool BaseSensor::isInitialized()
+{
+    return initialized;
+}

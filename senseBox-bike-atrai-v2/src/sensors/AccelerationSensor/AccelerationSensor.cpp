@@ -1,7 +1,9 @@
 #include "AccelerationSensor.h"
 #include "edge-impulse-sdk/classifier/ei_run_classifier.h"
 
-AccelerationSensor::AccelerationSensor() : BaseSensor("accelerationSensorTask", 2048, 0) {}
+AccelerationSensor::AccelerationSensor() : BaseSensor("accelerationSensorTask", 2048, 0) {
+  name = "Acceleration Sensor";
+}
 
 String surfaceClassificationUUID = "B944AF10F4954560968F2F0D18CAB521";
 String anomalyUUID = "B944AF10F4954560968F2F0D18CAB523";
@@ -10,10 +12,10 @@ int anomalyCharacteristic = 0;
 
 void AccelerationSensor::initSensor()
 {
-  // Try initializing MPU6050 first
   if (mpu.begin(0x68, &Wire1))
   {
     Serial.println("MPU6050 Found!");
+    initialized = true;
     mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
     mpu.setGyroRange(MPU6050_RANGE_500_DEG);
     mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
@@ -21,14 +23,16 @@ void AccelerationSensor::initSensor()
   }
   else if (icm.begin() == 0)
   {
-    // If MPU6050 fails, try ICM42670P
     Serial.println("ICM42670P Found!");
+    initialized = true;
     icm.startAccel(21, 8); // Accel ODR = 100 Hz, Full Scale Range = 16G
     icm.startGyro(21, 500); // Gyro ODR = 100 Hz, Full Scale Range = 2000 dps
     activeSensor = ICM42670X;
   }
   else if (icm2.begin_I2C(0x68, &Wire1))
   {
+    Serial.println("ICM20948 Found!");
+    initialized = true;
     icm2.setAccelRange(ICM20948_ACCEL_RANGE_8_G);
     icm2.setAccelRateDivisor(10.25); // 100 Hz sample rate
     activeSensor = ICM20948;
@@ -52,12 +56,17 @@ float probSett = 0.0;
 float probStanding = 0.0;
 float anomaly = 0.0;
 
-// float prevAccTime = millis();
+float prevAccTime = millis();
 
 bool AccelerationSensor::readSensorData()
 {
+  if (!initialized)
+  {
+    Serial.println("No acceleration sensor initialized");
+    return false;
+  }
+
   bool classified = false;
-  
 
   if (activeSensor == MPU6050)
   {

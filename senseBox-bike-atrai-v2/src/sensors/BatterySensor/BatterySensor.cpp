@@ -1,7 +1,8 @@
 #include "BatterySensor.h"
-#include <display/Display.h>
 
-BatterySensor::BatterySensor() : BaseSensor("batterySensorTask", 2048, 10000) {}
+BatterySensor::BatterySensor() : BaseSensor("batterySensorTask", 2048, 10000) {
+  name = "Battery Sensor";
+}
 
 // 5b262dea-4565-4ea0-912f-1e453bda0ca7
 // String batteryUUID = "5B262DEA45654EA0912F1E453BDA0CA7";
@@ -14,21 +15,26 @@ Adafruit_MAX17048 maxlipo;
 
 void BatterySensor::initSensor()
 {
-  while (!maxlipo.begin())
-  {
-    SBDisplay::showLoading("MAX17048 Error",  0);
-    Serial.println(F("Couldnt find Adafruit MAX17048?\nMake sure a battery is plugged in!"));
-    delay(2000);
+  for (int i = 0; i < maxInitAttempts && !initialized; i++) {
+    Serial.print("MAX17048 initialization failed\n");
+    initialized = maxlipo.begin();
+    delay(500);
   }
-
+  if (!initialized) {
+    Serial.println(F("Couldnt find Adafruit MAX17048?\nMake sure a battery is plugged in!"));
+    return;
+  }
   BLEModule::createService("180F");
   batteryCharacteristic = BLEModule::createCharacteristic(batteryUUID.c_str());
-  // add more if needed
 }
 
 bool BatterySensor::readSensorData()
 {
-  // read sensor data
+  if(!initialized)
+  {
+    Serial.println("MAX17048 not initialized");
+    return false;
+  }
   float batteryCharge = maxlipo.cellPercent();
 
   if (measurementCallback)

@@ -28,6 +28,7 @@ public:
   static void drawBattery(int x, int y, int width, int height);
   static void bicycleAnimationTask(void *pvParams);
   static void readBleId();
+  static void showError(String msg);
 
 private:
   static Adafruit_SSD1306 display;
