@@ -18,8 +18,8 @@ BaseSensor *sensors[] = {
     &distanceSensor,
     &tempHumiditySensor,
     &accelerationSensor,
-    &batterySensor,
-    &luxSensor
+    &luxSensor,
+    &batterySensor
 };
 
 SBDisplay display;
@@ -93,6 +93,7 @@ void loop()
     // Read temperature and fine dust sensor data after a surface classification
     if (classified)
     {
+        Serial.println("Surface classified, reading temp/humidity and lux sensor...");
         luxSensor.readSensorData();
         tempHumiditySensor.readSensorData();
         display.showConnectionScreen();
