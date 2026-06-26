@@ -16,6 +16,9 @@ public:
 protected:
   void initSensor() override;
   void notifyBLE(float lux);
+
+private:
+  float calculateLux(uint16_t ch0, uint16_t ch1);
 };
 
 #endif // LUX_SENSOR_H
