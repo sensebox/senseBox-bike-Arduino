@@ -18,7 +18,7 @@ BLEModule bleModule;
 LED led(1, 45);
 
 unsigned long previousMillis = 0; // stores the last time the sensors were read
-const long interval = 3000;       // interval at which to read the temperature and fine dust sensors (1 second)
+const long interval = 1000;       // interval at which to read the temperature and humidity sensors (1 second)
 
 void setup()
 {
@@ -91,6 +91,10 @@ void setup()
 
 void loop()
 {
-    tempHumiditySensor.readSensorData();
-    delay(100);
+    unsigned long currentMillis = millis();
+    if (currentMillis - previousMillis >= interval)
+    {
+        previousMillis = currentMillis;
+        tempHumiditySensor.readSensorData();
+    }
 }
