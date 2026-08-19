@@ -15,7 +15,8 @@ BaseSensor *sensors[] = {
 SBDisplay display;
 
 BLEModule bleModule;
-LED led(1, 45);
+//LED led(1, 45);
+LED led(PIN_NEOPIXEL, 1, 45);
 
 unsigned long previousMillis = 0; // stores the last time the sensors were read
 const long interval = 1000;       // interval at which to read the temperature and humidity sensors (1 second)
@@ -23,12 +24,17 @@ const long interval = 1000;       // interval at which to read the temperature a
 void setup()
 {
     Serial.begin(115200);
-    Wire.begin(2,1);
+    delay(1000);
+    Serial.println("FEATHER BOOT OK");
+    //Wire.begin(2,1); //senseBox MCU eye
+    Wire.begin(); // adafruit feather esp32-s3
     delay(1000);
 
-    // led.begin();
 
-    // led.startRainbow();
+
+     //led.begin();
+
+     //led.startRainbow();
 
     // SBDisplay::begin();
 
@@ -46,9 +52,16 @@ void setup()
     }
 
     // SBDisplay::showLoading("Ventilation...", 0.6);
-    pinMode(48, OUTPUT);
-    delay(100);
-    digitalWrite(48, HIGH);
+
+    //senseBox MCU eye
+    //pinMode(48, OUTPUT);
+    //delay(100);
+    //digitalWrite(48, HIGH);
+
+    // adafruit feather esp32-s3
+    pinMode(NEOPIXEL_POWER, OUTPUT);
+    digitalWrite(NEOPIXEL_POWER, NEOPIXEL_POWER_ON);
+
 
     const char* macString = bleModule.getMacAddress();
     String bleId = "[" + String(macString) + "]";
@@ -91,6 +104,7 @@ void setup()
 
 void loop()
 {
+
     unsigned long currentMillis = millis();
     if (currentMillis - previousMillis >= interval)
     {

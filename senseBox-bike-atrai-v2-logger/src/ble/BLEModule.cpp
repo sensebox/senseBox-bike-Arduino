@@ -67,15 +67,24 @@ bool BLEModule::isConnected()
 const char **BLEModule::getBLEConnectionString()
 {
     char bleId[34];
+
     snprintf(bleId, sizeof(bleId), "[%s]", macString);
+
     std::string bleIdStr = bleId;
-    std::string bleIdBegin = bleIdStr.substr(0, bleIdStr.length() / 2);
-    std::string bleIdEnd = bleIdStr.substr(bleIdStr.length() / 2);
-    const char *MESSAGE_CONFIGURE_WIFI[] = {
-        "senseBox",
-        "bike",
-        bleIdBegin.c_str(),
-        bleIdEnd.c_str()};
+
+    static std::string bleIdBegin;
+    static std::string bleIdEnd;
+
+    bleIdBegin = bleIdStr.substr(0, bleIdStr.length() / 2);
+    bleIdEnd = bleIdStr.substr(bleIdStr.length() / 2);
+
+    static const char *MESSAGE_CONFIGURE_WIFI[4];
+
+    MESSAGE_CONFIGURE_WIFI[0] = "senseBox";
+    MESSAGE_CONFIGURE_WIFI[1] = "bike";
+    MESSAGE_CONFIGURE_WIFI[2] = bleIdBegin.c_str();
+    MESSAGE_CONFIGURE_WIFI[3] = bleIdEnd.c_str();
+
     return MESSAGE_CONFIGURE_WIFI;
 }
 
