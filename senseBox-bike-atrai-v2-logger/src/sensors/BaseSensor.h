@@ -11,7 +11,7 @@ class BaseSensor
 public:
     BaseSensor(const char *taskName, uint32_t taskStackSize = 8192, uint32_t taskDelay = 1000);
 
-    void begin();
+    bool begin();
     void subscribe(std::function<void(std::vector<float>)> callback);
     void startSubscription();
     void stopSubscription();
@@ -19,7 +19,7 @@ public:
     void stopBLE();
 
 protected:
-    virtual void initSensor() = 0;
+    virtual bool initSensor() = 0;
     virtual bool readSensorData() = 0;
     static void sensorTask(void *pvParameters);
     bool activeSubscription;

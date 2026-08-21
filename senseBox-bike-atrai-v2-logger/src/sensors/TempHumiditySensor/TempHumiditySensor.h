@@ -11,7 +11,7 @@ public:
   bool readSensorData() override;
 
 protected:
-  void initSensor() override;
+  bool initSensor() override;
   void notifyBLE(float temperature, float humidity);
 };
 

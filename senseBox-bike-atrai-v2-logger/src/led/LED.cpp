@@ -2,7 +2,14 @@
 
 // Constructor
 LED::LED(uint8_t pin, uint16_t numPixels, uint8_t brightness)
-    : pixels(numPixels, pin, NEO_GRB + NEO_KHZ800), hue(0), taskHandle(NULL)
+    : pixels(numPixels, pin, NEO_GRB + NEO_KHZ800),
+      hue(0),
+      taskHandle(NULL),
+      currentStatus(LEDStatus::STARTING),
+      pulseValue(20),
+      pulseDirection(1),
+      errorLedOn(false),
+      lastErrorToggle(0)
 {
     pixels.setBrightness(brightness);
 }
@@ -13,17 +20,36 @@ void LED::begin()
     pixels.begin();
 }
 
+void LED::ensureTaskRunning()
+{
+    if (taskHandle == NULL)
+    {
+        BaseType_t result = xTaskCreate(
+            LEDTask,
+            "LED Task",
+            4096,
+            this,
+            1,
+            &taskHandle);
+
+        if (result != pdPASS)
+        {
+            taskHandle = NULL;
+            Serial.println("LED task FAILED");
+        }
+    }
+}
+
 // Start the FreeRTOS task to update the LED color
 void LED::startRainbow()
 {
-    // Create the LED update task
-    xTaskCreate(
-        LEDTask,    // Task function
-        "LED Task", // Name of the task (for debugging)
-        1024,       // Stack size (in words)
-        this,       // Task input parameter (this LED instance)
-        1,          // Priority of the task
-        &taskHandle // Task handle
+    BaseType_t result = xTaskCreate(
+        LEDTask,
+        "LED Task",
+        4096,
+        this,
+        1,
+        &taskHandle
     );
 }
 
@@ -40,6 +66,12 @@ void LED::stopRainbow()
     pixels.show();
 }
 
+void LED::setStatus(LEDStatus status)
+{
+    currentStatus = status;
+    ensureTaskRunning();
+}
+
 // Task function to update the LED color
 void LED::LEDTask(void *pvParameters)
 {
@@ -49,21 +81,62 @@ void LED::LEDTask(void *pvParameters)
     while (true)
     {
         ledInstance->update();
-        vTaskDelay(pdMS_TO_TICKS(5)); // Delay of 10 milliseconds
+        vTaskDelay(pdMS_TO_TICKS(20)); // Delay of 20 milliseconds
     }
 }
 
 // Update the LED color to the next hue
 void LED::update()
 {
-    pixels.setPixelColor(0, Wheel(hue));
-    pixels.show();
-
-    hue += 1;
-    if (hue > 255)
+    switch (currentStatus)
     {
-        hue = 0;
+    case LEDStatus::STARTING:
+        // Gelb: Initialisierung läuft
+        pixels.setPixelColor(0, pixels.Color(255, 180, 0));
+        break;
+
+    case LEDStatus::WAITING_BLE:
+        // Blau langsam pulsierend
+        pixels.setPixelColor(0, pixels.Color(0, 0, pulseValue));
+
+        pulseValue += pulseDirection * 2;
+
+        if (pulseValue >= 250)
+        {
+            pulseValue = 250;
+            pulseDirection = -1;
+        }
+        else if (pulseValue <= 20)
+        {
+            pulseValue = 20;
+            pulseDirection = 1;
+        }
+        break;
+
+    case LEDStatus::CONNECTED:
+        // Grün: BLE verbunden
+        pixels.setPixelColor(0, pixels.Color(0, 255, 0));
+        break;
+
+    case LEDStatus::ERROR:
+        // Rot blinkend
+        if (millis() - lastErrorToggle >= 500)
+        {
+            lastErrorToggle = millis();
+            errorLedOn = !errorLedOn;
+        }
+
+        if (errorLedOn)
+        {
+            pixels.setPixelColor(0, pixels.Color(255, 0, 0));
+        }
+        else
+        {
+            pixels.setPixelColor(0, 0);
+        }
+        break;
     }
+    pixels.show();
 }
 
 // Private function to generate rainbow colors across 0-255 positions

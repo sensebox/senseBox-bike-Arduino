@@ -12,40 +12,47 @@ int humidityCharacteristic = 0;
 
 Adafruit_HDC1000 hdc;
 
-void TempHumiditySensor::initSensor()
+bool TempHumiditySensor::initSensor()
 {
-  if (!hdc.begin())
-  {
-    Serial.println("Couldn't find HDC1080 sensor!");
-    while (1)
-      ;
-  }
+    if (!hdc.begin())
+    {
+        Serial.println("Couldn't find HDC1080 sensor!");
+        return false;
+    }
 
-  temperatureCharacteristic = BLEModule::createCharacteristic(tempUUID.c_str());
-  humidityCharacteristic = BLEModule::createCharacteristic(humUUID.c_str());
+    temperatureCharacteristic = BLEModule::createCharacteristic(tempUUID.c_str());
+    humidityCharacteristic = BLEModule::createCharacteristic(humUUID.c_str());
+
+    return true;
 }
 
 bool TempHumiditySensor::readSensorData()
 {
-  float temperature = hdc.readTemperature();
-  float humidity = hdc.readHumidity();
+    float temperature = hdc.readTemperature();
+    float humidity = hdc.readHumidity();
 
-  if (temperature < -37 || humidity < 2)
-  {
-    Serial.println("Invalid temperature or humidity value");
-    return false;
-  }
+    if (isnan(temperature) ||
+        isnan(humidity) ||
+        temperature < -37 ||
+        temperature > 125 ||
+        humidity < 0 ||
+        humidity > 100)
+    {
+        Serial.println("Invalid temperature or humidity value");
+        return false;
+    }
 
-  if (measurementCallback)
-  {
-    measurementCallback({temperature, humidity});
-  }
+    if (measurementCallback)
+    {
+        measurementCallback({temperature, humidity});
+    }
 
-  if (sendBLE)
-  {
-    notifyBLE(temperature, humidity);
-  }
-  return false;
+    if (sendBLE)
+    {
+        notifyBLE(temperature, humidity);
+    }
+
+    return true;
 }
 
 void TempHumiditySensor::notifyBLE(float temperature, float humidity)

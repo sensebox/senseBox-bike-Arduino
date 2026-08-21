@@ -1,6 +1,6 @@
 #include "BLEModule.h"
 
-bool isConnectedVar = false;
+volatile bool isConnectedVar = false;
 BLEServer *pServer;
 BLEService *pService;
 
@@ -20,17 +20,22 @@ class CustomBLECallbacks : public BLECharacteristicCallbacks {
   }
 };
 
-class CustomServerCallbacks : public BLEServerCallbacks {
-  void onConnect(BLEServer* pServer) override {
-    Serial.println("Client connected");
-    pServer->getAdvertising()->start();  // Restart advertising
-  }
+class CustomServerCallbacks : public BLEServerCallbacks
+{
+    void onConnect(BLEServer *pServer) override
+    {
+        isConnectedVar = true;
+        Serial.println("Client connected");
+        pServer->getAdvertising()->start();
+    }
 
-  void onDisconnect(BLEServer* pServer) override {
-    Serial.println("Client disconnected, restarting advertising...");
-    delay(500);  // Give the BLE stack some time
-    pServer->getAdvertising()->start();  // Restart advertising
-  }
+    void onDisconnect(BLEServer *pServer) override
+    {
+        isConnectedVar = false;
+        Serial.println("Client disconnected, restarting advertising...");
+        delay(500);
+        pServer->getAdvertising()->start();
+    }
 };
 
 BLEModule::BLEModule()

@@ -12,18 +12,18 @@ Adafruit_MAX17048 maxlipo;
 
 // add more if needed
 
-void BatterySensor::initSensor()
+bool BatterySensor::initSensor()
 {
-  while (!maxlipo.begin())
+  if (!maxlipo.begin())
   {
-    SBDisplay::showLoading("MAX17048 Error",  0);
-    Serial.println(F("Couldnt find Adafruit MAX17048?\nMake sure a battery is plugged in!"));
-    delay(2000);
+    SBDisplay::showLoading("MAX17048 Error", 0);
+    Serial.println(F("Couldn't find Adafruit MAX17048!"));
+    return false;
   }
 
-  // BLEModule::createService("180F");
   batteryCharacteristic = BLEModule::createCharacteristic(batteryUUID.c_str());
-  // add more if needed
+
+  return true;
 }
 
 bool BatterySensor::readSensorData()
@@ -40,7 +40,7 @@ bool BatterySensor::readSensorData()
   {
     notifyBLE(batteryCharge);
   }
-  return false;
+  return true;
 }
 
 void BatterySensor::notifyBLE(float batteryCharge)

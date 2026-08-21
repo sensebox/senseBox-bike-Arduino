@@ -3,10 +3,11 @@
 BaseSensor::BaseSensor(const char *taskName, uint32_t taskStackSize, uint32_t taskDelay)
     : activeSubscription(false), sendBLE(false), taskStackSize(taskStackSize), taskDelay(taskDelay) {}
 
-void BaseSensor::begin()
+bool BaseSensor::begin()
 {
-    initSensor();
+    bool success = initSensor();
     delay(500);
+    return success;
     // xTaskCreate(sensorTask, taskName, taskStackSize, this, 1, NULL);
 }
 

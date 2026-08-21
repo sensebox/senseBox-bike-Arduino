@@ -14,7 +14,7 @@ public:
   static float getBatteryChargeRate();
 
 protected:
-  void initSensor() override;
+  bool initSensor() override;
   bool readSensorData() override;
   void notifyBLE(float batteryCharge); // change this to match the data type of the sensor data
 };

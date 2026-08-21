@@ -30,25 +30,39 @@ void setup()
     Wire.begin(); // adafruit feather esp32-s3
     delay(1000);
 
-
-
-     //led.begin();
-
-     //led.startRainbow();
+    led.begin();
+    led.setStatus(LEDStatus::STARTING);
+    //led.startRainbow();
 
     // SBDisplay::begin();
-
     // SBDisplay::showLoading("Setup BLE...", 0.2);
+
     bleModule.begin();
     bleModule.createService("CF06A218-F68E-E0BE-AD04-8EBC1EB0BC84");
     Serial.println("BLE setup complete");
 
-    batterySensor.begin();
+    //batterySensor.begin();
 
     // SBDisplay::showLoading("Setup Sensors...", 0.4);
+    bool sensorInitOk = true;
+
     for (BaseSensor *sensor : sensors)
     {
-        sensor->begin();
+        if (!sensor->begin())
+        {
+            sensorInitOk = false;
+        }
+    }
+
+    if (!sensorInitOk)
+    {
+        Serial.println("Sensor initialization failed!");
+        led.setStatus(LEDStatus::ERROR);
+
+        while (true)
+        {
+            delay(1000);
+        }
     }
 
     // SBDisplay::showLoading("Ventilation...", 0.6);
@@ -93,22 +107,50 @@ void setup()
     bleModule.startService();
     Serial.println("BLE enabled");
 
-    // display.readBleId();
 
+    // display.readBleId();
     // led.stopRainbow();
 
     bleModule.bleStartPoll("CF06A218-F68E-E0BE-AD04-8EBC1EB0BC84");
+    led.setStatus(LEDStatus::WAITING_BLE);
 
     // display.showConnectionScreen();
 }
 
 void loop()
 {
+    static bool sensorOk = true;
+    static LEDStatus lastStatus = LEDStatus::STARTING;
 
     unsigned long currentMillis = millis();
+
     if (currentMillis - previousMillis >= interval)
     {
         previousMillis = currentMillis;
-        tempHumiditySensor.readSensorData();
+
+        sensorOk = tempHumiditySensor.readSensorData();
+    }
+
+    LEDStatus desiredStatus;
+
+    // Fehler hat höchste Priorität
+    if (!sensorOk)
+    {
+        desiredStatus = LEDStatus::ERROR;
+    }
+    else if (BLEModule::isConnected())
+    {
+        desiredStatus = LEDStatus::CONNECTED;
+    }
+    else
+    {
+        desiredStatus = LEDStatus::WAITING_BLE;
+    }
+
+    // LED nur aktualisieren, wenn sich der Status geändert hat
+    if (desiredStatus != lastStatus)
+    {
+        led.setStatus(desiredStatus);
+        lastStatus = desiredStatus;
     }
 }
