@@ -3,7 +3,7 @@
 
 #include "../BaseSensor.h"
 #include <Wire.h>
-#include <vl53l8cx_class.h>
+#include <vl53l8cx.h>
 
 class DistanceSensor : public BaseSensor
 {

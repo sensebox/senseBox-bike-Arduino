@@ -4,7 +4,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-#include <vl53l8cx_class.h>
+#include <vl53l8cx.h>
 // #include <TensorFlowLite_ESP32.h>
 #include "edge-impulse-sdk/tensorflow/lite/micro/kernels/micro_ops.h"
 #include "edge-impulse-sdk/tensorflow/lite/micro/micro_interpreter.h"
@@ -48,13 +48,13 @@ void DistanceSensor::initSensor()
 {
     // ------------------------------ setup VL53L8CX ------------------------------
     Serial.println("setting up VL53L8CX...");
-    Wire.begin();
+    Wire.begin(39,40);
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
     sensor_vl53l8cx_top.begin();
-    sensor_vl53l8cx_top.init_sensor();
-    sensor_vl53l8cx_top.vl53l8cx_set_ranging_frequency_hz(30);
-    sensor_vl53l8cx_top.vl53l8cx_set_resolution(VL53L8CX_RESOLUTION_8X8);
-    sensor_vl53l8cx_top.vl53l8cx_start_ranging();
+    sensor_vl53l8cx_top.init();
+    sensor_vl53l8cx_top.set_ranging_frequency_hz(30);
+    sensor_vl53l8cx_top.set_resolution(VL53L8CX_RESOLUTION_8X8);
+    sensor_vl53l8cx_top.start_ranging();
     // -------------------------- setup tensorflow model --------------------------
     Serial.println("setting up tensorflow...");
     model = tflite::GetModel(g_model_data);
@@ -103,13 +103,13 @@ bool DistanceSensor::readSensorData()
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
     VL53L8CX_ResultsData Results;
     uint8_t NewDataReady = 0;
-    uint8_t status = sensor_vl53l8cx_top.vl53l8cx_check_data_ready(&NewDataReady);
+    uint8_t status = sensor_vl53l8cx_top.check_data_ready(&NewDataReady);
 
     float distance = -1.0;
 
     if ((!status) && (NewDataReady != 0))
     {
-        sensor_vl53l8cx_top.vl53l8cx_get_ranging_data(&Results);
+        sensor_vl53l8cx_top.get_ranging_data(&Results);
         float overtakingPredictionPercentage = -1.0;
         float bikeOvertakingPredictionPercentage = -1.0;
         float oldVl53l8cxMin = -1.0;
