@@ -7,6 +7,10 @@
 
 #include "../ble/BLEModule.h"
 #include "../sensors/BatterySensor/BatterySensor.h"
+#include "../sensors/TempHumiditySensor/TempHumiditySensor.h"
+#include "../sensors/DustSensor/DustSensor.h"
+#include "../sensors/DistanceSensor/DistanceSensor.h"
+#include "../sensors/AccelerationSensor/AccelerationSensor.h"
 
 #include <Arduino.h>
 #include "freertos/FreeRTOS.h"
@@ -24,6 +28,7 @@ public:
   static void showConnectionScreen();
   static void drawQrCode(const char *qrStr, const char *lines[]);
   static void showLoading(String msg, float val);
+  static void showLoadingError(String msg, String subMsg = "");
   static void drawProgressbar(int x, int y, int width, int height, int progress);
   static void drawBattery(int x, int y, int width, int height);
   static void bicycleAnimationTask(void *pvParams);

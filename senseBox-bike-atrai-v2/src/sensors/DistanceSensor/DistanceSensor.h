@@ -20,6 +20,7 @@ class DistanceSensor : public BaseSensor
 public:
   DistanceSensor();
   bool readSensorData() override;
+  static bool isPresent();
 
 protected:
   void initSensor() override;

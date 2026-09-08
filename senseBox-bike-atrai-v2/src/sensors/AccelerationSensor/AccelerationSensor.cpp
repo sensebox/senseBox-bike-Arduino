@@ -1,5 +1,6 @@
 #include "AccelerationSensor.h"
 #include "edge-impulse-sdk/classifier/ei_run_classifier.h"
+#include <display/Display.h>
 
 AccelerationSensor::AccelerationSensor() : BaseSensor("accelerationSensorTask", 2048, 0) {}
 
@@ -8,37 +9,51 @@ String anomalyUUID = "B944AF10F4954560968F2F0D18CAB523";
 int surfaceClassificationCharacteristic = 0;
 int anomalyCharacteristic = 0;
 
+bool AccelerationSensor::sensorFound = false;
+
 void AccelerationSensor::initSensor()
 {
-  // Try initializing MPU6050 first
-  if (mpu.begin(0x68, &Wire1))
+  for (int attempt = 1; attempt <= MAX_INIT_ATTEMPTS && activeSensor == NONE; attempt++)
   {
-    Serial.println("MPU6050 Found!");
-    mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
-    mpu.setGyroRange(MPU6050_RANGE_500_DEG);
-    mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
-    activeSensor = MPU6050;
+    // Try initializing MPU6050 first
+    if (mpu.begin(0x68, &Wire1))
+    {
+      Serial.println("MPU6050 Found!");
+      mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
+      mpu.setGyroRange(MPU6050_RANGE_500_DEG);
+      mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+      activeSensor = MPU6050;
+    }
+    else if (icm.begin() == 0)
+    {
+      // If MPU6050 fails, try ICM42670P
+      Serial.println("ICM42670P Found!");
+      icm.startAccel(21, 8); // Accel ODR = 100 Hz, Full Scale Range = 16G
+      icm.startGyro(21, 500); // Gyro ODR = 100 Hz, Full Scale Range = 2000 dps
+      activeSensor = ICM42670X;
+    }
+    else if (icm2.begin_I2C(0x68, &Wire1))
+    {
+      icm2.setAccelRange(ICM20948_ACCEL_RANGE_8_G);
+      icm2.setAccelRateDivisor(10.25); // 100 Hz sample rate
+      activeSensor = ICM20948;
+    }
+    else
+    {
+      Serial.println("No compatible acceleration sensor found");
+      delay(1000);
+    }
   }
-  else if (icm.begin() == 0)
+
+  if (activeSensor == NONE)
   {
-    // If MPU6050 fails, try ICM42670P
-    Serial.println("ICM42670P Found!");
-    icm.startAccel(21, 8); // Accel ODR = 100 Hz, Full Scale Range = 16G
-    icm.startGyro(21, 500); // Gyro ODR = 100 Hz, Full Scale Range = 2000 dps
-    activeSensor = ICM42670X;
-  }
-  else if (icm2.begin_I2C(0x68, &Wire1))
-  {
-    icm2.setAccelRange(ICM20948_ACCEL_RANGE_8_G);
-    icm2.setAccelRateDivisor(10.25); // 100 Hz sample rate
-    activeSensor = ICM20948;
-  }
-  else
-  {
-    Serial.println("No compatible acceleration sensor found");
+    SBDisplay::showLoadingError("No Acceleration Sensor");
+    Serial.printf("Acceleration sensor not found after %d attempts, continuing without it.\n", MAX_INIT_ATTEMPTS);
+    delay(2000);
     return;
   }
 
+  sensorFound = true;
   surfaceClassificationCharacteristic = BLEModule::createCharacteristic(surfaceClassificationUUID.c_str());
   anomalyCharacteristic = BLEModule::createCharacteristic(anomalyUUID.c_str());
 }
@@ -58,6 +73,10 @@ bool AccelerationSensor::readSensorData()
 {
   bool classified = false;
   
+  if (!sensorFound)
+  {
+    return classified;
+  }
 
   if (activeSensor == MPU6050)
   {
@@ -112,7 +131,6 @@ bool AccelerationSensor::readSensorData()
     if (err != 0)
     {
       ei_printf("Failed to create signal from buffer (%d)\n", err);
-      buffer[EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE] = {};
       return classified;
     }
 
@@ -122,7 +140,6 @@ bool AccelerationSensor::readSensorData()
     if (err != EI_IMPULSE_OK)
     {
       ei_printf("ERR: Failed to run classifier (%d)\n", err);
-      buffer[EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE] = {};
       return classified;
     }
 
@@ -140,7 +157,6 @@ bool AccelerationSensor::readSensorData()
     }
 
     ix = 0;
-    buffer[EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE] = {};
   }
 
   if (measurementCallback)
@@ -155,4 +171,9 @@ void AccelerationSensor::notifyBLE(float probAsphalt, float probCompact, float p
 {
   BLEModule::writeBLE(surfaceClassificationCharacteristic, probAsphalt, probCompact, probPaving, probSett, probStanding);
   BLEModule::writeBLE(anomalyCharacteristic, anomaly);
+}
+
+bool AccelerationSensor::isPresent()
+{
+  return sensorFound;
 }

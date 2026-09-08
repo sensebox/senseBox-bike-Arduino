@@ -9,25 +9,42 @@ String batteryUUID = "2A19";
 int batteryCharacteristic = 0;
 
 Adafruit_MAX17048 maxlipo;
+bool batterySensorFound = false;
 
 // add more if needed
 
 void BatterySensor::initSensor()
 {
-  while (!maxlipo.begin())
+  for (int attempt = 1; attempt <= MAX_INIT_ATTEMPTS && !batterySensorFound; attempt++)
   {
-    SBDisplay::showLoading("MAX17048 Error",  0);
+    if (maxlipo.begin())
+    {
+      batterySensorFound = true;
+      break;
+    }
     Serial.println(F("Couldnt find Adafruit MAX17048?\nMake sure a battery is plugged in!"));
+    delay(1000);
+  }
+
+  if (!batterySensorFound)
+  {
+    SBDisplay::showLoadingError("No Battery Sensor");
+    Serial.printf("MAX17048 not found after %d attempts, continuing without battery sensor.\n", MAX_INIT_ATTEMPTS);
     delay(2000);
+    return;
   }
 
   BLEModule::createService("180F");
   batteryCharacteristic = BLEModule::createCharacteristic(batteryUUID.c_str());
-  // add more if needed
 }
 
 bool BatterySensor::readSensorData()
 {
+  if (!batterySensorFound)
+  {
+    return false;
+  }
+
   // read sensor data
   float batteryCharge = maxlipo.cellPercent();
 
@@ -48,14 +65,27 @@ void BatterySensor::notifyBLE(float batteryCharge)
   BLEModule::writeBLE(batteryCharacteristic, batteryCharge);
 }
 
+bool BatterySensor::isPresent()
+{
+  return batterySensorFound;
+}
+
 float BatterySensor::getBatteryCharge()
 {
+  if (!batterySensorFound)
+  {
+    return 0;
+  }
   float batteryCharge = maxlipo.cellPercent();
   return batteryCharge;
 }
 
 float BatterySensor::getBatteryChargeRate()
 {
+  if (!batterySensorFound)
+  {
+    return 0;
+  }
   float batteryChargeRate = maxlipo.chargeRate();
   return batteryChargeRate;
 }

@@ -26,8 +26,8 @@ SBDisplay display;
 BLEModule bleModule;
 LED led(1, 1);
 
-unsigned long previousMillis = 0; // stores the last time the sensors were read
-const long interval = 3000;       // interval at which to read the temperature and fine dust sensors (1 second)
+unsigned long previousMillis = 0;
+const long interval = 3000;
 
 void setup()
 {
@@ -45,8 +45,6 @@ void setup()
 
     SBDisplay::showLoading("Setup BLE...", 0.2);
     bleModule.begin();
-
-    batterySensor.begin();
 
     bleModule.createService("CF06A218F68EE0BEAD048EBC1EB0BC84");
 
@@ -90,11 +88,25 @@ void loop()
     bool classified = accelerationSensor.readSensorData();
 
     // Read temperature and fine dust sensor data after a surface classification
-    if (classified)
+    if (accelerationSensor.isPresent())
     {
-        dustSensor.readSensorData();
-        tempHumiditySensor.readSensorData();
-        display.showConnectionScreen();
+        if (classified)
+        {
+            dustSensor.readSensorData();
+            tempHumiditySensor.readSensorData();
+            display.showConnectionScreen();
+        }
+    } else
+    {
+        // If no acceleration sensor is present, read the other sensors at a fixed interval
+        unsigned long currentMillis = millis();
+        if (currentMillis - previousMillis >= interval)
+        {
+            previousMillis = currentMillis;
+            dustSensor.readSensorData();
+            tempHumiditySensor.readSensorData();
+            display.showConnectionScreen();
+        }
     }
 
     // Perform BLE polling

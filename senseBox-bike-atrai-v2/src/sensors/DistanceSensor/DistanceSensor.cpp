@@ -1,5 +1,6 @@
 #include "DistanceSensor.h"
 #include "model_data.h"
+#include <display/Display.h>
 
 DistanceSensor::DistanceSensor() : BaseSensor("distanceTask", 8192, 0) {}
 
@@ -31,6 +32,7 @@ int begin_index = 0;
 bool pending_initial_data = true;
 
 long prevDistanceTime = millis();
+bool distanceSensorFound = false;
 
 void DistanceSensor::initSensor()
 {
@@ -38,8 +40,26 @@ void DistanceSensor::initSensor()
     Serial.println("setting up VL53L8CX...");
     Wire.begin();
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
-    sensor_vl53l8cx.begin();
-    sensor_vl53l8cx.init();
+
+    for (int attempt = 1; attempt <= MAX_INIT_ATTEMPTS && !distanceSensorFound; attempt++)
+    {
+        if (sensor_vl53l8cx.begin() == 0 && sensor_vl53l8cx.init() == 0)
+        {
+            distanceSensorFound = true;
+            break;
+        }
+        Serial.println("VL53L8CX sensor probing failed");
+        delay(500);
+    }
+
+    if (!distanceSensorFound)
+    {
+        SBDisplay::showLoadingError("No Distance Sensor");
+        Serial.printf("VL53L8CX not found after %d attempts, continuing without distance sensor.\n", MAX_INIT_ATTEMPTS);
+        delay(2000);
+        return;
+    }
+
     sensor_vl53l8cx.set_ranging_frequency_hz(30);
     sensor_vl53l8cx.set_resolution(VL53L8CX_RESOLUTION_8X8);
     sensor_vl53l8cx.start_ranging();
@@ -51,6 +71,9 @@ void DistanceSensor::initSensor()
         Serial.printf("Model provided is schema version %d not equal "
                       "to supported version %d.",
                       model->version(), TFLITE_SCHEMA_VERSION);
+        distanceSensorFound = false;
+        SBDisplay::showLoadingError("Distance Sensor Error", "bad model schema");
+        delay(2000);
         return;
     }
     // This imports all operations, which is more intensive, than just importing the ones we need.
@@ -75,6 +98,9 @@ void DistanceSensor::initSensor()
         Serial.println(model_input->dims->data[2]);
         Serial.println(model_input->type);
         Serial.println("Bad input tensor parameters in model");
+        distanceSensorFound = false;
+        SBDisplay::showLoadingError("Distance Sensor Error", "bad input tensor");
+        delay(2000);
         return;
     }
     input_length = model_input->bytes / sizeof(float);
@@ -88,6 +114,11 @@ void DistanceSensor::initSensor()
 
 bool DistanceSensor::readSensorData()
 {
+    if (!distanceSensorFound)
+    {
+        return false;
+    }
+
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
     VL53L8CX_ResultsData Results;
     uint8_t NewDataReady = 0;
@@ -192,4 +223,9 @@ void DistanceSensor::notifyBLE(float distance, float overtakingPredictionPercent
 {
     BLEModule::writeBLE(distanceCharacteristic, distance);
     BLEModule::writeBLE(overtakingCharacteristic, overtakingPredictionPercentage, bikeOvertakingPredictionPercentage);
+}
+
+bool DistanceSensor::isPresent()
+{
+    return distanceSensorFound;
 }

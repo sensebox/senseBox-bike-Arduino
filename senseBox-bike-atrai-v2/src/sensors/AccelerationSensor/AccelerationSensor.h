@@ -12,6 +12,7 @@ class AccelerationSensor : public BaseSensor
 public:
   AccelerationSensor();
   bool readSensorData() override;
+  static bool isPresent();
 
 protected:
   void initSensor() override;
@@ -30,6 +31,7 @@ private:
   Adafruit_MPU6050 mpu;
   ICM42670 icm = ICM42670(Wire1, 0); // Instantiate an ICM42670 with LSB address set to 0
   Adafruit_ICM20948 icm2;
+  static bool sensorFound;
 };
 
 #endif // ACCELERATION_SENSOR_H

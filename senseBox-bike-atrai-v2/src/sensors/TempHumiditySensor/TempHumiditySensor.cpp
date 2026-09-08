@@ -1,4 +1,5 @@
 #include "TempHumiditySensor.h"
+#include <display/Display.h>
 
 TempHumiditySensor::TempHumiditySensor() : BaseSensor("temperatureHumidityTask", 2048, 1000) {}
 
@@ -9,14 +10,27 @@ int temperatureCharacteristic = 0;
 int humidityCharacteristic = 0;
 
 Adafruit_HDC1000 hdc;
+bool tempHumiditySensorFound = false;
 
 void TempHumiditySensor::initSensor()
 {
-  if (!hdc.begin())
+  for (int attempt = 1; attempt <= MAX_INIT_ATTEMPTS && !tempHumiditySensorFound; attempt++)
   {
+    if (hdc.begin())
+    {
+      tempHumiditySensorFound = true;
+      break;
+    }
     Serial.println("Couldn't find HDC1080 sensor!");
-    while (1)
-      ;
+    delay(1000);
+  }
+
+  if (!tempHumiditySensorFound)
+  {
+    SBDisplay::showLoadingError("No Temp/Humid Sensor");
+    Serial.printf("HDC1080 not found after %d attempts, continuing without temp/humidity sensor.\n", MAX_INIT_ATTEMPTS);
+    delay(2000);
+    return;
   }
 
   temperatureCharacteristic = BLEModule::createCharacteristic(tempUUID.c_str());
@@ -25,6 +39,11 @@ void TempHumiditySensor::initSensor()
 
 bool TempHumiditySensor::readSensorData()
 {
+  if (!tempHumiditySensorFound)
+  {
+    return false;
+  }
+
   float temperature = hdc.readTemperature();
   float humidity = hdc.readHumidity();
 
@@ -50,4 +69,9 @@ void TempHumiditySensor::notifyBLE(float temoperature, float humidity)
 {
   BLEModule::writeBLE(temperatureCharacteristic, temoperature);
   BLEModule::writeBLE(humidityCharacteristic, humidity);
+}
+
+bool TempHumiditySensor::isPresent()
+{
+  return tempHumiditySensorFound;
 }

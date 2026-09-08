@@ -1,6 +1,8 @@
 #include "BLEModule.h"
+#include <display/Display.h>
 
 bool isConnectedVar = false;
+bool bleModuleFound = false;
 
 // void (*BLEModule::receiveCallback)(BLEDevice, BLECharacteristic) = nullptr;
 
@@ -14,7 +16,16 @@ bool BLEModule::begin()
 {
     SenseBoxBLE::start("senseBox-BLE");
     delay(500);
-    bleName = "senseBox:bike [" + SenseBoxBLE::getMCUId() + "]";
+    String bleId = SenseBoxBLE::getMCUId();
+    if (bleId == "-1")
+    {
+        SBDisplay::showLoadingError("No Bluetooth");
+        Serial.printf("Bluetooth Bee not found.\n");
+        delay(2000);
+    } else {
+        bleModuleFound = true;
+    }
+    bleName = "senseBox:bike [" + bleId + "]";
     SenseBoxBLE::setName(bleName);
 
     delay(200);
@@ -33,6 +44,11 @@ String BLEModule::getBLEName()
 bool BLEModule::isConnected()
 {
     return isConnectedVar;
+}
+
+bool BLEModule::isPresent()
+{
+  return bleModuleFound;
 }
 
 const char **BLEModule::getBLEConnectionString()
