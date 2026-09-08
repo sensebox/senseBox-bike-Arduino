@@ -5,13 +5,6 @@
 #include <Adafruit_SSD1306.h>
 #include <QRCodeGenerator.h>
 
-#include "../ble/BLEModule.h"
-#include "../sensors/BatterySensor/BatterySensor.h"
-#include "../sensors/TempHumiditySensor/TempHumiditySensor.h"
-#include "../sensors/DustSensor/DustSensor.h"
-#include "../sensors/DistanceSensor/DistanceSensor.h"
-#include "../sensors/AccelerationSensor/AccelerationSensor.h"
-
 #include <Arduino.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"

@@ -5,6 +5,13 @@
 #include <Adafruit_SSD1306.h>
 #include <QRCodeGenerator.h>
 #include <Adafruit_MAX1704X.h>
+
+#include "../ble/BLEModule.h"
+#include "../sensors/BatterySensor/BatterySensor.h"
+#include "../sensors/TempHumiditySensor/TempHumiditySensor.h"
+#include "../sensors/DustSensor/DustSensor.h"
+#include "../sensors/DistanceSensor/DistanceSensor.h"
+#include "../sensors/AccelerationSensor/AccelerationSensor.h"
 #include "bitmaps.h"
 
 Adafruit_SSD1306 SBDisplay::display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
