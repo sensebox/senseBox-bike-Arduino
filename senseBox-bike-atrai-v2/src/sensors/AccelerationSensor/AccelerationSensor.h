@@ -12,6 +12,7 @@ class AccelerationSensor : public BaseSensor
 public:
   AccelerationSensor();
   bool readSensorData() override;
+  static bool isPresent();
 
 protected:
   void initSensor() override;

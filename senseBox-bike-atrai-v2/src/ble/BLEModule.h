@@ -37,6 +37,7 @@ public:
     static void bleTask(void *pvParameters);
 
     static bool isConnected();
+    static bool isPresent();
 
 private:
     // BLEService* service;

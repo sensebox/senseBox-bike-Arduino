@@ -12,6 +12,7 @@ public:
   BatterySensor();
   static float getBatteryCharge();
   static float getBatteryChargeRate();
+  static bool isPresent();
 
 protected:
   void initSensor() override;

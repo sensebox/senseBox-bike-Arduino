@@ -9,6 +9,7 @@ class TempHumiditySensor : public BaseSensor
 public:
   TempHumiditySensor();
   bool readSensorData() override;
+  static bool isPresent();
 
 protected:
   void initSensor() override;

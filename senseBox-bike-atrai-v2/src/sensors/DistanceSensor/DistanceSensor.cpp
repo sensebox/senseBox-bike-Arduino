@@ -1,10 +1,7 @@
 #include "DistanceSensor.h"
-
 #include "model_data.h"
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
+#include <display/Display.h>
 
-#include <vl53l8cx_class.h>
 // #include <TensorFlowLite_ESP32.h>
 #include "edge-impulse-sdk/tensorflow/lite/micro/kernels/micro_ops.h"
 #include "edge-impulse-sdk/tensorflow/lite/micro/micro_interpreter.h"
@@ -21,7 +18,7 @@ int distanceCharacteristic = 0;
 String overtakingUUID = "FC01C6882C444965AE18373AF9FED18D";
 int overtakingCharacteristic = 0;
 
-VL53L8CX sensor_vl53l8cx_top(&Wire, -1, -1);
+VL53L8CX sensor_vl53l8cx(&Wire, -1, -1);
 const int kChannelNumber = 64;
 const int kFrameNumber = 20;
 const tflite::Model *model = nullptr;
@@ -43,6 +40,7 @@ int begin_index = 0;
 bool pending_initial_data = true;
 
 long prevDistanceTime = millis();
+static bool sensorFound = false;
 
 void DistanceSensor::initSensor()
 {
@@ -50,11 +48,29 @@ void DistanceSensor::initSensor()
     Serial.println("setting up VL53L8CX...");
     Wire.begin();
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
-    sensor_vl53l8cx_top.begin();
-    sensor_vl53l8cx_top.init_sensor();
-    sensor_vl53l8cx_top.vl53l8cx_set_ranging_frequency_hz(30);
-    sensor_vl53l8cx_top.vl53l8cx_set_resolution(VL53L8CX_RESOLUTION_8X8);
-    sensor_vl53l8cx_top.vl53l8cx_start_ranging();
+
+    for (int attempt = 1; attempt <= MAX_INIT_ATTEMPTS && !sensorFound; attempt++)
+    {
+        if (sensor_vl53l8cx.begin() == 0 && sensor_vl53l8cx.init() == 0)
+        {
+            sensorFound = true;
+            break;
+        }
+        Serial.println("VL53L8CX sensor probing failed");
+        delay(500);
+    }
+
+    if (!sensorFound)
+    {
+        SBDisplay::showLoadingError("No Distance Sensor");
+        Serial.printf("VL53L8CX not found after %d attempts, continuing without distance sensor.\n", MAX_INIT_ATTEMPTS);
+        delay(2000);
+        return;
+    }
+
+    sensor_vl53l8cx.set_ranging_frequency_hz(30);
+    sensor_vl53l8cx.set_resolution(VL53L8CX_RESOLUTION_8X8);
+    sensor_vl53l8cx.start_ranging();
     // -------------------------- setup tensorflow model --------------------------
     Serial.println("setting up tensorflow...");
     model = tflite::GetModel(g_model_data);
@@ -63,6 +79,9 @@ void DistanceSensor::initSensor()
         Serial.printf("Model provided is schema version %d not equal "
                       "to supported version %d.",
                       model->version(), TFLITE_SCHEMA_VERSION);
+        sensorFound = false;
+        SBDisplay::showLoadingError("Distance Sensor Error", "bad model schema");
+        delay(2000);
         return;
     }
     // This imports all operations, which is more intensive, than just importing the ones we need.
@@ -87,6 +106,9 @@ void DistanceSensor::initSensor()
         Serial.println(model_input->dims->data[2]);
         Serial.println(model_input->type);
         Serial.println("Bad input tensor parameters in model");
+        sensorFound = false;
+        SBDisplay::showLoadingError("Distance Sensor Error", "bad input tensor");
+        delay(2000);
         return;
     }
     input_length = model_input->bytes / sizeof(float);
@@ -100,16 +122,21 @@ void DistanceSensor::initSensor()
 
 bool DistanceSensor::readSensorData()
 {
+    if (!sensorFound)
+    {
+        return false;
+    }
+
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
     VL53L8CX_ResultsData Results;
     uint8_t NewDataReady = 0;
-    uint8_t status = sensor_vl53l8cx_top.vl53l8cx_check_data_ready(&NewDataReady);
+    uint8_t status = sensor_vl53l8cx.check_data_ready(&NewDataReady);
 
     float distance = -1.0;
 
     if ((!status) && (NewDataReady != 0))
     {
-        sensor_vl53l8cx_top.vl53l8cx_get_ranging_data(&Results);
+        sensor_vl53l8cx.get_ranging_data(&Results);
         float overtakingPredictionPercentage = -1.0;
         float bikeOvertakingPredictionPercentage = -1.0;
         float oldVl53l8cxMin = -1.0;
@@ -204,4 +231,9 @@ void DistanceSensor::notifyBLE(float distance, float overtakingPredictionPercent
 {
     BLEModule::writeBLE(distanceCharacteristic, distance);
     BLEModule::writeBLE(overtakingCharacteristic, overtakingPredictionPercentage, bikeOvertakingPredictionPercentage);
+}
+
+bool DistanceSensor::isPresent()
+{
+    return sensorFound;
 }

@@ -3,13 +3,17 @@
 
 #include "../BaseSensor.h"
 #include <Wire.h>
-#include <vl53l8cx_class.h>
+#include <vl53l8cx.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+
 
 class DistanceSensor : public BaseSensor
 {
 public:
   DistanceSensor();
   bool readSensorData() override;
+  static bool isPresent();
 
 protected:
   void initSensor() override;

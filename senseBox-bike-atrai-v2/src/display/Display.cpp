@@ -5,7 +5,14 @@
 #include <Adafruit_SSD1306.h>
 #include <QRCodeGenerator.h>
 #include <Adafruit_MAX1704X.h>
-#include "bicycle_loading_bitmap.h"
+
+#include "../ble/BLEModule.h"
+#include "../sensors/BatterySensor/BatterySensor.h"
+#include "../sensors/TempHumiditySensor/TempHumiditySensor.h"
+#include "../sensors/DustSensor/DustSensor.h"
+#include "../sensors/DistanceSensor/DistanceSensor.h"
+#include "../sensors/AccelerationSensor/AccelerationSensor.h"
+#include "bitmaps.h"
 
 Adafruit_SSD1306 SBDisplay::display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 QRCode SBDisplay::qrcode;
@@ -21,8 +28,6 @@ String bleId = "";
 
 void SBDisplay::bicycleAnimationTask(void *pvParameter)
 {
-  int dsplW = 128;
-  int dsplH = 64;
   int prgsW = 120;
   int prgsH = 2;
 
@@ -32,12 +37,11 @@ void SBDisplay::bicycleAnimationTask(void *pvParameter)
     {
       display.clearDisplay();
       display.drawBitmap(32, -10, bicycle_loading_bitmap[i], 64, 64, 1); // this displays each frame hex value
-      drawProgressbar(4, (dsplH - 12) - prgsH - 8, prgsW, prgsH, loadingProgress * 100);
-      display.setCursor(4, dsplH - 12);
+      drawProgressbar(4, (SCREEN_HEIGHT - 12) - prgsH - 8, prgsW, prgsH, loadingProgress * 100);
+      display.setCursor(4, SCREEN_HEIGHT - 12);
       display.setTextSize(1);
       display.setTextColor(WHITE, BLACK);
       display.println(loadingMessage);
-      // drawBattery(0, 0, 16, 4);
       display.display();
       vTaskDelay(pdMS_TO_TICKS(100));
 
@@ -51,7 +55,9 @@ void SBDisplay::bicycleAnimationTask(void *pvParameter)
 
 void SBDisplay::begin()
 {
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3D);
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3D)) {
+    Serial.println(F("could not find a valid SSD1306 display, check wiring!"));
+  }
   display.setRotation(2);
   display.display();
   delay(100);
@@ -69,15 +75,29 @@ void SBDisplay::drawProgressbar(int x, int y, int width, int height, int progres
 
 void SBDisplay::drawBattery(int x, int y, int width, int height)
 {
+  if (!BatterySensor::isPresent())
+  {
+    display.setCursor(x + (width / 2) - 2, y);
+    display.setTextSize(1);
+    display.setTextColor(WHITE, BLACK);
+    display.setTextWrap(false);
+    display.println("?");
+    display.setTextWrap(true);
+    display.setCursor(0, 0);
+    return;
+  }
+
   batteryCharge = BatterySensor::getBatteryCharge();
   drawProgressbar(x, y, width, height, batteryCharge);
   display.fillRect(x + width, y + 2, 2, height, WHITE);
   if (BatterySensor::getBatteryChargeRate() > 0)
   {
-    display.setCursor(x + width + 4, y + 1);
+    display.setCursor(x - 6, y);
     display.setTextSize(1);
     display.setTextColor(WHITE, BLACK);
+    display.setTextWrap(false);
     display.println("+");
+    display.setTextWrap(true);
     display.setCursor(0, 0);
   }
 }
@@ -91,6 +111,39 @@ void SBDisplay::showLoading(String msg, float val)
   }
   loadingMessage = msg;
   loadingProgress = val;
+}
+
+void SBDisplay::showLoadingError(String msg, String subMsg)
+{
+  if (isBicycleAnimationShowing)
+  {
+    isBicycleAnimationShowing = false;
+  }
+
+  display.clearDisplay();
+  display.display();
+  delay(10);  // Brief delay to ensure display is cleared
+  display.clearDisplay();
+
+  // Draw warning symbol centered at the top
+  int symbolX = (SCREEN_WIDTH - 32) / 2;  // Center horizontally (32 is symbol width)
+  int symbolY = 2;  // Position from top
+  display.drawBitmap(symbolX, symbolY, warning_symbol, 32, 32, WHITE);
+
+  // Error message below the triangle
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(4, SCREEN_HEIGHT - 24);
+  display.println(msg);
+
+  // Optional subtitle below the error message
+  if (subMsg.length() > 0)
+  {
+    display.setCursor(4, SCREEN_HEIGHT - 12);
+    display.println(subMsg);
+  }
+
+  display.display();
 }
 
 void SBDisplay::showSystemStatus()
@@ -138,14 +191,44 @@ void SBDisplay::showConnectionScreen()
 
   display.clearDisplay();
   display.setTextSize(1);
-  
-  display.setCursor(4, 22);
+
+
+  if (BLEModule::isConnected())
+  {
+    display.drawBitmap(SCREEN_WIDTH - 15, 10, bluetooth_icon_bitmap, 8, 11, SSD1306_WHITE);
+  }
+
+  display.setCursor(0, 0);
   display.println("senseBox:bike");
   
-  display.setCursor(4, 34);
+  display.setCursor(0, 12);
   display.println(bleIdBrackets);
-  
-  drawBattery(0, 0, 16, 4);
+
+  const char *missingModules[] = {
+      BLEModule::isPresent() ? nullptr : "no Bluetooth",
+      BatterySensor::isPresent() ? nullptr : "no Battery Sensor",
+      TempHumiditySensor::isPresent() ? nullptr : "no Temp/Humid Sensor",
+      DustSensor::isPresent() ? nullptr : "no Dust Sensor",
+      DistanceSensor::isPresent() ? nullptr : "no Distance Sensor",
+      AccelerationSensor::isPresent() ? nullptr : "no Acceler. Sensor"};
+
+  int listCursorY = 36;
+  for (const char *missingSensor : missingModules)
+  {
+    if (missingSensor == nullptr)
+    {
+      continue;
+    }
+    if (listCursorY > SCREEN_HEIGHT - 8)
+    {
+      break;
+    }
+    display.setCursor(0, listCursorY);
+    display.println(missingSensor);
+    listCursorY += 8;
+  }
+
+  drawBattery(SCREEN_WIDTH - 20, 0, 16, 4);
   display.display();
 }
 

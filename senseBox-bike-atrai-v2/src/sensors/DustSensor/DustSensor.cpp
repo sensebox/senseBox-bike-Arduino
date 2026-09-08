@@ -1,9 +1,11 @@
 #include "DustSensor.h"
+#include <display/Display.h>
 
 DustSensor::DustSensor() : BaseSensor("DustSensorTask", 2048, 1000) {}
 
 String dustUUID = "7E14E07084EA489FB45AE1317364B979";
 int dustCharacteristic = 0;
+static bool dustSensorFound = false;
 
 // add more if needed
 
@@ -15,10 +17,23 @@ void DustSensor::initSensor()
 
   sensirion_i2c_init();
 
-  while (sps30_probe() != 0)
+  for (int attempt = 1; attempt <= MAX_INIT_ATTEMPTS && !dustSensorFound; attempt++)
   {
+    if (sps30_probe() == 0)
+    {
+      dustSensorFound = true;
+      break;
+    }
     Serial.print("SPS sensor probing failed\n");
     delay(500);
+  }
+
+  if (!dustSensorFound)
+  {
+    SBDisplay::showLoadingError("No Dust Sensor");
+    Serial.printf("SPS30 not found after %d attempts, continuing without dust sensor.\n", MAX_INIT_ATTEMPTS);
+    delay(2000);
+    return;
   }
 
   Serial.print("SPS sensor probing successful\n");
@@ -34,15 +49,25 @@ void DustSensor::initSensor()
   if (ret < 0)
   {
     Serial.print("error starting measurement\n");
+    dustSensorFound = false;
+    SBDisplay::showLoadingError("Dust Sensor Error", "could not start");
+    Serial.printf("error starting measurement of SPS30\n");
+    delay(2000);
+    return;
+  } else {
+    Serial.print("measurements started\n");
   }
-
-  Serial.print("measurements started\n");
 
   dustCharacteristic = BLEModule::createCharacteristic(dustUUID.c_str());
 }
 
 bool DustSensor::readSensorData()
 {
+  if (!dustSensorFound)
+  {
+    return false;
+  }
+
   Wire.setClock(100000); // Sensor has max I2C freq of 1MHz
   struct sps30_measurement m;
   char serial[SPS30_MAX_SERIAL_LEN];
@@ -89,4 +114,9 @@ bool DustSensor::readSensorData()
 void DustSensor::notifyBLE(float pm1, float pm2_5, float pm4, float pm10)
 {
   BLEModule::writeBLE(dustCharacteristic, pm1, pm2_5, pm4, pm10);
+}
+
+bool DustSensor::isPresent()
+{
+  return dustSensorFound;
 }

@@ -5,9 +5,6 @@
 #include <Adafruit_SSD1306.h>
 #include <QRCodeGenerator.h>
 
-#include "../ble/BLEModule.h"
-#include "../sensors/BatterySensor/BatterySensor.h"
-
 #include <Arduino.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -24,6 +21,7 @@ public:
   static void showConnectionScreen();
   static void drawQrCode(const char *qrStr, const char *lines[]);
   static void showLoading(String msg, float val);
+  static void showLoadingError(String msg, String subMsg = "");
   static void drawProgressbar(int x, int y, int width, int height, int progress);
   static void drawBattery(int x, int y, int width, int height);
   static void bicycleAnimationTask(void *pvParams);
