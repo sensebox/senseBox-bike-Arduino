@@ -1,9 +1,8 @@
 #include "BLEModule.h"
 #include <display/Display.h>
 
-bool isConnectedVar = false;
-bool bleModuleFound = false;
-
+static bool isConnectedVar = false;
+static bool bleModuleFound = false;
 // void (*BLEModule::receiveCallback)(BLEDevice, BLECharacteristic) = nullptr;
 
 BLEModule::BLEModule()
