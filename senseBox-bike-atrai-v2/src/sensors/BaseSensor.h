@@ -25,7 +25,7 @@ protected:
     bool activeSubscription;
     bool sendBLE;
     std::function<void(std::vector<float>)> measurementCallback;
-    static const int MAX_INIT_ATTEMPTS = 3;
+    static constexpr int MAX_INIT_ATTEMPTS = 3;
 
 private:
     const char *taskName;

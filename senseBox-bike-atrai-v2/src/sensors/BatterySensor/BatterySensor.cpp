@@ -9,24 +9,24 @@ String batteryUUID = "2A19";
 int batteryCharacteristic = 0;
 
 Adafruit_MAX17048 maxlipo;
-bool batterySensorFound = false;
+static bool sensorFound = false;
 
 // add more if needed
 
 void BatterySensor::initSensor()
 {
-  for (int attempt = 1; attempt <= MAX_INIT_ATTEMPTS && !batterySensorFound; attempt++)
+  for (int attempt = 1; attempt <= MAX_INIT_ATTEMPTS && !sensorFound; attempt++)
   {
     if (maxlipo.begin())
     {
-      batterySensorFound = true;
+      sensorFound = true;
       break;
     }
     Serial.println(F("Couldnt find Adafruit MAX17048?\nMake sure a battery is plugged in!"));
     delay(1000);
   }
 
-  if (!batterySensorFound)
+  if (!sensorFound)
   {
     SBDisplay::showLoadingError("No Battery Sensor");
     Serial.printf("MAX17048 not found after %d attempts, continuing without battery sensor.\n", MAX_INIT_ATTEMPTS);
@@ -40,7 +40,7 @@ void BatterySensor::initSensor()
 
 bool BatterySensor::readSensorData()
 {
-  if (!batterySensorFound)
+  if (!sensorFound)
   {
     return false;
   }
@@ -67,12 +67,12 @@ void BatterySensor::notifyBLE(float batteryCharge)
 
 bool BatterySensor::isPresent()
 {
-  return batterySensorFound;
+  return sensorFound;
 }
 
 float BatterySensor::getBatteryCharge()
 {
-  if (!batterySensorFound)
+  if (!sensorFound)
   {
     return 0;
   }
@@ -82,7 +82,7 @@ float BatterySensor::getBatteryCharge()
 
 float BatterySensor::getBatteryChargeRate()
 {
-  if (!batterySensorFound)
+  if (!sensorFound)
   {
     return 0;
   }

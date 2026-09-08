@@ -9,7 +9,7 @@ String anomalyUUID = "B944AF10F4954560968F2F0D18CAB523";
 int surfaceClassificationCharacteristic = 0;
 int anomalyCharacteristic = 0;
 
-bool AccelerationSensor::sensorFound = false;
+static bool sensorFound = false;
 
 void AccelerationSensor::initSensor()
 {

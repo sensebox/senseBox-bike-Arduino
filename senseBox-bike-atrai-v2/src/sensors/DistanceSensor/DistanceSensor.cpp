@@ -2,6 +2,14 @@
 #include "model_data.h"
 #include <display/Display.h>
 
+// #include <TensorFlowLite_ESP32.h>
+#include "edge-impulse-sdk/tensorflow/lite/micro/kernels/micro_ops.h"
+#include "edge-impulse-sdk/tensorflow/lite/micro/micro_interpreter.h"
+#include "edge-impulse-sdk/tensorflow/lite/micro/micro_mutable_op_resolver.h"
+#include "edge-impulse-sdk/tensorflow/lite/micro/all_ops_resolver.h"
+#include "edge-impulse-sdk/tensorflow/lite/schema/schema_generated.h"
+#include <edge-impulse-sdk/tensorflow/lite/micro/micro_error_reporter.h>
+
 DistanceSensor::DistanceSensor() : BaseSensor("distanceTask", 8192, 0) {}
 
 String distanceUUID = "B3491B60C0F34306A30D49C91F37A62B";
@@ -32,7 +40,7 @@ int begin_index = 0;
 bool pending_initial_data = true;
 
 long prevDistanceTime = millis();
-bool distanceSensorFound = false;
+static bool sensorFound = false;
 
 void DistanceSensor::initSensor()
 {
@@ -41,18 +49,18 @@ void DistanceSensor::initSensor()
     Wire.begin();
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
 
-    for (int attempt = 1; attempt <= MAX_INIT_ATTEMPTS && !distanceSensorFound; attempt++)
+    for (int attempt = 1; attempt <= MAX_INIT_ATTEMPTS && !sensorFound; attempt++)
     {
         if (sensor_vl53l8cx.begin() == 0 && sensor_vl53l8cx.init() == 0)
         {
-            distanceSensorFound = true;
+            sensorFound = true;
             break;
         }
         Serial.println("VL53L8CX sensor probing failed");
         delay(500);
     }
 
-    if (!distanceSensorFound)
+    if (!sensorFound)
     {
         SBDisplay::showLoadingError("No Distance Sensor");
         Serial.printf("VL53L8CX not found after %d attempts, continuing without distance sensor.\n", MAX_INIT_ATTEMPTS);
@@ -71,7 +79,7 @@ void DistanceSensor::initSensor()
         Serial.printf("Model provided is schema version %d not equal "
                       "to supported version %d.",
                       model->version(), TFLITE_SCHEMA_VERSION);
-        distanceSensorFound = false;
+        sensorFound = false;
         SBDisplay::showLoadingError("Distance Sensor Error", "bad model schema");
         delay(2000);
         return;
@@ -98,7 +106,7 @@ void DistanceSensor::initSensor()
         Serial.println(model_input->dims->data[2]);
         Serial.println(model_input->type);
         Serial.println("Bad input tensor parameters in model");
-        distanceSensorFound = false;
+        sensorFound = false;
         SBDisplay::showLoadingError("Distance Sensor Error", "bad input tensor");
         delay(2000);
         return;
@@ -114,7 +122,7 @@ void DistanceSensor::initSensor()
 
 bool DistanceSensor::readSensorData()
 {
-    if (!distanceSensorFound)
+    if (!sensorFound)
     {
         return false;
     }
@@ -227,5 +235,5 @@ void DistanceSensor::notifyBLE(float distance, float overtakingPredictionPercent
 
 bool DistanceSensor::isPresent()
 {
-    return distanceSensorFound;
+    return sensorFound;
 }

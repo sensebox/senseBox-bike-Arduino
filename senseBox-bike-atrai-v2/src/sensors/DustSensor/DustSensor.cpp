@@ -5,7 +5,7 @@ DustSensor::DustSensor() : BaseSensor("DustSensorTask", 2048, 1000) {}
 
 String dustUUID = "7E14E07084EA489FB45AE1317364B979";
 int dustCharacteristic = 0;
-bool dustSensorFound = false;
+static bool dustSensorFound = false;
 
 // add more if needed
 

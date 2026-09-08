@@ -10,22 +10,22 @@ int temperatureCharacteristic = 0;
 int humidityCharacteristic = 0;
 
 Adafruit_HDC1000 hdc;
-bool tempHumiditySensorFound = false;
+static bool sensorFound = false;
 
 void TempHumiditySensor::initSensor()
 {
-  for (int attempt = 1; attempt <= MAX_INIT_ATTEMPTS && !tempHumiditySensorFound; attempt++)
+  for (int attempt = 1; attempt <= MAX_INIT_ATTEMPTS && !sensorFound; attempt++)
   {
     if (hdc.begin())
     {
-      tempHumiditySensorFound = true;
+      sensorFound = true;
       break;
     }
     Serial.println("Couldn't find HDC1080 sensor!");
     delay(1000);
   }
 
-  if (!tempHumiditySensorFound)
+  if (!sensorFound)
   {
     SBDisplay::showLoadingError("No Temp/Humid Sensor");
     Serial.printf("HDC1080 not found after %d attempts, continuing without temp/humidity sensor.\n", MAX_INIT_ATTEMPTS);
@@ -39,7 +39,7 @@ void TempHumiditySensor::initSensor()
 
 bool TempHumiditySensor::readSensorData()
 {
-  if (!tempHumiditySensorFound)
+  if (!sensorFound)
   {
     return false;
   }
@@ -73,5 +73,5 @@ void TempHumiditySensor::notifyBLE(float temoperature, float humidity)
 
 bool TempHumiditySensor::isPresent()
 {
-  return tempHumiditySensorFound;
+  return sensorFound;
 }
