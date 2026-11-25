@@ -21,6 +21,16 @@ void initUltrasonic() {
   // pinMode(ECHO_RIGHT, INPUT);
 };
 
+void initVL53L8CX() {
+  Wire.begin();
+  Wire.setClock(1000000); //Sensor has max I2C freq of 1MHz
+  sensor_vl53l8cx_top.begin();
+  sensor_vl53l8cx_top.init_sensor();
+  sensor_vl53l8cx_top.vl53l8cx_set_ranging_frequency_hz(30);
+  sensor_vl53l8cx_top.vl53l8cx_set_resolution(VL53L8CX_RESOLUTION_8X8);
+  sensor_vl53l8cx_top.vl53l8cx_start_ranging();
+}
+
 void initSPS() {
   int errorCount = 0;
   int16_t ret;

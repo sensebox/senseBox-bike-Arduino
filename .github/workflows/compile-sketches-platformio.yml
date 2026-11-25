@@ -11,9 +11,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project:
+          - senseBox-bike-atrai-v2
+          - senseBox-bike-nancy
 
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/cache@v3
         with:
           path: |
@@ -29,28 +35,37 @@ jobs:
         run: pip install --upgrade platformio
 
       - name: Build PlatformIO Project
-        run: pio run -d senseBox-bike-atrai-v2
+        run: pio run -d ${{ matrix.project }}
 
       - name: Create OTA update file
         run: |
           git clone https://github.com/arduino-libraries/ArduinoIoTCloud.git
-
           pip install crccheck
-
           cd ArduinoIoTCloud/extras/tools
 
-          python3 lzss.py --encode ${{ github.workspace }}/senseBox-bike-atrai-v2/.pio/build/sensebox_mcu_esp32s2/firmware.bin ${{ runner.temp }}/firmware.bin.lzss
-          python3 bin2ota.py ESP32 ${{ runner.temp }}/firmware.bin.lzss ${{ runner.temp }}/firmware.ota
+          # Encode firmware
+          python3 lzss.py --encode \
+            ${{ github.workspace }}/${{ matrix.project }}/.pio/build/sensebox_mcu_esp32s2/firmware.bin \
+            ${{ runner.temp }}/firmware.bin.lzss
 
-          mkdir -p ${{ github.workspace }}/senseBox-bike-atrai-v2/build/sensebox_mcu_esp32s2
-          mv ${{ runner.temp }}/firmware.ota ${{ github.workspace }}/senseBox-bike-atrai-v2/build/sensebox_mcu_esp32s2/senseBox-bike-atrai-v2.bin.ota
-          mv ${{ github.workspace }}/senseBox-bike-atrai-v2/.pio/build/sensebox_mcu_esp32s2/firmware.bin ${{ github.workspace }}/senseBox-bike-atrai-v2/build/sensebox_mcu_esp32s2/senseBox-bike-atrai-v2.bin
+          # Convert to OTA format
+          python3 bin2ota.py ESP32 \
+            ${{ runner.temp }}/firmware.bin.lzss \
+            ${{ runner.temp }}/firmware.ota
+
+          # Move output files
+          mkdir -p ${{ github.workspace }}/${{ matrix.project }}/build/sensebox_mcu_esp32s2
+          mv ${{ runner.temp }}/firmware.ota \
+            ${{ github.workspace }}/${{ matrix.project }}/build/sensebox_mcu_esp32s2/${{ matrix.project }}.bin.ota
+          mv \
+            ${{ github.workspace }}/${{ matrix.project }}/.pio/build/sensebox_mcu_esp32s2/firmware.bin \
+            ${{ github.workspace }}/${{ matrix.project }}/build/sensebox_mcu_esp32s2/${{ matrix.project }}.bin
 
       - name: Export binaries as artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: senseBox-bike-atrai-v2-artifacts
-          path: ${{ github.workspace }}
+          name: ${{ matrix.project }}-artifacts
+          path: ${{ github.workspace }}/${{ matrix.project }}/build
 
   release:
     needs: build
@@ -60,6 +75,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: release
+
       - name: Release Firmware
         uses: ncipollo/release-action@v1
         if: startsWith(github.ref, 'refs/tags/')

@@ -25,6 +25,35 @@ void handleDistance() {
   // }
 }
 
+/*  To give a confidence rating, a target with status 5 is considered as 100% valid. 
+A status of 6 or 9 can be considered with a confidence value of 50%. 
+All other statuses are below the 50% confidence level. */
+bool validTargetStatus(int status) {
+  return status == 5 || status == 6 || status == 9;
+}
+
+void handleDistanceVL53L8CX() {
+  VL53L8CX_ResultsData Results;
+  uint8_t NewDataReady = 0;
+  uint8_t status;
+
+  status = sensor_vl53l8cx_top.vl53l8cx_check_data_ready(&NewDataReady);
+
+  if ((!status) && (NewDataReady != 0)) {
+    sensor_vl53l8cx_top.vl53l8cx_get_ranging_data(&Results);
+    float min = 1000.0; // larger than what the sensor could possibly see
+    for(int i = 0; i < VL53L8CX_RESOLUTION_8X8*VL53L8CX_NB_TARGET_PER_ZONE; i++) {
+      if(validTargetStatus((int)(&Results)->target_status[i])){
+        float distance = ((&Results)->distance_mm[i])/10;
+        if(min > distance) {
+          min = distance;
+        }
+      }
+    }
+    dist_l = (min==1000.0) ? 400.0 : min; // in theory the sensor can measure up to 4m distance
+  }
+}
+
 void callSPS() {
   //struct sps30_measurement m;
   char serial[SPS30_MAX_SERIAL_LEN];

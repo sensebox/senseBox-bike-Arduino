@@ -11,11 +11,13 @@
 #include <NMEAGPS.h>
 #include <Adafruit_MPU6050.h>
 #include <NewPing.h>  // http://librarymanager/All#NewPing
+#include <vl53l8cx_class.h>
 
 #define TRIGGER_LEFT 1
 #define ECHO_LEFT 2
 #define MAX_DISTANCE_A 400
 NewPing sonarA(TRIGGER_LEFT, ECHO_LEFT, MAX_DISTANCE_A);
+VL53L8CX sensor_vl53l8cx_top(&Wire, -1, -1);
 static NMEAGPS gps;
 // https://github.com/SlashDevin/NeoGPS/blob/master/extras/doc/Data%20Model.md
 static gps_fix fix;
@@ -71,7 +73,8 @@ String name;
 // todo: give feedback through LED if all is working?
 void initsSensors() {
   Serial.print("Ultrasonic...");
-  initUltrasonic();
+  // initUltrasonic();
+  initVL53L8CX();
   // ATTENTION! SPS Disabled for essen-auf-raedern
   // Serial.print("SPS30...");
   // initSPS();  Serial.println("done!");
@@ -98,7 +101,7 @@ void initsSensors() {
 // set measurements for acceleration, distance, humidity and temperature
 void setMeasurements() {
   getAccAmplitudes(&sumAccX, &sumAccY, &sumAccZ);
-  handleDistance();
+  handleDistanceVL53L8CX();
   temp = HDC.readTemperature();
   humi = HDC.readHumidity();
 
