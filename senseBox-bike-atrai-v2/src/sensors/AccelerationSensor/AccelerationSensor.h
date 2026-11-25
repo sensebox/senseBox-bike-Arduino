@@ -4,7 +4,7 @@
 #include "../BaseSensor.h"
 #include <Adafruit_MPU6050.h>
 #include "ICM42670P.h" // Include for ICM42670P
-#include <Adafruit_ICM20948.h> // Include for ICM20948
+#include "SimpleICM20948.h" // ICM20948 without magnetometer
 #include <Adafruit_Sensor.h> // Include for ICM20948
 
 class AccelerationSensor : public BaseSensor
@@ -29,7 +29,7 @@ private:
   SensorType activeSensor = NONE; // Track which sensor is active
   Adafruit_MPU6050 mpu;
   ICM42670 icm = ICM42670(Wire1, 0); // Instantiate an ICM42670 with LSB address set to 0
-  Adafruit_ICM20948 icm2;
+  SimpleICM20948 icm2;
 };
 
 #endif // ACCELERATION_SENSOR_H
